@@ -88,6 +88,7 @@ const APP_REGISTRY: AppDefinition[] = [
       'Gather community voice through surveys, listening tools, and needs/assets analysis.',
     status: 'active',
     isPopular: true,
+    launchPath: '/community-compass',
     audience: 'organization',
     transformationArea: 'Community listening',
     lastUsed: hoursAgo(6),

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { AppShell } from '@/components/layout/AppShell';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { PostHogProvider } from '@/components/analytics/PostHogProvider';
+import dynamic from 'next/dynamic';
+const PostHogProviderWrapper = dynamic(() => import('@/components/PostHogProviderWrapper'), { ssr: false });
+// const inter = Inter({ subsets: ['latin'] });
 
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'VISION Platform',
@@ -21,8 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <PostHogProvider>
+      <body className="font-sans">{/* Changed from inter.className to font-sans */}
+        <PostHogProviderWrapper>
           <ErrorBoundary>
             <AppShell>{children}</AppShell>
             <Toaster
@@ -43,7 +43,7 @@ export default function RootLayout({
               }}
             />
           </ErrorBoundary>
-        </PostHogProvider>
+        </PostHogProviderWrapper>
       </body>
     </html>
   );

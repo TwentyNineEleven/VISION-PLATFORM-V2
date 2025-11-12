@@ -14,7 +14,7 @@ import { documentService } from '@/services/documentService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -28,7 +28,7 @@ export async function GET(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
