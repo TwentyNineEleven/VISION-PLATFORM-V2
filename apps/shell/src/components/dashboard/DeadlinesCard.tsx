@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, Group, Stack, Text } from '@/components/glow-ui';
 import { FileText, ArrowRight } from 'lucide-react';
 import { type Deadline, formatDueDate } from '@/lib/dashboard/mockDashboardData';
-import { getAppMeta, getPhaseColor, getPhaseSoftColor } from '@/lib/apps/appMetadata';
+import { getAppMeta } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
 
 export interface DeadlinesCardProps {
   deadlines: Deadline[];
@@ -14,8 +16,11 @@ export interface DeadlinesCardProps {
 function DeadlineRow({ deadline }: { deadline: Deadline }) {
   const appMeta = getAppMeta(deadline.appId);
   const appName = appMeta?.name || deadline.appId;
-  const phaseColor = appMeta ? getPhaseColor(appMeta.phase) : '#64748B';
-  const phaseSoftColor = appMeta ? getPhaseSoftColor(appMeta.phase) : 'rgba(100, 116, 139, 0.12)';
+
+  // Use Bold Color System tokens via getPhaseTokenClasses
+  const phaseClasses = appMeta
+    ? getPhaseTokenClasses(appMeta.phase)
+    : { iconBackground: 'bg-vision-gray-100', iconText: 'text-vision-gray-700', badgeBackground: 'bg-vision-gray-100', badgeText: 'text-vision-gray-700' };
 
   // Format date for chip (e.g., "Dec 14", "Jan 3")
   const date = new Date(deadline.dueDate + 'T00:00:00Z');
@@ -24,11 +29,11 @@ function DeadlineRow({ deadline }: { deadline: Deadline }) {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/50 px-4 py-3 transition hover:border-border hover:shadow-sm">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 mt-0.5"
-        style={{
-          backgroundColor: phaseSoftColor,
-          color: phaseColor,
-        }}
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 mt-0.5',
+          phaseClasses.iconBackground,
+          phaseClasses.iconText
+        )}
       >
         <FileText className="h-4 w-4" />
       </div>
@@ -40,22 +45,22 @@ function DeadlineRow({ deadline }: { deadline: Deadline }) {
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[10px] font-medium"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[10px] font-medium',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {appName}
           </GlowBadge>
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[10px] font-semibold"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[10px] font-semibold',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {dateChip}
           </GlowBadge>
