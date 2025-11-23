@@ -64,13 +64,13 @@ export function AppsAdvancedFilters({
           aria-hidden="true"
         />
         {/* Bottom Sheet */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] rounded-t-lg border-t border-vision-gray-300 bg-card shadow-2xl animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] rounded-t-lg border-t border-border bg-card shadow-2xl animate-in slide-in-from-bottom duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-vision-gray-300 p-4">
+          <div className="flex items-center justify-between border-b border-border p-4">
             <h2 className="text-lg font-semibold text-foreground">Focus Filters</h2>
             <button
               onClick={onClose}
-              className="rounded p-1 text-muted-foreground transition-colors hover:bg-vision-gray-100"
+              className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted"
               aria-label="Close filters"
             >
               <X className="h-5 w-5" />
@@ -95,8 +95,9 @@ export function AppsAdvancedFilters({
                           'rounded-full px-4 py-2 text-sm font-semibold transition-all',
                           isSelected
                             ? 'bg-primary text-primary-foreground shadow-md'
-                            : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                            : 'bg-muted text-foreground hover:border hover:border-border'
                         )}
+                        aria-pressed={isSelected}
                       >
                         {tag}
                       </button>
@@ -110,7 +111,7 @@ export function AppsAdvancedFilters({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-vision-gray-300 p-4">
+          <div className="flex items-center justify-between border-t border-border p-4">
             <button
               onClick={clearFocusFilters}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -129,7 +130,7 @@ export function AppsAdvancedFilters({
   // Desktop: Slide-down panel
   return (
     <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-      <GlowCard variant="default" padding="md" className="border-vision-gray-100">
+      <GlowCard variant="default" padding="md" className="border-border">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="mb-3 flex items-center justify-between">
@@ -138,7 +139,7 @@ export function AppsAdvancedFilters({
               </p>
               <button
                 onClick={onClose}
-                className="rounded p-1 text-muted-foreground transition-colors hover:bg-vision-gray-100"
+                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted"
                 aria-label="Close filters"
               >
                 <X className="h-4 w-4" />
@@ -156,8 +157,9 @@ export function AppsAdvancedFilters({
                         'rounded-full px-4 py-2 text-sm font-semibold transition-all',
                         isSelected
                           ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                          : 'bg-muted text-foreground hover:border hover:border-border'
                       )}
+                      aria-pressed={isSelected}
                     >
                       {tag}
                     </button>
@@ -172,7 +174,7 @@ export function AppsAdvancedFilters({
 
         {/* Footer Actions */}
         {filters.focusTags.length > 0 && (
-          <div className="mt-4 flex items-center justify-end gap-3 border-t border-vision-gray-300 pt-4">
+          <div className="mt-4 flex items-center justify-end gap-3 border-t border-border pt-4">
             <button
               onClick={clearFocusFilters}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"

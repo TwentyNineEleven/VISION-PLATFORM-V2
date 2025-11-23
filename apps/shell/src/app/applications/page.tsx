@@ -28,6 +28,7 @@ import { GlowButton } from '@/components/glow-ui';
 import { useAppShell } from '@/components/layout/AppShell';
 import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
 import type { AppMetadata, AppCatalogFilters, SortOption, Audience } from '@/lib/app-catalog-types';
+import { favoritesService } from '@/services/favoritesService';
 
 export default function ApplicationsPage() {
   const { openAppLauncher } = useAppShell();
@@ -43,6 +44,13 @@ export default function ApplicationsPage() {
   const [selectedApp, setSelectedApp] = React.useState<AppMetadata | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
+  const [favoriteIds, setFavoriteIds] = React.useState<string[]>([]);
+
+  // Load favorites on mount
+  React.useEffect(() => {
+    const favorites = favoritesService.getFavorites();
+    setFavoriteIds(favorites);
+  }, []);
 
   // Detect mobile (using lg breakpoint: 1024px)
   React.useEffect(() => {
@@ -74,9 +82,14 @@ export default function ApplicationsPage() {
     return count;
   }, [filters]);
 
-  // Filter and sort apps
+  // Filter and sort apps (with favorites status)
   const filteredApps = React.useMemo(() => {
-    let result = [...APP_CATALOG_DATA];
+    // Merge favorite status with app data
+    let result = APP_CATALOG_DATA.map((app) => ({
+      ...app,
+      isFavorite: favoriteIds.includes(app.id),
+      isFavorited: favoriteIds.includes(app.id), // Support both property names
+    }));
 
     // Search
     if (filters.searchQuery) {
@@ -131,7 +144,7 @@ export default function ApplicationsPage() {
     }
 
     return result;
-  }, [filters]);
+  }, [filters, favoriteIds]);
 
   const handleLaunchApp = (app: AppMetadata) => {
     if (app.launchPath) {
@@ -142,8 +155,17 @@ export default function ApplicationsPage() {
   };
 
   const handleToggleFavorite = (appId: string) => {
-    // TODO: Implement favorite toggle with backend
-    console.log('Toggle favorite:', appId);
+    // Toggle favorite in localStorage
+    const newIsFavorite = favoritesService.toggleFavorite(appId);
+
+    // Update local state to reflect the change
+    setFavoriteIds((prev) => {
+      if (newIsFavorite) {
+        return [...prev, appId];
+      } else {
+        return prev.filter((id) => id !== appId);
+      }
+    });
   };
 
   const handleViewDetails = (app: AppMetadata) => {

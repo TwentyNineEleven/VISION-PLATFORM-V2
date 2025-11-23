@@ -85,7 +85,7 @@ export function AppsFilterBar({
 
   return (
     <div className="sticky top-0 z-10 bg-background pb-4">
-      <GlowCard variant="default" padding="md" className="border-vision-gray-100">
+      <GlowCard variant="default" padding="md" className="border-border">
         {/* Primary Row: Search + Phase + Audience + Actions */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
           {/* Left: Search */}
@@ -112,8 +112,9 @@ export function AppsFilterBar({
                   'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                   filters.phase === 'All'
                     ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                    : 'bg-muted text-foreground hover:border hover:border-border'
                 )}
+                aria-pressed={filters.phase === 'All'}
               >
                 All
               </button>
@@ -128,13 +129,14 @@ export function AppsFilterBar({
                       'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                       isSelected
                         ? 'text-white shadow-md'
-                        : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                        : 'bg-muted text-foreground hover:border hover:border-border'
                     )}
                     style={
                       isSelected
                         ? { backgroundColor: domainColor }
                         : undefined
                     }
+                    aria-pressed={isSelected}
                   >
                     {phaseLabels[phase].split(' ')[0]}
                   </button>
@@ -150,8 +152,9 @@ export function AppsFilterBar({
                   'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                   filters.audience === 'All'
                     ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                    : 'bg-muted text-foreground hover:border hover:border-border'
                 )}
+                aria-pressed={filters.audience === 'All'}
               >
                 All
               </button>
@@ -163,8 +166,9 @@ export function AppsFilterBar({
                     'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                     filters.audience === audience
                       ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
+                      : 'bg-muted text-foreground hover:border hover:border-border'
                   )}
+                  aria-pressed={filters.audience === audience}
                 >
                   {audience}
                 </button>
@@ -181,6 +185,8 @@ export function AppsFilterBar({
                 size="sm"
                 onClick={onToggleAdvancedFilters}
                 leftIcon={<Filter className="h-4 w-4" />}
+                aria-expanded={isAdvancedFiltersOpen}
+                aria-label="Toggle advanced filters"
               >
                 More filters
               </GlowButton>
@@ -216,16 +222,17 @@ export function AppsFilterBar({
 
             {/* View Toggle */}
             {onViewModeChange && (
-              <div className="flex rounded-lg border border-vision-gray-300 p-1">
+              <div className="flex rounded-lg border border-border p-1">
                 <button
                   onClick={() => onViewModeChange('GRID')}
                   className={cn(
                     'rounded p-1.5 transition-colors',
                     viewMode === 'GRID'
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-vision-gray-100'
+                      : 'text-muted-foreground hover:bg-muted'
                   )}
                   aria-label="Grid view"
+                  aria-pressed={viewMode === 'GRID'}
                 >
                   <Grid3x3 className="h-4 w-4" />
                 </button>
@@ -235,9 +242,10 @@ export function AppsFilterBar({
                     'rounded p-1.5 transition-colors',
                     viewMode === 'LIST'
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-vision-gray-100'
+                      : 'text-muted-foreground hover:bg-muted'
                   )}
                   aria-label="List view"
+                  aria-pressed={viewMode === 'LIST'}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -247,7 +255,7 @@ export function AppsFilterBar({
         </div>
 
         {/* Summary Row */}
-        <div className="mt-3 flex items-center justify-between border-t border-vision-gray-300 pt-3">
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
           <p className="text-sm text-muted-foreground">
             Showing <span className="font-semibold text-foreground">{filteredAppCount}</span>{' '}
             {filteredAppCount === 1 ? 'app' : 'apps'}
