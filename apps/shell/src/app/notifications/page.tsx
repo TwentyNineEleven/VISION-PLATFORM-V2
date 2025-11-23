@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Stack,
@@ -58,11 +58,7 @@ export default function NotificationsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       // Initialize with mock data if no notifications exist
       const convertedMockNotifications = mockNotifications.map((n) => ({
@@ -80,7 +76,11 @@ export default function NotificationsPage() {
       setError('Failed to load notifications');
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const filteredNotifications = useMemo(() => {
     return notifications.filter((notification) => {
@@ -90,7 +90,15 @@ export default function NotificationsPage() {
     });
   }, [notifications, filter]);
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.read).length,
+    [notifications]
+  );
+
+  const readCount = useMemo(
+    () => notifications.filter((notification) => notification.read).length,
+    [notifications]
+  );
 
   const markAsRead = async (id: string) => {
     setIsLoading(true);
@@ -155,8 +163,6 @@ export default function NotificationsPage() {
   };
 
   const deleteAllRead = async () => {
-    const readCount = notifications.filter((n) => n.read).length;
-
     if (readCount === 0) {
       return;
     }
@@ -215,7 +221,7 @@ export default function NotificationsPage() {
                       variant="ghost"
                       leftIcon={<Trash size={16} />}
                       onClick={deleteAllRead}
-                      disabled={isLoading || notifications.filter((n) => n.read).length === 0}
+                      disabled={isLoading || readCount === 0}
                       aria-label="Delete all read notifications"
                     >
                       Delete Read
@@ -252,7 +258,7 @@ export default function NotificationsPage() {
                 </GlowCard>
 
                 <div aria-live="polite" aria-atomic="true" className="sr-only">
-                  {error && error}
+                  {error}
                   {isLoading && 'Processing...'}
                 </div>
 
@@ -332,10 +338,9 @@ export default function NotificationsPage() {
                                   size="sm"
                                   rightIcon={<ArrowRight size={16} />}
                                   onClick={() => {
-                                    if (notification.actionUrl) {
-                                      window.location.href = notification.actionUrl;
-                                    }
+                                    window.location.href = notification.actionUrl!;
                                   }}
+                                  aria-label={`${notification.actionLabel} for ${notification.title}`}
                                 >
                                   {notification.actionLabel}
                                 </GlowButton>
