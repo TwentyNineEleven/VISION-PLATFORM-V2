@@ -36,7 +36,11 @@ export function AppsGrid({
 }: AppsGridProps) {
   if (apps.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-vision-gray-300 bg-card p-12 text-center">
+      <div
+        className="flex flex-col items-center justify-center rounded-lg border border-border bg-card p-12 text-center"
+        role="status"
+        aria-live="polite"
+      >
         <p className="mb-2 text-lg font-semibold text-foreground">
           No apps match these filters
         </p>

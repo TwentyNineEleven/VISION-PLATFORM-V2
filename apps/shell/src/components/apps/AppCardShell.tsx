@@ -35,36 +35,44 @@ const getStatusChipStyle = (
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   };
 
+  // Use Tailwind color tokens from design system
+  const COLORS = {
+    blue: { text: 'hsl(221 83% 53%)', bg: 'hsl(214 100% 97%)' }, // Electric Blue / Ice Blue
+    orange: { text: 'hsl(21 90% 41%)', bg: 'hsl(24 100% 97%)' }, // Vivid Tangerine / Peach Light
+    gray: { text: 'hsl(215 16% 47%)', border: 'hsl(214 32% 91%)', bg: 'hsl(210 40% 96.1%)' }, // Steel Gray / Silver / Smoke
+    purple: { text: 'hsl(266 68% 51%)', bg: 'hsl(270 100% 98%)' }, // Rich Purple / Lavender Light
+  };
+
   switch (status) {
     case 'preview':
       // Use domain color if available, otherwise use blue
       return {
         label: 'Preview',
-        textColor: domainColor || '#2563EB',
-        borderColor: domainColor || '#2563EB',
-        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : '#DBEAFE',
+        textColor: domainColor || COLORS.blue.text,
+        borderColor: domainColor || COLORS.blue.text,
+        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : COLORS.blue.bg,
       };
     case 'beta':
       // Use domain color if available, otherwise use orange
       return {
         label: 'Beta',
-        textColor: domainColor || '#C2410C',
-        borderColor: domainColor || '#C2410C',
-        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : '#FFEDD5',
+        textColor: domainColor || COLORS.orange.text,
+        borderColor: domainColor || COLORS.orange.text,
+        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : COLORS.orange.bg,
       };
     case 'coming-soon':
       return {
         label: 'Coming soon',
-        textColor: '#64748B',
-        borderColor: '#CBD5E1',
-        bgColor: '#F1F5F9',
+        textColor: COLORS.gray.text,
+        borderColor: COLORS.gray.border,
+        bgColor: COLORS.gray.bg,
       };
     case 'funder-only':
       return {
         label: 'Funder-only',
-        textColor: '#7C3AED',
-        borderColor: '#7C3AED',
-        bgColor: '#EDE9FE',
+        textColor: COLORS.purple.text,
+        borderColor: COLORS.purple.text,
+        bgColor: COLORS.purple.bg,
       };
     default:
       return null;
@@ -130,7 +138,7 @@ export function AppCardShell({
       variant="default"
       padding="none"
       className={cn(
-        'flex h-full w-full flex-col border border-vision-gray-300 bg-card text-left shadow-ambient-card transition-all hover:shadow-ambient-card-hover',
+        'flex h-full w-full flex-col border border-border bg-card text-left shadow-ambient-card transition-all hover:shadow-ambient-card-hover',
         'rounded-2xl overflow-hidden',
         className
       )}
@@ -159,19 +167,19 @@ export function AppCardShell({
             }
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
-              'hover:bg-vision-gray-100',
-              isFavorite ? 'text-white' : 'text-vision-gray-300'
+              'hover:bg-muted',
+              isFavorite ? 'text-white' : 'text-muted-foreground'
             )}
             style={
               isFavorite
-                ? { backgroundColor: domainColor, color: '#FFFFFF' }
+                ? { backgroundColor: domainColor, color: 'white' }
                 : {}
             }
           >
             <Star
               size={16}
               fill={isFavorite ? favoriteColor : 'none'}
-              stroke={isFavorite ? '#FFFFFF' : '#94A3B8'}
+              stroke={isFavorite ? 'white' : 'currentColor'}
               className={isFavorite ? '' : 'text-muted-foreground'}
             />
           </button>
@@ -229,10 +237,10 @@ export function AppCardShell({
             className="h-10 w-full rounded-lg text-sm font-semibold text-white"
             style={
               isDisabled
-                ? { backgroundColor: '#94A3B8' }
+                ? { backgroundColor: 'hsl(var(--muted-foreground))' }
                 : {
                     backgroundColor: domainColor,
-                    color: '#FFFFFF',
+                    color: 'white',
                   }
             }
             disabled={isDisabled}
