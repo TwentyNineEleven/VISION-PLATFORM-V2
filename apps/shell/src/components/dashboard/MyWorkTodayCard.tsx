@@ -28,10 +28,10 @@ import {
 } from '@/lib/dashboard/mockDashboardData';
 import {
   getAppMeta,
-  getPhaseColor,
   getPhaseLabel,
-  getPhaseSoftColor,
 } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
 
 export interface MyWorkTodayCardProps {
   tasks: Task[];
@@ -42,20 +42,20 @@ export interface MyWorkTodayCardProps {
 const statusConfig = {
   overdue: {
     icon: AlertTriangle,
-    color: '#DB2777', // NARRATE
-    bg: 'rgba(219, 39, 119, 0.15)',
+    textColor: 'text-vision-purple-600',   // Bold Color System (NARRATE)
+    bgColor: 'bg-vision-purple-50',        // Bold Color System
     label: 'Overdue',
   },
   'due-today': {
     icon: Clock,
-    color: '#C2410C', // INSPIRE
-    bg: 'rgba(194, 65, 12, 0.18)',
+    textColor: 'text-vision-orange-900',   // Bold Color System (INSPIRE)
+    bgColor: 'bg-vision-orange-50',        // Bold Color System
     label: 'Due today',
   },
   upcoming: {
     icon: Calendar,
-    color: '#2563EB', // INITIATE
-    bg: 'rgba(37, 99, 235, 0.15)',
+    textColor: 'text-vision-blue-700',     // Bold Color System (INITIATE)
+    bgColor: 'bg-vision-blue-50',          // Bold Color System
     label: 'Upcoming',
   },
 } as const;
@@ -65,14 +65,20 @@ function TaskRow({ task }: { task: Task }) {
   const AppMeta = getAppMeta(task.appId);
   const appName = AppMeta?.name || task.appId;
   const phaseLabel = AppMeta ? getPhaseLabel(AppMeta.phase) : task.context;
-  const phaseColor = AppMeta ? getPhaseColor(AppMeta.phase) : '#64748B';
-  const phaseSoftColor = AppMeta ? getPhaseSoftColor(AppMeta.phase) : 'rgba(100, 116, 139, 0.12)';
+
+  // Use Bold Color System tokens via getPhaseTokenClasses
+  const phaseClasses = AppMeta
+    ? getPhaseTokenClasses(AppMeta.phase)
+    : { badgeBackground: 'bg-vision-gray-100', badgeText: 'text-vision-gray-700' };
 
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-border border-opacity-40 bg-card px-3 py-3 transition hover:border-border hover:shadow-glow-primary-sm">
       <div
-        className="flex h-9 w-9 items-center justify-center rounded-xl"
-        style={{ backgroundColor: config.bg, color: config.color }}
+        className={cn(
+          'flex h-9 w-9 items-center justify-center rounded-xl',
+          config.bgColor,
+          config.textColor
+        )}
       >
         <config.icon size={16} />
       </div>
@@ -84,33 +90,33 @@ function TaskRow({ task }: { task: Task }) {
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[11px]"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[11px]',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {appName}
           </GlowBadge>
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[11px]"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[11px]',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {phaseLabel || task.context}
           </GlowBadge>
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[11px] font-semibold"
-            style={{
-              backgroundColor: config.bg,
-              color: config.color,
-            }}
+            className={cn(
+              'border-transparent text-[11px] font-semibold',
+              config.bgColor,
+              config.textColor
+            )}
           >
             {formatDueDate(task.dueDate, task.status)}
           </GlowBadge>
@@ -125,25 +131,28 @@ function TimelineRow({
   appId,
   dueDate,
   type,
-  iconColor,
 }: {
   title: string;
   appId: string;
   dueDate: string;
   type: 'deadline' | 'grant';
-  iconColor: string;
 }) {
   const AppMeta = getAppMeta(appId);
   const appName = AppMeta?.name || appId;
 
+  // Use Bold Color System tokens
+  const typeClasses = type === 'deadline'
+    ? { bgColor: 'bg-vision-purple-50', textColor: 'text-vision-purple-700' }
+    : { bgColor: 'bg-vision-blue-50', textColor: 'text-vision-blue-700' };
+
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-border border-opacity-40 bg-card px-3 py-3 transition hover:border-border">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-xl"
-        style={{
-          backgroundColor: `${iconColor}30`,
-          color: iconColor,
-        }}
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-xl',
+          typeClasses.bgColor,
+          typeClasses.textColor
+        )}
       >
         <Calendar size={16} />
       </div>
@@ -164,11 +173,11 @@ function TimelineRow({
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[11px]"
-            style={{
-              backgroundColor: `${iconColor}15`,
-              color: iconColor,
-            }}
+            className={cn(
+              'border-transparent text-[11px]',
+              typeClasses.bgColor,
+              typeClasses.textColor
+            )}
           >
             {type === 'deadline' ? 'Report' : 'Grant'}
           </GlowBadge>
@@ -185,11 +194,10 @@ function ApprovalRow({ approval }: { approval: Approval }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-border border-opacity-40 bg-card px-3 py-3 transition hover:border-border">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-xl"
-        style={{
-          backgroundColor: 'rgba(194, 65, 12, 0.15)',
-          color: '#C2410C',
-        }}
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-xl',
+          'bg-vision-orange-50 text-vision-orange-900'  // Bold Color System
+        )}
       >
         <AlertTriangle size={16} />
       </div>
@@ -244,7 +252,7 @@ export function MyWorkTodayCard({ tasks, deadlines, approvals }: MyWorkTodayCard
             </Stack>
           </Stack>
 
-          <div className="h-px" style={{ backgroundColor: 'rgba(148, 163, 184, 0.25)' }} />
+          <div className="h-px bg-border/25" />
 
           <Stack spacing="md">
             <Text size="sm" weight="semibold" color="secondary">
@@ -258,13 +266,12 @@ export function MyWorkTodayCard({ tasks, deadlines, approvals }: MyWorkTodayCard
                   appId={deadline.appId}
                   dueDate={deadline.dueDate}
                   type={deadline.type === 'grant' ? 'grant' : 'deadline'}
-                  iconColor={deadline.type === 'grant' ? '#2563EB' : '#7C3AED'}
                 />
               ))}
             </Stack>
           </Stack>
 
-          <div className="h-px" style={{ backgroundColor: 'rgba(148, 163, 184, 0.25)' }} />
+          <div className="h-px bg-border/25" />
 
           <Stack spacing="md">
             <Text size="sm" weight="semibold" color="secondary">
