@@ -57,10 +57,8 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
               {tasks.slice(0, 5).map((task) => {
                 const config = statusConfig[task.status];
                 const StatusIcon = config.icon;
-                // Try to find app metadata, otherwise use task data
-                const taskAppMeta = Object.values(require('@/lib/apps/appMetadata').appMetadata).find(
-                  (meta: any) => meta.name === task.app
-                ) as any;
+                // Try to find app metadata using appId
+                const taskAppMeta = getAppMeta(task.appId);
                 // Use Bold Color System tokens via getPhaseTokenClasses
                 const phaseClasses = taskAppMeta
                   ? getPhaseTokenClasses(taskAppMeta.phase)
@@ -89,29 +87,31 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
                       <Group spacing="xs" wrap="wrap">
                         <GlowBadge
                           variant="outline"
-                          size="xs"
+                          size="sm"
                           className={cn(
                             'border-transparent text-[10px]',
                             phaseClasses.badgeBackground,
                             phaseClasses.badgeText
                           )}
                         >
-                          {task.app}
+                          {taskAppMeta?.name ?? task.appId}
                         </GlowBadge>
+                        {taskAppMeta && (
+                          <GlowBadge
+                            variant="outline"
+                            size="sm"
+                            className={cn(
+                              'border-transparent text-[10px] uppercase',
+                              phaseClasses.badgeBackground,
+                              phaseClasses.badgeText
+                            )}
+                          >
+                            {taskAppMeta.phase}
+                          </GlowBadge>
+                        )}
                         <GlowBadge
                           variant="outline"
-                          size="xs"
-                          className={cn(
-                            'border-transparent text-[10px] uppercase',
-                            phaseClasses.badgeBackground,
-                            phaseClasses.badgeText
-                          )}
-                        >
-                          {task.module}
-                        </GlowBadge>
-                        <GlowBadge
-                          variant="outline"
-                          size="xs"
+                          size="sm"
                           className={cn(
                             'border-transparent text-[10px] font-semibold',
                             config.bgColor,
@@ -161,7 +161,7 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
                       </Text>
                       <Group spacing="xs" wrap="wrap">
                         <Text size="xs" color="tertiary">
-                          {deadline.app}
+                          {getAppMeta(deadline.appId)?.name ?? deadline.appId}
                         </Text>
                         <Text size="xs" color="tertiary">
                           ·
@@ -171,9 +171,9 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
                         </Text>
                         <GlowBadge
                           variant="outline"
-                          size="xs"
+                          size="sm"
                           className={cn(
-                            'border-transparent',
+                            'border-transparent text-[10px]',
                             typeClasses.bgColor,
                             typeClasses.textColor
                           )}
@@ -214,7 +214,7 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
                       </Text>
                       <Group spacing="xs" wrap="wrap">
                         <Text size="xs" color="tertiary">
-                          {approval.app}
+                          {getAppMeta(approval.appId)?.name ?? approval.appId}
                         </Text>
                         <Text size="xs" color="tertiary">
                           ·
@@ -249,4 +249,3 @@ export function MyWorkCard({ tasks, deadlines, approvals }: MyWorkCardProps) {
     </GlowCard>
   );
 }
-

@@ -48,6 +48,7 @@ export interface AppMetadata {
   category: string;
   description: string;
   iconName: string;
+  shortDescription?: string;
   status: AppStatus;
   route: string;
   launchPath?: string;

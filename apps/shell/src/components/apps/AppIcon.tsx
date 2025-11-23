@@ -30,7 +30,7 @@ const SIZE_MAP: Record<AppIconSize, { container: string; icon: number }> = {
   lg: { container: 'h-16 w-16', icon: 28 },
 };
 
-const ICON_MAP: Record<string, LucideIcon> = {
+export const APP_ICON_MAP: Record<string, LucideIcon> = {
   'community-compass': MapPin,
   stakeholdr: Users,
   visionverse: Lightbulb,
@@ -57,7 +57,7 @@ interface AppIconProps {
 
 export function AppIcon({ app, size = 'md', className, showBackground = true }: AppIconProps) {
   const iconSize = SIZE_MAP[size];
-  const Icon = ICON_MAP[app.iconName] ?? Grid3x3;
+  const Icon = APP_ICON_MAP[app.iconName] ?? Grid3x3;
   const phaseColor = getPhaseColor(app.phase);
 
   return (
