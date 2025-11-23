@@ -4,6 +4,7 @@ import React from 'react';
 import { Users, MoreVertical, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { GlowButton } from '@/components/glow-ui';
 
 interface TeamMember {
   id: string;
@@ -87,16 +88,22 @@ export function TeamListWidget() {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4 h-[456px] w-[280px] shrink-0">
       {/* Header */}
-      <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="w-6 h-6 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-center shrink-0 text-blue-600">
             <Users className="w-4 h-4" />
           </div>
           <p className="text-sm font-medium text-gray-600 truncate">Your team</p>
         </div>
-        <button className="p-2 rounded-md hover:bg-gray-100 text-gray-500 shrink-0">
+        <GlowButton
+          variant="ghost"
+          size="icon"
+          glow="none"
+          className="text-gray-500 hover:text-gray-700 shrink-0"
+          aria-label="More team settings"
+        >
           <MoreVertical className="w-4 h-4" />
-        </button>
+        </GlowButton>
       </div>
 
       {/* Team Members List */}
@@ -110,10 +117,14 @@ export function TeamListWidget() {
 
       {/* Footer */}
       <div>
-        <button className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
+        <GlowButton
+          variant="outline"
+          size="sm"
+          className="w-full flex items-center justify-center gap-2 text-sm font-medium"
+        >
           View all
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </GlowButton>
       </div>
     </div>
   );

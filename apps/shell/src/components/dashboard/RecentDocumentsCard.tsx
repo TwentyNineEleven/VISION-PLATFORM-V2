@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, Group, Stack, Text } from '@/components/glow-ui';
+import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, GlowButton, Group, Stack, Text } from '@/components/glow-ui';
 import { FileText, MoreVertical } from 'lucide-react';
 import { type Document, formatRelativeTime } from '@/lib/dashboard/mockDashboardData';
 import { getAppMeta } from '@/lib/apps/appMetadata';
@@ -53,9 +53,15 @@ function DocumentRow({ document }: { document: Document }) {
           </Text>
         </Group>
       </div>
-      <button className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+      <GlowButton
+        variant="ghost"
+        size="icon"
+        glow="none"
+        className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+        aria-label="View document options"
+      >
         <MoreVertical className="h-4 w-4" />
-      </button>
+      </GlowButton>
     </div>
   );
 }
