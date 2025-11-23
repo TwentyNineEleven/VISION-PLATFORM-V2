@@ -19,7 +19,10 @@ export function CatalogBanner({
     <GlowCard
       variant="glow"
       padding="lg"
-      className="relative overflow-hidden bg-gradient-to-br from-vision-blue-950/5 via-vision-green-900/5 to-vision-orange-900/5"
+      className="relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(to bottom right, rgba(0, 71, 171, 0.05), rgba(4, 120, 87, 0.05), rgba(194, 65, 12, 0.05))'
+      }}
     >
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <Stack spacing="sm" className="flex-1">

@@ -3,29 +3,36 @@
 @theme {
   /* Bold Color System v3.0 - Phase Colors */
   /* These must be defined in @theme for Tailwind v4 to generate utilities */
+
+  /* INITIATE Phase - Blue */
   --color-vision-blue-50: #EFF6FF;
   --color-vision-blue-700: #2563EB;
   --color-vision-blue-950: #0047AB;
 
+  /* VOICE Phase - Green */
   --color-vision-green-50: #F0FDFA;
   --color-vision-green-500: #14B8A6;
   --color-vision-green-600: #0F766E;
   --color-vision-green-700: #059669;
   --color-vision-green-900: #047857;
 
+  /* INSPIRE Phase - Orange */
   --color-vision-orange-50: #FFF7ED;
   --color-vision-orange-800: #9A3412;
   --color-vision-orange-900: #C2410C;
 
+  /* NARRATE Phase - Purple */
   --color-vision-purple-50: #F5F3FF;
   --color-vision-purple-600: #8B5CF6;
   --color-vision-purple-700: #7C3AED;
   --color-vision-purple-900: #6D28D9;
 
+  /* Error/Alert - Red */
   --color-vision-red-50: #FEF2F2;
   --color-vision-red-700: #DC2626;
   --color-vision-red-900: #B91C1C;
 
+  /* Neutral - Gray */
   --color-vision-gray-0: #FFFFFF;
   --color-vision-gray-50: #F8FAFC;
   --color-vision-gray-100: #F1F5F9;
