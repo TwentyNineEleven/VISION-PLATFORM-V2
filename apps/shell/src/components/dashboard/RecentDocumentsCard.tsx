@@ -68,7 +68,7 @@ function DocumentRow({ document }: { document: Document }) {
 
 export function RecentDocumentsCard({ documents }: RecentDocumentsCardProps) {
   return (
-    <GlowCard variant="elevated" className="h-full">
+    <GlowCard variant="elevated">
       <GlowCardHeader>
         <GlowCardTitle className="text-lg">Recent documents & drafts</GlowCardTitle>
       </GlowCardHeader>
