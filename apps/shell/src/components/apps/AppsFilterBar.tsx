@@ -114,6 +114,8 @@ export function AppsFilterBar({
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
                 )}
+                role="button"
+                aria-pressed={filters.phase === 'All'}
               >
                 All
               </button>
@@ -135,6 +137,8 @@ export function AppsFilterBar({
                         ? { backgroundColor: domainColor }
                         : undefined
                     }
+                    role="button"
+                    aria-pressed={isSelected}
                   >
                     {phaseLabels[phase].split(' ')[0]}
                   </button>
@@ -152,6 +156,8 @@ export function AppsFilterBar({
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
                 )}
+                role="button"
+                aria-pressed={filters.audience === 'All'}
               >
                 All
               </button>
@@ -165,6 +171,8 @@ export function AppsFilterBar({
                       ? 'bg-primary text-primary-foreground shadow-md'
                       : 'bg-vision-gray-100 text-foreground hover:border hover:border-vision-gray-300'
                   )}
+                  role="button"
+                  aria-pressed={filters.audience === audience}
                 >
                   {audience}
                 </button>

@@ -55,11 +55,11 @@ export function AppDetailDrawer({
       >
         <div className="flex h-full flex-col overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#E2E8F0] px-6 py-4">
-            <h2 className="text-xl font-bold text-[#1F2937]">App Details</h2>
+          <div className="flex items-center justify-between border-b border-vision-gray-300 px-6 py-4">
+            <h2 className="text-xl font-bold text-vision-gray-950">App Details</h2>
             <button
               onClick={onClose}
-              className="flex items-center justify-center rounded-lg p-2 text-[#64748B] transition-colors hover:bg-[#F1F5F9]"
+              className="flex items-center justify-center rounded-lg p-2 text-vision-gray-700 transition-colors hover:bg-vision-gray-100"
               aria-label="Close drawer"
             >
               <X size={20} />
@@ -74,7 +74,7 @@ export function AppDetailDrawer({
                 <AppIcon app={app} size="lg" className="shadow-none" />
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-2">
-                    <h3 className="text-2xl font-bold text-[#1F2937]">
+                    <h3 className="text-2xl font-bold text-vision-gray-950">
                       {app.name}
                     </h3>
                     <span
@@ -86,7 +86,7 @@ export function AppDetailDrawer({
                       {phaseLabel.toUpperCase().replace(/\s+/g, ' ')}
                     </span>
                   </div>
-                  <p className="text-base text-[#64748B] leading-relaxed">
+                  <p className="text-base text-vision-gray-700 leading-relaxed">
                     {app.description}
                   </p>
                 </div>
@@ -98,33 +98,33 @@ export function AppDetailDrawer({
                   onLaunch?.(app);
                   onClose();
                 }}
-                className="w-full rounded-lg bg-[#0047AB] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#1E3A8A] hover:shadow-md"
+                className="w-full rounded-lg bg-vision-blue-950 px-4 py-3 text-base font-semibold text-white transition-all hover:bg-vision-blue-700 hover:shadow-md"
               >
                 Open App
               </button>
 
               {/* What this tool is for */}
               <div>
-                <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                   What this tool is for
                 </h4>
-                <p className="text-sm text-[#64748B] leading-relaxed">
+                <p className="text-sm text-vision-gray-700 leading-relaxed">
                   {app.description}
                 </p>
               </div>
 
               {/* Inputs Required */}
               <div>
-                <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                   Inputs Required
                 </h4>
-                <ul className="space-y-1 text-sm text-[#64748B]">
+                <ul className="space-y-1 text-sm text-vision-gray-700">
                   <li className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#0047AB]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-vision-blue-950" />
                     <span>Organization information and context</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#0047AB]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-vision-blue-950" />
                     <span>Relevant documents and data</span>
                   </li>
                 </ul>
@@ -132,16 +132,16 @@ export function AppDetailDrawer({
 
               {/* Outputs Generated */}
               <div>
-                <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                   Outputs Generated
                 </h4>
-                <ul className="space-y-1 text-sm text-[#64748B]">
+                <ul className="space-y-1 text-sm text-vision-gray-700">
                   <li className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#047857]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-vision-green-900" />
                     <span>Structured deliverables and reports</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#047857]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-vision-green-900" />
                     <span>Actionable insights and recommendations</span>
                   </li>
                 </ul>
@@ -150,14 +150,14 @@ export function AppDetailDrawer({
               {/* Audiences */}
               {app.audiences && app.audiences.length > 0 && (
                 <div>
-                  <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                  <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                     Best for
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {app.audiences.map((audience, index) => (
                       <span
                         key={index}
-                        className="rounded-full bg-[#F1F5F9] px-3 py-1.5 text-xs font-medium text-[#64748B]"
+                        className="rounded-full bg-vision-gray-100 px-3 py-1.5 text-xs font-medium text-vision-gray-700"
                       >
                         {audience}
                       </span>
@@ -169,14 +169,14 @@ export function AppDetailDrawer({
               {/* Focus Tags */}
               {app.focusTags && app.focusTags.length > 0 && (
                 <div>
-                  <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                  <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                     Focus Areas
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {app.focusTags.map((tag, index) => (
                       <span
                         key={index}
-                        className="rounded-full bg-[#F1F5F9] px-3 py-1.5 text-xs font-medium text-[#64748B]"
+                        className="rounded-full bg-vision-gray-100 px-3 py-1.5 text-xs font-medium text-vision-gray-700"
                       >
                         {tag}
                       </span>
@@ -188,14 +188,14 @@ export function AppDetailDrawer({
               {/* Connected Apps */}
               {app.connectedApps && app.connectedApps.length > 0 && (
                 <div>
-                  <h4 className="mb-2 text-sm font-semibold text-[#1F2937]">
+                  <h4 className="mb-2 text-sm font-semibold text-vision-gray-950">
                     Works well with
                   </h4>
                   <div className="space-y-2">
                     {app.connectedApps.map((connectedAppId) => (
                       <div
                         key={connectedAppId}
-                        className="flex items-center gap-2 text-sm text-[#0047AB]"
+                        className="flex items-center gap-2 text-sm text-vision-blue-950"
                       >
                         <Link2 size={16} />
                         <span>{connectedAppId}</span>
@@ -208,7 +208,7 @@ export function AppDetailDrawer({
 
               {/* Time to Complete */}
               {app.timeToComplete && (
-                <div className="flex items-center gap-2 text-sm text-[#64748B]">
+                <div className="flex items-center gap-2 text-sm text-vision-gray-700">
                   <Clock size={16} />
                   <span>{app.timeToComplete}</span>
                 </div>
@@ -217,17 +217,17 @@ export function AppDetailDrawer({
               {/* Status Tags */}
               <div className="flex flex-wrap gap-2">
                 {app.status === 'beta' && (
-                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#C2410C] bg-[#FFEDD5]">
+                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-vision-orange-900 bg-vision-orange-100">
                     Beta
                   </span>
                 )}
                 {app.status === 'coming-soon' && (
-                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#C2410C] bg-[#FFEDD5]">
+                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-vision-orange-900 bg-vision-orange-100">
                     Coming Soon
                   </span>
                 )}
                 {app.access === 'Requires Upgrade' && (
-                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#6D28D9] bg-[#EDE9FE]">
+                  <span className="rounded px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-vision-purple-900 bg-vision-purple-100">
                     Upgrade Required
                   </span>
                 )}
