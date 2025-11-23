@@ -26,22 +26,35 @@ export interface DashboardStatCardProps {
 
 const semanticConfig: Record<
   DashboardStatCardProps['semantic'],
-  { color: string; icon: React.ComponentType<{ className?: string }> }
+  {
+    textColor: string;
+    bgColor: string;
+    dotColor: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
 > = {
   info: {
-    color: '#0047AB', // Bold Royal Blue
+    textColor: 'text-vision-blue-950',     // Bold Color System
+    bgColor: 'bg-vision-blue-50',         // Bold Color System
+    dotColor: 'bg-vision-blue-950',       // Bold Color System
     icon: Grid3x3,
   },
   warning: {
-    color: '#C2410C', // Vivid Tangerine
+    textColor: 'text-vision-orange-900',   // Bold Color System
+    bgColor: 'bg-vision-orange-50',       // Bold Color System
+    dotColor: 'bg-vision-orange-900',     // Bold Color System
     icon: Inbox,
   },
   error: {
-    color: '#B91C1C', // Electric Scarlet
+    textColor: 'text-vision-red-900',      // Bold Color System
+    bgColor: 'bg-vision-red-50',          // Bold Color System
+    dotColor: 'bg-vision-red-900',        // Bold Color System
     icon: Bell,
   },
   success: {
-    color: '#047857', // Vivid Forest Green
+    textColor: 'text-vision-green-900',    // Bold Color System
+    bgColor: 'bg-vision-green-50',        // Bold Color System
+    dotColor: 'bg-vision-green-900',      // Bold Color System
     icon: Gauge,
   },
 };
@@ -53,8 +66,8 @@ export function DashboardStatCard({
   semantic,
   trend,
 }: DashboardStatCardProps) {
-  const { color, icon: Icon } = semanticConfig[semantic];
-  
+  const { textColor, bgColor, dotColor, icon: Icon } = semanticConfig[semantic];
+
   return (
     <GlowCard
       variant="elevated"
@@ -65,11 +78,11 @@ export function DashboardStatCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl"
-              style={{
-                backgroundColor: `${color}15`,
-                color,
-              }}
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-xl',
+                bgColor,
+                textColor
+              )}
             >
               <Icon className="h-5 w-5" />
             </div>
@@ -79,17 +92,11 @@ export function DashboardStatCard({
               </p>
             </div>
           </div>
-          <div
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: color }}
-          />
+          <div className={cn('h-2 w-2 rounded-full', dotColor)} />
         </div>
-        
+
         <div className="flex items-baseline gap-2">
-          <span
-            className="text-3xl font-bold leading-tight"
-            style={{ color }}
-          >
+          <span className={cn('text-3xl font-bold leading-tight', textColor)}>
             {value}
           </span>
           {trend && (
@@ -105,7 +112,7 @@ export function DashboardStatCard({
             </div>
           )}
         </div>
-        
+
         <p className="text-xs text-muted-foreground">
           {sublabel}
         </p>
