@@ -1,11 +1,12 @@
 import type { Config } from 'tailwindcss';
 
-const config: Config = {
+const config = {
   darkMode: 'class',
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     '../../packages/ui/src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // @ts-expect-error - safelist is supported in Tailwind but not in v4 alpha types yet
   safelist: [
     // Bold Color System - Phase Colors (used by getPhaseTokenClasses())
     // Background colors
@@ -208,6 +209,6 @@ const config: Config = {
     },
   },
   plugins: [require('tailwindcss-animate')],
-};
+} satisfies Config;
 
 export default config;
