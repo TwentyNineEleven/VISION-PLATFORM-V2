@@ -157,7 +157,7 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       {/* 1. Hero Section */}
       <div className="mb-6">
         <PageHero
@@ -234,6 +234,6 @@ export default function ApplicationsPage() {
         onClose={() => setIsDrawerOpen(false)}
         onLaunch={handleLaunchApp}
       />
-    </div>
+    </>
   );
 }
