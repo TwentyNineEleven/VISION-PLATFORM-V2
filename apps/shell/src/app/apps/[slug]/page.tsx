@@ -34,7 +34,7 @@ export default async function AppDetailPage({
             </p>
           </div>
           <GlowButton asChild variant="outline" size="sm">
-            <Link href="/apps">
+            <Link href="/applications">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Apps
             </Link>
@@ -122,7 +122,7 @@ export default async function AppDetailPage({
           )}
 
           <GlowButton asChild variant="outline">
-            <Link href="/apps">
+            <Link href="/applications">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to launcher
             </Link>
