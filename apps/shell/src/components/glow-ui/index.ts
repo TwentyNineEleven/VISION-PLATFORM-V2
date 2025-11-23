@@ -11,6 +11,7 @@ export * from './GlowBadge';
 export * from './GlowModal';
 export * from './GlowTabs';
 export * from './GlowSwitch';
+export * from './GlowCheckbox';
 
 // Layout Components
 export * from './Container';
