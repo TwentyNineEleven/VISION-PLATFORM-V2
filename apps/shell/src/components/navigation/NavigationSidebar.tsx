@@ -359,7 +359,7 @@ export const defaultNavItems: NavItem[] = [
   {
     id: 'apps',
     label: 'Apps',
-    href: '/apps',
+    href: '/applications',
     icon: LayoutGrid,
     badge: VISION_APPS.length,
     badgeVariant: 'info',
