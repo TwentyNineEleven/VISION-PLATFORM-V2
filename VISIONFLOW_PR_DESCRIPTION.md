@@ -1,19 +1,19 @@
-# Ops360 MVP Implementation
+# VisionFlow MVP Implementation
 
 ## 🎯 Overview
 
-This PR introduces **Ops360**, the central execution engine of the VISION Platform. Ops360 transforms strategic insights from all VISION apps into actionable projects, tasks, and workflows, powered by AI.
+This PR introduces **VisionFlow**, the central execution engine of the VISION Platform. VisionFlow transforms strategic insights from all VISION apps into actionable projects, tasks, and workflows, powered by AI.
 
-**Branch:** `feature/ops360-app`
+**Branch:** `feature/visionflow-app`
 **Target:** `main`
 **Timeline:** 17 weeks (8 phases)
 **Status:** 🚧 MVP Complete — Ready for Review
 
 ---
 
-## 📋 What is Ops360?
+## 📋 What is VisionFlow?
 
-Ops360 is a multi-tenant, AI-powered project and task management application designed specifically for mission-driven organizations (nonprofits, social enterprises, government agencies).
+VisionFlow is a multi-tenant, AI-powered project and task management application designed specifically for mission-driven organizations (nonprofits, social enterprises, government agencies).
 
 ### Core Capabilities
 
@@ -60,12 +60,12 @@ Ops360 is a multi-tenant, AI-powered project and task management application des
 ### API Layer
 
 **30+ REST endpoints:**
-- `/api/v1/ops360/plans` — Plan CRUD + sharing
-- `/api/v1/ops360/projects` — Project management
-- `/api/v1/ops360/tasks` — Task CRUD + assignment + comments
-- `/api/v1/ops360/workflows` — Workflow templates + application
-- `/api/v1/ops360/ai/plan-builder` — AI plan generation
-- `/api/v1/ops360/ingest/task` — Webhook for cross-app task imports
+- `/api/v1/visionflow/plans` — Plan CRUD + sharing
+- `/api/v1/visionflow/projects` — Project management
+- `/api/v1/visionflow/tasks` — Task CRUD + assignment + comments
+- `/api/v1/visionflow/workflows` — Workflow templates + application
+- `/api/v1/visionflow/ai/plan-builder` — AI plan generation
+- `/api/v1/visionflow/ingest/task` — Webhook for cross-app task imports
 
 ### AI Architecture
 
@@ -96,16 +96,16 @@ Ops360 is a multi-tenant, AI-powered project and task management application des
 
 ### Key Screens (10 total)
 
-1. **Dashboard** (`/ops360/dashboard`) — My Day, AI Insights, Active Projects
-2. **My Tasks** (`/ops360/tasks`) — Search, filters, grouping (Overdue/Today/This Week/Later)
+1. **Dashboard** (`/visionflow/dashboard`) — My Day, AI Insights, Active Projects
+2. **My Tasks** (`/visionflow/tasks`) — Search, filters, grouping (Overdue/Today/This Week/Later)
 3. **Task Detail** — Right slide-out panel with comments, activity, AI suggestions
-4. **Plans List** (`/ops360/plans`) — Plan cards with progress, visibility indicators
+4. **Plans List** (`/visionflow/plans`) — Plan cards with progress, visibility indicators
 5. **AI Plan Builder** — 3-step modal (Goal → Context → Review → Create)
-6. **Project View** (`/ops360/projects/:id`) — Milestones, tasks, timeline, progress
-7. **Workflows** (`/ops360/workflows`) — My workflows + public templates
-8. **Calendar** (`/ops360/calendar`) — Day/Week/Month views, drag-to-reschedule
+6. **Project View** (`/visionflow/projects/:id`) — Milestones, tasks, timeline, progress
+7. **Workflows** (`/visionflow/workflows`) — My workflows + public templates
+8. **Calendar** (`/visionflow/calendar`) — Day/Week/Month views, drag-to-reschedule
 9. **Sharing Modal** — Manage plan access (View/Comment/Edit)
-10. **Integrations** (`/ops360/integrations`) — Connected apps, ingestion logs
+10. **Integrations** (`/visionflow/integrations`) — Connected apps, ingestion logs
 
 ### Design System
 
@@ -121,10 +121,10 @@ Ops360 is a multi-tenant, AI-powered project and task management application des
 
 ### Integration Pattern
 
-Other VISION apps send tasks to Ops360 via webhook:
+Other VISION apps send tasks to VisionFlow via webhook:
 
 ```http
-POST /api/v1/ops360/ingest/task
+POST /api/v1/visionflow/ingest/task
 Authorization: Bearer {jwt}
 X-Vision-App-Key: {app_api_key}
 
@@ -175,8 +175,8 @@ Webhook retries are idempotent (return existing task if duplicate).
 ### Key Test Files
 
 ```
-apps/shell/src/services/ops360Service.test.ts
-apps/shell/src/app/api/v1/ops360/tasks/route.test.ts
+apps/shell/src/services/visionflowService.test.ts
+apps/shell/src/app/api/v1/visionflow/tasks/route.test.ts
 tests/rls/plans.test.ts
 tests/rls/tasks.test.ts
 tests/ai/plan-builder.test.ts
@@ -186,7 +186,7 @@ tests/e2e/ai-plan-builder.spec.ts
 
 ### CI/CD
 
-GitHub Actions workflow: `.github/workflows/ops360-tests.yml`
+GitHub Actions workflow: `.github/workflows/visionflow-tests.yml`
 
 **Jobs:**
 - `unit-tests` — Run Vitest, upload coverage to Codecov
@@ -200,8 +200,8 @@ GitHub Actions workflow: `.github/workflows/ops360-tests.yml`
 ### New Migrations
 
 ```
-supabase/migrations/20250124000001_ops360_schema.sql
-supabase/migrations/20250124000002_ops360_rls.sql
+supabase/migrations/20250124000001_visionflow_schema.sql
+supabase/migrations/20250124000002_visionflow_rls.sql
 ```
 
 ### New Edge Functions
@@ -214,48 +214,48 @@ supabase/functions/ai-task-breakdown/index.ts
 ### New API Routes
 
 ```
-apps/shell/src/app/api/v1/ops360/plans/route.ts
-apps/shell/src/app/api/v1/ops360/plans/[id]/route.ts
-apps/shell/src/app/api/v1/ops360/plans/[id]/shares/route.ts
-apps/shell/src/app/api/v1/ops360/projects/route.ts
-apps/shell/src/app/api/v1/ops360/projects/[id]/route.ts
-apps/shell/src/app/api/v1/ops360/tasks/route.ts
-apps/shell/src/app/api/v1/ops360/tasks/[id]/route.ts
-apps/shell/src/app/api/v1/ops360/tasks/[id]/assign/route.ts
-apps/shell/src/app/api/v1/ops360/tasks/[id]/comments/route.ts
-apps/shell/src/app/api/v1/ops360/workflows/route.ts
-apps/shell/src/app/api/v1/ops360/workflows/[id]/apply/route.ts
-apps/shell/src/app/api/v1/ops360/ai/plan-builder/route.ts
-apps/shell/src/app/api/v1/ops360/ai/plan-builder/convert/route.ts
-apps/shell/src/app/api/v1/ops360/ai/task-breakdown/route.ts
-apps/shell/src/app/api/v1/ops360/ingest/task/route.ts
-apps/shell/src/app/api/v1/ops360/ingest/logs/route.ts
-apps/shell/src/app/api/v1/ops360/dashboard/route.ts
+apps/shell/src/app/api/v1/visionflow/plans/route.ts
+apps/shell/src/app/api/v1/visionflow/plans/[id]/route.ts
+apps/shell/src/app/api/v1/visionflow/plans/[id]/shares/route.ts
+apps/shell/src/app/api/v1/visionflow/projects/route.ts
+apps/shell/src/app/api/v1/visionflow/projects/[id]/route.ts
+apps/shell/src/app/api/v1/visionflow/tasks/route.ts
+apps/shell/src/app/api/v1/visionflow/tasks/[id]/route.ts
+apps/shell/src/app/api/v1/visionflow/tasks/[id]/assign/route.ts
+apps/shell/src/app/api/v1/visionflow/tasks/[id]/comments/route.ts
+apps/shell/src/app/api/v1/visionflow/workflows/route.ts
+apps/shell/src/app/api/v1/visionflow/workflows/[id]/apply/route.ts
+apps/shell/src/app/api/v1/visionflow/ai/plan-builder/route.ts
+apps/shell/src/app/api/v1/visionflow/ai/plan-builder/convert/route.ts
+apps/shell/src/app/api/v1/visionflow/ai/task-breakdown/route.ts
+apps/shell/src/app/api/v1/visionflow/ingest/task/route.ts
+apps/shell/src/app/api/v1/visionflow/ingest/logs/route.ts
+apps/shell/src/app/api/v1/visionflow/dashboard/route.ts
 ```
 
 ### New Services
 
 ```
-apps/shell/src/services/ops360Service.ts
+apps/shell/src/services/visionflowService.ts
 ```
 
 ### New Pages
 
 ```
-apps/shell/src/app/ops360/layout.tsx
-apps/shell/src/app/ops360/dashboard/page.tsx
-apps/shell/src/app/ops360/tasks/page.tsx
-apps/shell/src/app/ops360/plans/page.tsx
-apps/shell/src/app/ops360/projects/[id]/page.tsx
-apps/shell/src/app/ops360/workflows/page.tsx
-apps/shell/src/app/ops360/calendar/page.tsx
-apps/shell/src/app/ops360/integrations/page.tsx
+apps/shell/src/app/visionflow/layout.tsx
+apps/shell/src/app/visionflow/dashboard/page.tsx
+apps/shell/src/app/visionflow/tasks/page.tsx
+apps/shell/src/app/visionflow/plans/page.tsx
+apps/shell/src/app/visionflow/projects/[id]/page.tsx
+apps/shell/src/app/visionflow/workflows/page.tsx
+apps/shell/src/app/visionflow/calendar/page.tsx
+apps/shell/src/app/visionflow/integrations/page.tsx
 ```
 
 ### New Components
 
 ```
-apps/shell/src/components/ops360/
+apps/shell/src/components/visionflow/
 ├── TaskList.tsx
 ├── TaskDetailPanel.tsx
 ├── PlanCard.tsx
@@ -264,20 +264,20 @@ apps/shell/src/components/ops360/
 ├── WorkflowCard.tsx
 ├── CalendarView.tsx
 ├── SharingModal.tsx
-└── Ops360TopNav.tsx
+└── VisionFlowTopNav.tsx
 ```
 
 ### New Types
 
 ```
-apps/shell/src/types/ops360.ts
+apps/shell/src/types/visionflow.ts
 ```
 
 ### Updated Files
 
 ```
-apps/shell/src/lib/nav-config.ts (Add Ops360 to app launcher)
-apps/shell/tailwind.config.ts (Extend with Ops360 custom classes)
+apps/shell/src/lib/nav-config.ts (Add VisionFlow to app launcher)
+apps/shell/tailwind.config.ts (Extend with VisionFlow custom classes)
 ```
 
 ---
@@ -378,7 +378,7 @@ NEXT_PUBLIC_APP_URL=https://app.visionplatform.com
 
 ### Post-Deployment
 
-- [ ] Verify Ops360 appears in app launcher
+- [ ] Verify VisionFlow appears in app launcher
 - [ ] Test AI Plan Builder with production API
 - [ ] Test cross-app webhooks
 - [ ] Monitor error rate (Sentry)
@@ -392,24 +392,24 @@ NEXT_PUBLIC_APP_URL=https://app.visionplatform.com
 
 Complete technical architecture, design specs, and development roadmap:
 
-📘 **[OPS360_IMPLEMENTATION_PLAYBOOK.md](./OPS360_IMPLEMENTATION_PLAYBOOK.md)**
+📘 **[VISIONFLOW_IMPLEMENTATION_PLAYBOOK.md](./VISIONFLOW_IMPLEMENTATION_PLAYBOOK.md)**
 
 ### GitHub Project Template
 
 Milestones, tasks, and issue templates for tracking:
 
-📋 **[OPS360_GITHUB_PROJECT_TEMPLATE.md](./OPS360_GITHUB_PROJECT_TEMPLATE.md)**
+📋 **[VISIONFLOW_GITHUB_PROJECT_TEMPLATE.md](./VISIONFLOW_GITHUB_PROJECT_TEMPLATE.md)**
 
 ### User Documentation
 
-- **Getting Started Guide** — `/docs/ops360/getting-started.md`
-- **AI Plan Builder Guide** — `/docs/ops360/ai-plan-builder.md`
-- **Sharing & Permissions** — `/docs/ops360/sharing.md`
-- **Cross-App Integrations** — `/docs/ops360/integrations.md`
+- **Getting Started Guide** — `/docs/visionflow/getting-started.md`
+- **AI Plan Builder Guide** — `/docs/visionflow/ai-plan-builder.md`
+- **Sharing & Permissions** — `/docs/visionflow/sharing.md`
+- **Cross-App Integrations** — `/docs/visionflow/integrations.md`
 
 ### API Documentation
 
-OpenAPI spec: `/docs/api/ops360-openapi.yaml`
+OpenAPI spec: `/docs/api/visionflow-openapi.yaml`
 
 ---
 
@@ -477,7 +477,7 @@ Please verify:
 
 This PR represents **17 weeks of development** and delivers a fully-functional, production-ready execution engine for the VISION Platform.
 
-**Ops360 is ready to transform how mission-driven organizations turn strategy into action.**
+**VisionFlow is ready to transform how mission-driven organizations turn strategy into action.**
 
 ---
 
@@ -488,4 +488,4 @@ This PR represents **17 weeks of development** and delivers a fully-functional, 
 - ✅ Production environment variables configured
 - ✅ Migration plan approved
 
-**Questions?** See [OPS360_IMPLEMENTATION_PLAYBOOK.md](./OPS360_IMPLEMENTATION_PLAYBOOK.md) or contact the development team.
+**Questions?** See [VISIONFLOW_IMPLEMENTATION_PLAYBOOK.md](./VISIONFLOW_IMPLEMENTATION_PLAYBOOK.md) or contact the development team.

@@ -1,5 +1,5 @@
 -- =====================================================
--- OPS360 DATABASE SCHEMA
+-- VISIONFLOW DATABASE SCHEMA
 -- Supabase PostgreSQL 15
 -- Multi-Tenant | RLS-Enforced | Audit-Ready
 -- Migration: Phase 0 - Foundation

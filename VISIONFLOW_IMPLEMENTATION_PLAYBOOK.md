@@ -1,4 +1,4 @@
-# 📘 OPS360 IMPLEMENTATION PLAYBOOK
+# 📘 VISIONFLOW IMPLEMENTATION PLAYBOOK
 
 **VISION Platform · TwentyNine Eleven Impact Partners, LLC**
 **Version 1.0 — Production Ready**
@@ -16,18 +16,19 @@
 - [Section F — Testing Strategy](#section-f--testing-strategy)
 - [Section G — Development Roadmap & Git Strategy](#section-g--development-roadmap--git-strategy)
 - [Section H — Research-Based Comparisons](#section-h--research-based-comparisons--best-practices)
+- [Section I — Tiered Plans & Pricing](#section-i--tiered-plans--pricing)
 - [Implementation Guide](#implementation-guide)
 
 ---
 
 # Executive Summary
 
-This **Ops360 Implementation Playbook** serves as the complete architectural, technical, and strategic blueprint for building Ops360, the central execution engine of the VISION Platform.
+This **VisionFlow Implementation Playbook** serves as the complete architectural, technical, and strategic blueprint for building VisionFlow, the central execution engine of the VISION Platform.
 
 ## Document Purpose
 
 **Intended Audience:**
-- Development team implementing Ops360
+- Development team implementing VisionFlow
 - Product managers overseeing rollout
 - 2911 leadership evaluating scope and timeline
 - Future contributors to the VISION Platform ecosystem
@@ -44,6 +45,7 @@ This **Ops360 Implementation Playbook** serves as the complete architectural, te
 | **F. Testing Strategy** | Unit, integration, RLS, AI validation, E2E tests |
 | **G. Development Roadmap** | 8-phase implementation plan, git branching strategy, 17-week timeline |
 | **H. Research-Based Comparisons** | Analysis of Notion AI, Linear, Motion, ClickUp, Asana; best practices |
+| **I. Tiered Plans & Pricing** | Basic, Professional, and Enterprise tiers with feature matrix |
 
 ---
 
@@ -51,7 +53,7 @@ This **Ops360 Implementation Playbook** serves as the complete architectural, te
 
 ## A.1 Vision & Purpose
 
-Ops360 is the **central execution engine** of the VISION Platform, serving as the operational backbone that transforms strategic insights into actionable reality.
+VisionFlow is the **central execution engine** of the VISION Platform, serving as the operational backbone that transforms strategic insights into actionable reality.
 
 ### The Challenge
 
@@ -63,9 +65,9 @@ Mission-driven organizations across the nonprofit, social enterprise, and impact
 
 **But they struggle to EXECUTE.**
 
-### The Ops360 Solution
+### The VisionFlow Solution
 
-Ops360 closes the execution gap by:
+VisionFlow closes the execution gap by:
 
 1. **Centralizing Action** — All tasks from every VISION app flow into one unified workspace
 2. **AI-Powered Planning** — "Help me build a plan" converts context into executable roadmaps
@@ -98,7 +100,7 @@ Ops360 closes the execution gap by:
    STRATEGY LAYER      EXECUTION LAYER       INSIGHT LAYER
         │                     │                     │
 ┌───────────────┐    ┌────────────────┐    ┌──────────────┐
-│ PathwayPro    │───▶│   OPS360       │◀───│ MetricMap    │
+│ PathwayPro    │───▶│   VISIONFLOW       │◀───│ MetricMap    │
 │ Stakeholdr    │───▶│  (Execution    │◀───│ CapacityIQ   │
 │ FundingFramer │───▶│   Engine)      │◀───│ Analytics    │
 │ Architex      │───▶│                │◀───│ Reporting    │
@@ -110,7 +112,7 @@ Ops360 closes the execution gap by:
                     └───────────────────┘
 ```
 
-### Ops360's Role
+### VisionFlow's Role
 
 - **Receives**: Strategic plans, logic models, KPIs, capacity gaps, budgets, stakeholder maps
 - **Processes**: AI Plan Builder converts context → executable plans
@@ -121,9 +123,9 @@ Ops360 closes the execution gap by:
 
 The Transformative Exile Impact Framework (TEIF) underpins all VISION applications.
 
-Ops360 operationalizes TEIF by:
+VisionFlow operationalizes TEIF by:
 
-| TEIF Pillar | Ops360 Implementation |
+| TEIF Pillar | VisionFlow Implementation |
 |-------------|----------------------|
 | **Equity** | Multi-role collaboration (staff + consultants + funders) ensures diverse voices in execution |
 | **Community-Centered** | Tasks can originate from stakeholder engagement (Stakeholdr) and community needs |
@@ -182,14 +184,14 @@ Ops360 operationalizes TEIF by:
 
 ## A.5 Success Metrics
 
-Ops360 will be considered successful when:
+VisionFlow will be considered successful when:
 
 | Metric | Target | Rationale |
 |--------|--------|-----------|
 | **Task Completion Rate** | >75% of tasks marked complete within 7 days of due date | Execution actually happens |
 | **Plan Generation Time** | <5 minutes from "Help me build a plan" to executable tasks | AI reduces planning overhead |
 | **Cross-App Task Ingestion** | >80% of tasks auto-imported from other apps | Centralization works |
-| **User Adoption** | >60% of active VISION users engage with Ops360 weekly | Stickiness |
+| **User Adoption** | >60% of active VISION users engage with VisionFlow weekly | Stickiness |
 | **Consultant Efficiency** | Consultants report 40% reduction in planning time | Value for multi-org users |
 | **Funder Visibility** | Funders access grantee plans 2x per month on average | Accountability works |
 
@@ -222,7 +224,7 @@ Ops360 will be considered successful when:
 
 ## B.2 Database Schema (Supabase SQL)
 
-See `supabase/migrations/YYYYMMDDHHMMSS_ops360_schema.sql` for the complete implementation.
+See `supabase/migrations/YYYYMMDDHHMMSS_visionflow_schema.sql` for the complete implementation.
 
 ### Core Tables Overview
 
@@ -246,7 +248,7 @@ See `supabase/migrations/YYYYMMDDHHMMSS_ops360_schema.sql` for the complete impl
 
 ## B.3 Row Level Security (RLS) Policies
 
-See `supabase/migrations/YYYYMMDDHHMMSS_ops360_rls.sql` for complete RLS implementation.
+See `supabase/migrations/YYYYMMDDHHMMSS_visionflow_rls.sql` for complete RLS implementation.
 
 ### RLS Philosophy
 
@@ -267,40 +269,40 @@ See `supabase/migrations/YYYYMMDDHHMMSS_ops360_rls.sql` for complete RLS impleme
 ### Base URL Structure
 
 ```
-https://app.visionplatform.com/api/v1/ops360/...
+https://app.visionplatform.com/api/v1/visionflow/...
 ```
 
 ### Core API Endpoints
 
 **Plans:**
-- `GET /api/v1/ops360/plans` — List accessible plans
-- `POST /api/v1/ops360/plans` — Create plan
-- `GET /api/v1/ops360/plans/:id` — Get plan details
-- `PUT /api/v1/ops360/plans/:id` — Update plan
-- `DELETE /api/v1/ops360/plans/:id` — Delete plan
+- `GET /api/v1/visionflow/plans` — List accessible plans
+- `POST /api/v1/visionflow/plans` — Create plan
+- `GET /api/v1/visionflow/plans/:id` — Get plan details
+- `PUT /api/v1/visionflow/plans/:id` — Update plan
+- `DELETE /api/v1/visionflow/plans/:id` — Delete plan
 
 **Plan Sharing:**
-- `GET /api/v1/ops360/plans/:id/shares` — List shares
-- `POST /api/v1/ops360/plans/:id/shares` — Create share
-- `DELETE /api/v1/ops360/plans/:id/shares/:share_id` — Revoke share
+- `GET /api/v1/visionflow/plans/:id/shares` — List shares
+- `POST /api/v1/visionflow/plans/:id/shares` — Create share
+- `DELETE /api/v1/visionflow/plans/:id/shares/:share_id` — Revoke share
 
 **Tasks:**
-- `GET /api/v1/ops360/tasks` — List tasks
-- `POST /api/v1/ops360/tasks` — Create task
-- `GET /api/v1/ops360/tasks/:id` — Get task details
-- `PUT /api/v1/ops360/tasks/:id` — Update task
-- `DELETE /api/v1/ops360/tasks/:id` — Delete task
-- `POST /api/v1/ops360/tasks/:id/assign` — Assign task
-- `POST /api/v1/ops360/tasks/:id/comments` — Add comment
+- `GET /api/v1/visionflow/tasks` — List tasks
+- `POST /api/v1/visionflow/tasks` — Create task
+- `GET /api/v1/visionflow/tasks/:id` — Get task details
+- `PUT /api/v1/visionflow/tasks/:id` — Update task
+- `DELETE /api/v1/visionflow/tasks/:id` — Delete task
+- `POST /api/v1/visionflow/tasks/:id/assign` — Assign task
+- `POST /api/v1/visionflow/tasks/:id/comments` — Add comment
 
 **AI Plan Builder:**
-- `POST /api/v1/ops360/ai/plan-builder` — Generate plan
-- `POST /api/v1/ops360/ai/plan-builder/convert` — Convert draft to plan
-- `POST /api/v1/ops360/ai/task-breakdown` — Break task into subtasks
+- `POST /api/v1/visionflow/ai/plan-builder` — Generate plan
+- `POST /api/v1/visionflow/ai/plan-builder/convert` — Convert draft to plan
+- `POST /api/v1/visionflow/ai/task-breakdown` — Break task into subtasks
 
 **Cross-App Ingestion:**
-- `POST /api/v1/ops360/ingest/task` — Webhook for task ingestion
-- `GET /api/v1/ops360/ingest/logs` — View ingestion logs
+- `POST /api/v1/visionflow/ingest/task` — Webhook for task ingestion
+- `GET /api/v1/visionflow/ingest/logs` — View ingestion logs
 
 ---
 
@@ -308,7 +310,7 @@ https://app.visionplatform.com/api/v1/ops360/...
 
 ## C.1 AI Vision
 
-The **Universal AI Plan Builder** is the core innovation of Ops360 and the VISION Platform.
+The **Universal AI Plan Builder** is the core innovation of VisionFlow and the VISION Platform.
 
 ### Guiding Principle
 
@@ -337,7 +339,7 @@ Context is all the organizational data relevant to plan generation:
 | **MetricMap** | KPIs, performance data, metrics to track |
 | **Stakeholdr** | Stakeholder maps, engagement strategies |
 | **Community Compass** | Community needs, equity assessments |
-| **Ops360** | Historical task completion rates, team velocity |
+| **VisionFlow** | Historical task completion rates, team velocity |
 
 ### Context API
 
@@ -426,7 +428,7 @@ See `supabase/functions/ai-plan-builder/index.ts` for complete implementation.
 
 ## D.1 Design Principles
 
-Ops360's UI must embody:
+VisionFlow's UI must embody:
 
 1. **Clarity** — Users should always know where they are and what they can do
 2. **Efficiency** — Minimize clicks to complete common tasks
@@ -438,9 +440,9 @@ Ops360's UI must embody:
 
 ### CRITICAL: Top Navigation Only
 
-Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. All app-level navigation uses a **top navigation bar** within the AppShell content region.
+Per platform-wide requirements, VisionFlow **MUST NOT** implement a left sidebar. All app-level navigation uses a **top navigation bar** within the AppShell content region.
 
-### Ops360 Top Navigation Structure
+### VisionFlow Top Navigation Structure
 
 **Primary Tabs:**
 - **Dashboard** — Personal command center
@@ -455,7 +457,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 
 ### Color Roles
 
-| 2911 Color | Hex | Usage in Ops360 |
+| 2911 Color | Hex | Usage in VisionFlow |
 |------------|-----|-----------------|
 | **Blue** | `#0047AB` | Primary actions, active states, links, status badges (In Progress) |
 | **Green** | `#047857` | Success states, completed tasks, positive metrics |
@@ -466,7 +468,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 
 ## D.4 Core Screens
 
-### Screen 1: Dashboard (`/ops360/dashboard`)
+### Screen 1: Dashboard (`/visionflow/dashboard`)
 
 **Purpose:** Personal command center showing today's priorities, active projects, and AI insights.
 
@@ -477,7 +479,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 - Recent Activity (team updates)
 - Tasks From Other Apps (imported items)
 
-### Screen 2: My Tasks (`/ops360/tasks`)
+### Screen 2: My Tasks (`/visionflow/tasks`)
 
 **Purpose:** Comprehensive task list with filtering, search, and quick actions.
 
@@ -500,7 +502,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 - Activity log
 - AI sidebar (suggestions, task breakdown)
 
-### Screen 4: Plans List (`/ops360/plans`)
+### Screen 4: Plans List (`/visionflow/plans`)
 
 **Purpose:** View all plans user has access to, with filters and search.
 
@@ -520,7 +522,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 3. AI generation & review
 4. Convert to plan
 
-### Screen 6: Project View (`/ops360/projects/:id`)
+### Screen 6: Project View (`/visionflow/projects/:id`)
 
 **Purpose:** Detailed view of a single project with milestones, tasks, and progress.
 
@@ -530,7 +532,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 - Task list (grouped by milestone)
 - Progress summary
 
-### Screen 7: Workflows (`/ops360/workflows`)
+### Screen 7: Workflows (`/visionflow/workflows`)
 
 **Purpose:** Browse workflow templates, create custom workflows.
 
@@ -539,7 +541,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 - Public Templates
 - Workflow detail modal
 
-### Screen 8: Calendar View (`/ops360/calendar`)
+### Screen 8: Calendar View (`/visionflow/calendar`)
 
 **Purpose:** Timeline view of tasks and milestones across projects.
 
@@ -558,7 +560,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 - Add new share (user or org)
 - Access level selector (View, Comment, Edit)
 
-### Screen 10: Integrations Panel (`/ops360/integrations`)
+### Screen 10: Integrations Panel (`/visionflow/integrations`)
 
 **Purpose:** View connected VISION apps, ingestion status, logs.
 
@@ -574,7 +576,7 @@ Per platform-wide requirements, Ops360 **MUST NOT** implement a left sidebar. Al
 
 ### Pattern 1: Webhook Push (Recommended)
 
-Source app sends task to Ops360 when an event occurs.
+Source app sends task to VisionFlow when an event occurs.
 
 **Use Cases:**
 - CapacityIQ: Assessment complete → generate action items
@@ -583,16 +585,16 @@ Source app sends task to Ops360 when an event occurs.
 
 ### Pattern 2: User-Initiated Export
 
-User explicitly sends work from source app to Ops360.
+User explicitly sends work from source app to VisionFlow.
 
 **Use Cases:**
 - PathwayPro: "Turn this logic model into an execution plan"
-- LaunchPath: "Send 90-day plan to Ops360"
+- LaunchPath: "Send 90-day plan to VisionFlow"
 - Stakeholdr: "Convert engagement strategy to tasks"
 
 ### Pattern 3: Scheduled Sync
 
-Ops360 periodically pulls from source app.
+VisionFlow periodically pulls from source app.
 
 **Use Cases:**
 - Architex: Service delivery tasks generated in batch
@@ -603,7 +605,7 @@ Ops360 periodically pulls from source app.
 ### Endpoint
 
 ```
-POST /api/v1/ops360/ingest/task
+POST /api/v1/visionflow/ingest/task
 ```
 
 ### Authentication
@@ -639,37 +641,37 @@ X-Vision-App-Key: {app_api_key}
 {
   "status": "SUCCESS",
   "task_id": "task_uuid",
-  "task_url": "https://vision.platform/ops360/tasks/task_uuid"
+  "task_url": "https://vision.platform/visionflow/tasks/task_uuid"
 }
 ```
 
 ## E.3 App-Specific Integration Specs
 
-### CapacityIQ → Ops360
+### CapacityIQ → VisionFlow
 **Trigger:** User completes capacity assessment
 **Tasks Generated:** Action items for each critical gap
 
-### LaunchPath → Ops360
+### LaunchPath → VisionFlow
 **Trigger:** User completes 90-day plan
 **Tasks Generated:** Full plan converted to projects and tasks
 
-### FundingFramer → Ops360
+### FundingFramer → VisionFlow
 **Trigger:** Grant awarded
 **Tasks Generated:** Grant milestones and deliverables
 
-### MetricMap → Ops360
+### MetricMap → VisionFlow
 **Trigger:** KPI falls below threshold
 **Tasks Generated:** Improvement action items
 
-### Stakeholdr → Ops360
+### Stakeholdr → VisionFlow
 **Trigger:** User creates engagement plan
 **Tasks Generated:** Stakeholder touchpoint tasks
 
-### Architex → Ops360
+### Architex → VisionFlow
 **Trigger:** Service model created
 **Tasks Generated:** Recurring operational tasks
 
-### PathwayPro → Ops360
+### PathwayPro → VisionFlow
 **Trigger:** Logic model implementation phase
 **Tasks Generated:** Outcome-based implementation tasks
 
@@ -679,7 +681,7 @@ X-Vision-App-Key: {app_api_key}
 
 ## F.1 Testing Philosophy
 
-Ops360 is mission-critical infrastructure. Testing must ensure:
+VisionFlow is mission-critical infrastructure. Testing must ensure:
 
 1. **Security** — RLS policies prevent unauthorized data access
 2. **Data Integrity** — Multi-tenant isolation is never violated
@@ -709,7 +711,7 @@ Ops360 is mission-critical infrastructure. Testing must ensure:
 
 ## F.4 CI/CD Pipeline
 
-See `.github/workflows/ops360-tests.yml`
+See `.github/workflows/visionflow-tests.yml`
 
 **Jobs:**
 - `unit-tests` — Run Vitest, upload coverage
@@ -727,23 +729,23 @@ See `.github/workflows/ops360-tests.yml`
 ```
 main (App Launcher + Vision Impact Hub Shell — STABLE)
  │
- └── feature/ops360-app (Long-lived Ops360 branch)
+ └── feature/visionflow-app (Long-lived VisionFlow branch)
       │
-      ├── feature/ops360-schema (Short-lived)
-      ├── feature/ops360-rls (Short-lived)
-      ├── feature/ops360-api-tasks (Short-lived)
-      ├── feature/ops360-dashboard-ui (Short-lived)
+      ├── feature/visionflow-schema (Short-lived)
+      ├── feature/visionflow-rls (Short-lived)
+      ├── feature/visionflow-api-tasks (Short-lived)
+      ├── feature/visionflow-dashboard-ui (Short-lived)
       └── ... (additional feature branches)
 ```
 
 ### Workflow
 
-1. Create feature branch from `feature/ops360-app`
+1. Create feature branch from `feature/visionflow-app`
 2. Develop feature
-3. Push and open PR to `feature/ops360-app`
+3. Push and open PR to `feature/visionflow-app`
 4. Code review, tests pass, merge
 5. Delete feature branch
-6. When MVP complete, merge `feature/ops360-app` → `main`
+6. When MVP complete, merge `feature/visionflow-app` → `main`
 
 ## G.2 Implementation Phases
 
@@ -751,7 +753,7 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 - Create database schema
 - Implement RLS policies
 - Set up API routes
-- Add Ops360 to nav
+- Add VisionFlow to nav
 
 ### Phase 1: Task Management (Weeks 3-4)
 - Task API endpoints
@@ -819,7 +821,7 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 
 ## H.2 Feature Comparison Matrix
 
-| Feature | Notion AI | Linear | Motion | ClickUp | Asana | **Ops360** |
+| Feature | Notion AI | Linear | Motion | ClickUp | Asana | **VisionFlow** |
 |---------|-----------|--------|--------|---------|-------|------------|
 | **AI Plan Generation** | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ **CORE** |
 | **Cross-App Context** | ⚠️ | ❌ | ❌ | ❌ | ❌ | ✅ **UNIQUE** |
@@ -827,7 +829,7 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 | **Consultant/Funder Roles** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **UNIQUE** |
 | **Nonprofit Pricing** | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ **INCLUDED** |
 
-## H.3 Unique Value Propositions of Ops360
+## H.3 Unique Value Propositions of VisionFlow
 
 1. **Platform-Native Cross-App Intelligence** — Context from CapacityIQ, FundingFramer, MetricMap, etc.
 2. **Multi-Role Collaboration** — Staff, consultants, funders working together
@@ -863,6 +865,141 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 
 ---
 
+# SECTION I — TIERED PLANS & PRICING
+
+## I.1 Pricing Strategy
+
+VisionFlow is offered in three tiers to serve organizations at different stages of growth and complexity:
+
+| Tier | Target Audience | Monthly Price | Annual Price |
+|------|----------------|---------------|--------------|
+| **Basic** | Small nonprofits, grassroots orgs (1-10 staff) | $49/org | $490/year (2 months free) |
+| **Professional** | Growing nonprofits, social enterprises (11-50 staff) | $149/org | $1,490/year (2 months free) |
+| **Enterprise** | Large nonprofits, coalitions, government (51+ staff) | Custom | Custom |
+
+### Nonprofit Discounts
+
+- **501(c)(3) Verification**: 20% additional discount for verified nonprofits
+- **Coalition/Network Pricing**: Special multi-org pricing for networks serving 5+ member organizations
+- **Capacity Builders**: Free Professional tier for consultants serving 3+ nonprofit clients
+
+## I.2 Feature Comparison Matrix
+
+| Feature | Basic | Professional | Enterprise |
+|---------|-------|--------------|------------|
+| **Core Features** | | | |
+| Plans & Projects | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
+| Tasks & Subtasks | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
+| Task Assignments | ✅ | ✅ | ✅ |
+| Comments & Activity Log | ✅ | ✅ | ✅ |
+| Calendar View | ✅ | ✅ | ✅ |
+| **Collaboration** | | | |
+| Team Members | Up to 10 | Up to 50 | Unlimited |
+| Plan Sharing (Org-level) | ✅ | ✅ | ✅ |
+| Cross-Org Sharing | ❌ | ✅ | ✅ |
+| Consultant Access | ❌ | ✅ (3 consultants) | ✅ (Unlimited) |
+| Funder Visibility | ❌ | ✅ (View only) | ✅ (Full access) |
+| **AI Features** | | | |
+| AI Plan Builder | 10 plans/month | 50 plans/month | Unlimited |
+| AI Task Breakdown | 25 tasks/month | 100 tasks/month | Unlimited |
+| AI Context from VISION Apps | ✅ 3 apps | ✅ All apps | ✅ All apps + Custom integrations |
+| **Workflows** | | | |
+| Workflow Templates | ✅ Public library | ✅ Public + Create custom | ✅ Unlimited custom + Private library |
+| Workflow Automation | ❌ | ✅ Basic rules | ✅ Advanced automation |
+| Recurring Tasks | ❌ | ✅ | ✅ |
+| **Integrations** | | | |
+| Cross-App Task Ingestion | ✅ 3 apps | ✅ All VISION apps | ✅ All VISION apps |
+| Webhook Webhooks | ❌ | ✅ 5 webhooks | ✅ Unlimited |
+| API Access | ❌ | ✅ Read-only | ✅ Full API access |
+| **Analytics & Reporting** | | | |
+| Basic Reports | ✅ | ✅ | ✅ |
+| Advanced Analytics | ❌ | ✅ | ✅ |
+| Workload Management | ❌ | ✅ | ✅ |
+| Custom Dashboards | ❌ | ❌ | ✅ |
+| Data Export | CSV only | CSV + JSON | CSV + JSON + API |
+| **Support** | | | |
+| Documentation & Self-Service | ✅ | ✅ | ✅ |
+| Email Support | ✅ (48hr response) | ✅ (24hr response) | ✅ (4hr response) |
+| Priority Support | ❌ | ❌ | ✅ |
+| Dedicated Success Manager | ❌ | ❌ | ✅ |
+| Training & Onboarding | Self-service | 1 training session | Unlimited training |
+| **Security & Compliance** | | | |
+| RLS Enforcement | ✅ | ✅ | ✅ |
+| 2FA | ✅ | ✅ | ✅ |
+| Audit Logs | 30 days | 1 year | Unlimited |
+| SOC 2 Compliance | ❌ | ❌ | ✅ |
+| HIPAA Compliance | ❌ | ❌ | ✅ (add-on) |
+| Custom SLA | ❌ | ❌ | ✅ |
+
+## I.3 Add-Ons (All Tiers)
+
+| Add-On | Price | Description |
+|--------|-------|-------------|
+| **Additional AI Credits** | $20/month | +25 AI plan generations + 100 task breakdowns |
+| **Extra Storage** | $10/month per 50GB | For task attachments beyond included limits |
+| **Advanced Automation** | $30/month | Zapier-style automation rules (Professional/Enterprise only) |
+| **Mobile App** | Free (Phase 2) | iOS/Android native apps (launching Q3 2025) |
+| **White-Label Branding** | $200/month | Custom branding for Enterprise clients |
+
+## I.4 Implementation Notes
+
+### Tier Enforcement in Code
+
+**Database Schema:**
+```sql
+ALTER TABLE organizations ADD COLUMN subscription_tier TEXT DEFAULT 'BASIC' CHECK (subscription_tier IN ('BASIC', 'PROFESSIONAL', 'ENTERPRISE'));
+ALTER TABLE organizations ADD COLUMN subscription_status TEXT DEFAULT 'ACTIVE' CHECK (subscription_status IN ('ACTIVE', 'TRIAL', 'SUSPENDED', 'CANCELLED'));
+ALTER TABLE organizations ADD COLUMN subscription_expires_at TIMESTAMPTZ;
+ALTER TABLE organizations ADD COLUMN ai_credits_remaining INTEGER DEFAULT 10;
+ALTER TABLE organizations ADD COLUMN ai_credits_reset_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 month';
+```
+
+**Middleware Check:**
+```typescript
+// apps/shell/src/middleware/subscriptionCheck.ts
+export function checkFeatureAccess(org: Organization, feature: string): boolean {
+  const tierLimits = {
+    BASIC: { team_members: 10, ai_plans_per_month: 10, consultants: 0 },
+    PROFESSIONAL: { team_members: 50, ai_plans_per_month: 50, consultants: 3 },
+    ENTERPRISE: { team_members: Infinity, ai_plans_per_month: Infinity, consultants: Infinity }
+  };
+
+  const limits = tierLimits[org.subscription_tier];
+  // Check against limits...
+}
+```
+
+**API Enforcement:**
+```typescript
+// Example: POST /api/v1/apps/visionflow/ai/plan-builder
+const org = await getOrganization(user.activeOrgId);
+
+if (org.ai_credits_remaining <= 0) {
+  return NextResponse.json({ error: 'AI credits exhausted. Upgrade or purchase add-on.' }, { status: 403 });
+}
+
+// Decrement credits
+await supabase
+  .from('organizations')
+  .update({ ai_credits_remaining: org.ai_credits_remaining - 1 })
+  .eq('id', org.id);
+```
+
+### Free Trial
+
+- All new organizations start with a **14-day free trial of Professional tier**
+- No credit card required
+- Full feature access during trial
+- Automatic downgrade to Basic at trial end (unless upgraded)
+
+### Usage Tracking
+
+- Monthly AI credit reset on subscription anniversary
+- Storage quotas: Basic (5GB), Professional (25GB), Enterprise (Unlimited)
+- Overage notifications at 80% and 100% of limits
+
+---
+
 # IMPLEMENTATION GUIDE
 
 ## Quick Start: Where to Begin
@@ -872,9 +1009,9 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 1. **Read** Section B (Technical Architecture)
 2. **Review** Section G (Development Roadmap)
 3. **Start** Phase 0 implementation:
-   - Create `feature/ops360-app` branch
-   - Run migration: `supabase/migrations/YYYYMMDDHHMMSS_ops360_schema.sql`
-   - Apply RLS: `supabase/migrations/YYYYMMDDHHMMSS_ops360_rls.sql`
+   - Create `feature/visionflow-app` branch
+   - Run migration: `supabase/migrations/YYYYMMDDHHMMSS_visionflow_schema.sql`
+   - Apply RLS: `supabase/migrations/YYYYMMDDHHMMSS_visionflow_rls.sql`
 
 ### For Product Managers
 
@@ -890,7 +1027,7 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 
 ## Critical Design Decisions
 
-1. ✅ **Vision Impact Hub SSO ONLY** — No auth in Ops360
+1. ✅ **Vision Impact Hub SSO ONLY** — No auth in VisionFlow
 2. ✅ **Top navigation ONLY** — No app-level left sidebar
 3. ✅ **Database-level RLS** — Security at PostgreSQL level
 4. ✅ **Anthropic Claude Sonnet 4.5** — AI model
@@ -902,7 +1039,7 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 - ✅ Create, assign, complete tasks
 - ✅ Create plans with projects/milestones
 - ✅ AI Plan Builder generates valid plans
-- ✅ Tasks from other apps appear in Ops360
+- ✅ Tasks from other apps appear in VisionFlow
 - ✅ Sharing works (staff, consultants, funders)
 
 ### Non-Functional Requirements
@@ -945,11 +1082,11 @@ main (App Launcher + Vision Impact Hub Shell — STABLE)
 
 ## Appendix A: Database Schema SQL
 
-See `supabase/migrations/YYYYMMDDHHMMSS_ops360_schema.sql`
+See `supabase/migrations/YYYYMMDDHHMMSS_visionflow_schema.sql`
 
 ## Appendix B: RLS Policies SQL
 
-See `supabase/migrations/YYYYMMDDHHMMSS_ops360_rls.sql`
+See `supabase/migrations/YYYYMMDDHHMMSS_visionflow_rls.sql`
 
 ## Appendix C: API Documentation
 
@@ -965,7 +1102,7 @@ See Section G.2 for complete branching strategy
 
 ---
 
-**END OF OPS360 IMPLEMENTATION PLAYBOOK**
+**END OF VISIONFLOW IMPLEMENTATION PLAYBOOK**
 
 **Version:** 1.0
 **Date:** 2025-01-24

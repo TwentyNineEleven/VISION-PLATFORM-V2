@@ -1,13 +1,13 @@
-# Ops360 GitHub Project Template
+# VisionFlow GitHub Project Template
 
-This document provides the complete structure for tracking Ops360 development in GitHub Projects.
+This document provides the complete structure for tracking VisionFlow development in GitHub Projects.
 
 ## Project Overview
 
-**Name:** Ops360 Implementation
+**Name:** VisionFlow Implementation
 **Timeline:** 17 weeks
 **Team:** 2-3 developers
-**Branch:** `feature/ops360-app`
+**Branch:** `feature/visionflow-app`
 
 ---
 
@@ -16,19 +16,19 @@ This document provides the complete structure for tracking Ops360 development in
 ### Milestone 1: Phase 0 - Foundation (Weeks 1-2)
 
 **Due Date:** +2 weeks from start
-**Description:** Set up Ops360 infrastructure, database schema, and authentication integration.
+**Description:** Set up VisionFlow infrastructure, database schema, and authentication integration.
 
 **Tasks:**
 
 - [ ] **Create database schema**
   - Labels: `database`, `phase-0`
   - Implement all tables from schema SQL file
-  - Run migration: `20250124000001_ops360_schema.sql`
+  - Run migration: `20250124000001_visionflow_schema.sql`
   - Verify tables created successfully
 
 - [ ] **Implement RLS policies**
   - Labels: `database`, `security`, `phase-0`
-  - Apply RLS policies from `20250124000002_ops360_rls.sql`
+  - Apply RLS policies from `20250124000002_visionflow_rls.sql`
   - Test helper functions (`user_is_org_member`, etc.)
   - Verify policies enforce multi-tenant isolation
 
@@ -39,23 +39,23 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Generate TypeScript types**
   - Labels: `typescript`, `phase-0`
-  - Run: `npx supabase gen types typescript > apps/shell/src/types/ops360.ts`
+  - Run: `npx supabase gen types typescript > apps/shell/src/types/visionflow.ts`
   - Verify no type errors
   - Export types from index
 
 - [ ] **Create API route structure**
   - Labels: `api`, `phase-0`
-  - Create directory structure: `apps/shell/src/app/api/v1/ops360/`
+  - Create directory structure: `apps/shell/src/app/api/v1/visionflow/`
   - Add empty route files (plans, tasks, projects, etc.)
   - Set up API error handling utilities
 
-- [ ] **Add Ops360 to Vision Impact Hub nav**
+- [ ] **Add VisionFlow to Vision Impact Hub nav**
   - Labels: `ui`, `phase-0`
   - Register in app launcher
   - Add to global nav config
-  - Create route: `apps/shell/src/app/ops360/layout.tsx`
+  - Create route: `apps/shell/src/app/visionflow/layout.tsx`
 
-- [ ] **Create Ops360 top navigation component**
+- [ ] **Create VisionFlow top navigation component**
   - Labels: `ui`, `phase-0`
   - Build GlowTabs-based top nav
   - Add routes: Dashboard, Tasks, Plans, Projects, Workflows, Calendar
@@ -65,7 +65,7 @@ This document provides the complete structure for tracking Ops360 development in
 - ✅ All migrations run successfully
 - ✅ RLS smoke tests passing
 - ✅ Types generated without errors
-- ✅ Ops360 visible in app launcher
+- ✅ VisionFlow visible in app launcher
 - ✅ Top nav renders correctly
 
 ---
@@ -79,49 +79,49 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Task API - Create endpoint**
   - Labels: `api`, `phase-1`
-  - `POST /api/v1/ops360/tasks`
+  - `POST /api/v1/visionflow/tasks`
   - Request validation (Zod)
   - Create task in database
   - Return created task
 
 - [ ] **Task API - List endpoint**
   - Labels: `api`, `phase-1`
-  - `GET /api/v1/ops360/tasks`
+  - `GET /api/v1/visionflow/tasks`
   - Query params: status, priority, project, assigned_to_me, due_before
   - Pagination support
   - RLS enforcement
 
 - [ ] **Task API - Detail endpoint**
   - Labels: `api`, `phase-1`
-  - `GET /api/v1/ops360/tasks/:id`
+  - `GET /api/v1/visionflow/tasks/:id`
   - Include assignments, comments, activity
 
 - [ ] **Task API - Update endpoint**
   - Labels: `api`, `phase-1`
-  - `PUT /api/v1/ops360/tasks/:id`
+  - `PUT /api/v1/visionflow/tasks/:id`
   - Validate permissions
   - Log activity
 
 - [ ] **Task API - Delete endpoint**
   - Labels: `api`, `phase-1`
-  - `DELETE /api/v1/ops360/tasks/:id`
+  - `DELETE /api/v1/visionflow/tasks/:id`
   - Soft delete (set deleted_at)
 
 - [ ] **Task API - Assignment endpoint**
   - Labels: `api`, `phase-1`
-  - `POST /api/v1/ops360/tasks/:id/assign`
+  - `POST /api/v1/visionflow/tasks/:id/assign`
   - Validate assignee is org member
   - Create task_assignment record
 
 - [ ] **Task service layer**
   - Labels: `service`, `phase-1`
-  - `apps/shell/src/services/ops360Service.ts`
+  - `apps/shell/src/services/visionflowService.ts`
   - Methods: createTask, getTasks, updateTask, assignTask
   - Error handling
 
 - [ ] **My Tasks page**
   - Labels: `ui`, `phase-1`
-  - Route: `/ops360/tasks`
+  - Route: `/visionflow/tasks`
   - Search bar
   - Filters (status, priority, project, source app, due date)
   - Task grouping (Overdue, Today, This Week, Later)
@@ -139,7 +139,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Dashboard page (basic)**
   - Labels: `ui`, `phase-1`
-  - Route: `/ops360/dashboard`
+  - Route: `/visionflow/dashboard`
   - My Day section (tasks due today)
   - Active Projects section
   - Recent Activity
@@ -162,30 +162,30 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Plans API - CRUD endpoints**
   - Labels: `api`, `phase-2`
-  - `GET/POST/PUT/DELETE /api/v1/ops360/plans`
+  - `GET/POST/PUT/DELETE /api/v1/visionflow/plans`
   - Visibility enforcement (USER_PRIVATE, ORG, SHARED)
 
 - [ ] **Plan sharing API**
   - Labels: `api`, `phase-2`
-  - `GET /api/v1/ops360/plans/:id/shares`
-  - `POST /api/v1/ops360/plans/:id/shares`
-  - `DELETE /api/v1/ops360/plans/:id/shares/:share_id`
+  - `GET /api/v1/visionflow/plans/:id/shares`
+  - `POST /api/v1/visionflow/plans/:id/shares`
+  - `DELETE /api/v1/visionflow/plans/:id/shares/:share_id`
   - Validate share targets (org or user)
 
 - [ ] **Projects API - CRUD endpoints**
   - Labels: `api`, `phase-2`
-  - `GET/POST/PUT/DELETE /api/v1/ops360/projects`
+  - `GET/POST/PUT/DELETE /api/v1/visionflow/projects`
   - Link to parent plan
   - Progress calculation
 
 - [ ] **Milestones API - CRUD endpoints**
   - Labels: `api`, `phase-2`
-  - `GET/POST/PUT/DELETE /api/v1/ops360/milestones`
+  - `GET/POST/PUT/DELETE /api/v1/visionflow/milestones`
   - Link to parent project
 
 - [ ] **Plans List page**
   - Labels: `ui`, `phase-2`
-  - Route: `/ops360/plans`
+  - Route: `/visionflow/plans`
   - Plan cards with progress bars
   - Visibility indicators (Private, Org, Shared)
   - Status grouping (Active, Draft, Archived)
@@ -193,7 +193,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Project Detail page**
   - Labels: `ui`, `phase-2`
-  - Route: `/ops360/projects/:id`
+  - Route: `/visionflow/projects/:id`
   - Breadcrumb to parent plan
   - Milestone checklist
   - Timeline visualization
@@ -292,7 +292,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Ingestion webhook endpoint**
   - Labels: `api`, `integration`, `phase-4`
-  - `POST /api/v1/ops360/ingest/task`
+  - `POST /api/v1/visionflow/ingest/task`
   - API key validation (`X-Vision-App-Key`)
   - Request body validation
   - Deduplication logic
@@ -309,7 +309,7 @@ This document provides the complete structure for tracking Ops360 development in
   - Labels: `integration`, `phase-4`
   - Implement webhook sender in CapacityIQ
   - Test assessment → action items flow
-  - Verify tasks appear in Ops360
+  - Verify tasks appear in VisionFlow
 
 - [ ] **LaunchPath integration**
   - Labels: `integration`, `phase-4`
@@ -331,7 +331,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Integrations UI page**
   - Labels: `ui`, `integration`, `phase-4`
-  - Route: `/ops360/integrations`
+  - Route: `/visionflow/integrations`
   - Connected Apps list (status, last import)
   - Recent Ingestion Log
   - Error details and retry button
@@ -340,7 +340,7 @@ This document provides the complete structure for tracking Ops360 development in
 - ✅ Webhook accepts valid payloads
 - ✅ Rejects invalid/unauthorized requests
 - ✅ Deduplication prevents duplicates
-- ✅ Tasks from CapacityIQ appear in Ops360
+- ✅ Tasks from CapacityIQ appear in VisionFlow
 - ✅ E2E: Trigger webhook → Task created → View in UI
 
 ---
@@ -354,12 +354,12 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Workflows API - CRUD endpoints**
   - Labels: `api`, `phase-5`
-  - `GET/POST/PUT/DELETE /api/v1/ops360/workflows`
+  - `GET/POST/PUT/DELETE /api/v1/visionflow/workflows`
   - Support workflow_steps (nested)
 
 - [ ] **Workflow application logic**
   - Labels: `service`, `phase-5`
-  - `POST /api/v1/ops360/workflows/:id/apply`
+  - `POST /api/v1/visionflow/workflows/:id/apply`
   - Create workflow_instance
   - Generate tasks from workflow steps
   - Link to project
@@ -375,7 +375,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Workflows List page**
   - Labels: `ui`, `phase-5`
-  - Route: `/ops360/workflows`
+  - Route: `/visionflow/workflows`
   - My Workflows section
   - Public Templates section
   - Workflow preview modal
@@ -404,7 +404,7 @@ This document provides the complete structure for tracking Ops360 development in
 
 - [ ] **Calendar view page**
   - Labels: `ui`, `phase-6`
-  - Route: `/ops360/calendar`
+  - Route: `/visionflow/calendar`
   - Day/Week/Month view switcher
   - Display tasks and milestones
   - Color-coded by priority

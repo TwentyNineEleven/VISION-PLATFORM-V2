@@ -1,5 +1,5 @@
 -- =====================================================
--- OPS360 ROW LEVEL SECURITY (RLS) POLICIES
+-- VISIONFLOW ROW LEVEL SECURITY (RLS) POLICIES
 -- Migration: Phase 0 - Foundation
 -- =====================================================
 
