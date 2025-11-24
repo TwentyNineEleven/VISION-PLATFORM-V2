@@ -33,6 +33,7 @@
     "next": "^15.0.3",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
+    "posthog-js": "^1.298.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.53.2",
