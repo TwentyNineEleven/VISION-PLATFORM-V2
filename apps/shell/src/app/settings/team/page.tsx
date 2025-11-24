@@ -9,7 +9,9 @@ import {
   GlowCardDescription,
 } from '@/components/glow-ui/GlowCard';
 import { GlowInput, GlowButton, GlowBadge, GlowSelect } from '@/components/glow-ui';
-import { mockTeamMembers, mockPendingInvites, TeamRole } from '@/lib/mock-data';
+import { mockTeamMembers, mockPendingInvites } from '@/lib/mock-data';
+import { type TeamMember, type PendingInvite, type TeamRole } from '@/types/team';
+import { teamService } from '@/services/teamService';
 import { PermissionsMatrix } from '@/components/settings/PermissionsMatrix';
 import { ConfirmDialog } from '@/components/settings/ConfirmDialog';
 import { Plus, Send, Users, Clock3, RefreshCcw } from 'lucide-react';
