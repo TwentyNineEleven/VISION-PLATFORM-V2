@@ -2,36 +2,31 @@
 
 import * as React from 'react';
 import { GlowButton, GlowCard } from '@/components/glow-ui';
-import { UploadCloud, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 interface LogoUploadProps {
   value?: string;
-  onChange?: (value?: string) => void;
+  onChange?: (file: File) => void | Promise<void>;
   label?: string;
   helperText?: string;
+  disabled?: boolean;
+  isLoading?: boolean;
 }
 
-export function LogoUpload({ value, onChange, label = 'Organization logo', helperText }: LogoUploadProps) {
+export function LogoUpload({ value, onChange, label = 'Organization logo', helperText, disabled, isLoading }: LogoUploadProps) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [preview, setPreview] = React.useState<string | undefined>(value);
 
-  const handleFile = (file?: File | null) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const data = reader.result?.toString();
-      setPreview(data);
-      onChange?.(data);
-    };
-    reader.readAsDataURL(file);
+  const handleFile = async (file?: File | null) => {
+    if (!file || !onChange) return;
+    await onChange(file);
   };
 
   return (
     <GlowCard variant="flat" padding="md" className="flex items-center gap-4">
       <div className="flex h-16 w-32 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted">
-        {preview ? (
+        {value ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="Logo preview" className="h-full w-full object-contain" />
+          <img src={value} alt="Logo preview" className="h-full w-full object-contain" />
         ) : (
           <ImageIcon className="h-6 w-6 text-muted-foreground" />
         )}
@@ -39,31 +34,28 @@ export function LogoUpload({ value, onChange, label = 'Organization logo', helpe
       <div className="flex-1 space-y-1">
         <p className="text-sm font-semibold text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground">
-          {helperText || 'Upload a transparent PNG or SVG. Max 2MB.'}
+          {helperText || 'Upload a transparent PNG or SVG. Max 5MB.'}
         </p>
         <div className="flex gap-2">
           <GlowButton
             type="button"
             size="sm"
             variant="outline"
-            leftIcon={<UploadCloud className="h-4 w-4" />}
+            leftIcon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
             onClick={() => inputRef.current?.click()}
+            disabled={disabled || isLoading}
           >
-            Upload
+            {isLoading ? 'Uploading...' : 'Upload'}
           </GlowButton>
-          {preview && (
-            <GlowButton type="button" size="sm" variant="ghost" onClick={() => { setPreview(undefined); onChange?.(undefined); }}>
-              Remove
-            </GlowButton>
-          )}
         </div>
       </div>
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
         className="hidden"
         onChange={(e) => handleFile(e.target.files?.[0])}
+        disabled={disabled || isLoading}
       />
     </GlowCard>
   );

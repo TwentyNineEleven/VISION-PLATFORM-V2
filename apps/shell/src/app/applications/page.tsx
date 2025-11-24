@@ -27,7 +27,7 @@ import { AppDetailDrawer } from '@/components/app-catalog/AppDetailDrawer';
 import { GlowButton } from '@/components/glow-ui';
 import { useAppShell } from '@/components/layout/AppShell';
 import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
-import type { AppMetadata, AppCatalogFilters, SortOption, Audience } from '@/lib/app-catalog-types';
+import type { AppMetadata, AppCatalogFilters, SortOption } from '@/lib/app-catalog-types';
 import { favoritesService } from '@/services/favoritesService';
 
 export default function ApplicationsPage() {
@@ -77,7 +77,6 @@ export default function ApplicationsPage() {
     let count = 0;
     if (filters.searchQuery) count++;
     if (filters.phase !== 'All') count++;
-    if (filters.audience !== 'All') count++;
     if (filters.focusTags.length > 0) count++;
     return count;
   }, [filters]);
@@ -111,12 +110,6 @@ export default function ApplicationsPage() {
         const appPhase = app.phase || app.transformationArea;
         return appPhase === filters.phase;
       });
-    }
-
-    // Audience filter
-    if (filters.audience !== 'All') {
-      const audienceFilter = filters.audience as Audience;
-      result = result.filter((app) => app.audiences?.includes(audienceFilter));
     }
 
     // Focus tags filter (multi-select)
@@ -259,3 +252,4 @@ export default function ApplicationsPage() {
     </div>
   );
 }
+

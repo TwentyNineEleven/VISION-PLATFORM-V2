@@ -73,7 +73,7 @@ export interface AppMetadata {
 export interface AppCatalogFilters {
   searchQuery: string;
   phase: Phase | 'All';
-  audience: Audience | 'All';
+  audience?: Audience | 'All'; // Optional - no longer shown in UI
   focusTags: string[]; // Multi-select
   sortBy: SortOption;
 }

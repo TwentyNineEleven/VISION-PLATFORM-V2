@@ -1,84 +1,337 @@
 'use client';
 
+import { createClient } from '@/lib/supabase/client';
+import type { Tables } from '@/types/supabase';
 import type { Organization, OrganizationBrandColors } from '@/types/organization';
-import { mockOrganizationSettings } from '@/lib/mock-data';
+
+type DbOrganization = Tables<'organizations'>;
+type DbOrganizationMember = Tables<'organization_members'>;
 
 export const ORGANIZATION_STORAGE_KEY = 'vision.platform.organization';
-const STORAGE_KEY = ORGANIZATION_STORAGE_KEY;
-const DEFAULT_BRAND_COLORS: OrganizationBrandColors = {
-  primary: mockOrganizationSettings.brandColors?.primary ?? '#2563eb',
-  secondary: mockOrganizationSettings.brandColors?.secondary ?? '#9333ea',
-};
 
-const hasBrowserStorage = () => typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-
-const sanitizeOrganization = (data: Partial<Organization>): Organization => {
-  const fallback = mockOrganizationSettings;
-  const fallbackBrandColors = fallback.brandColors ?? DEFAULT_BRAND_COLORS;
-  const sourceBrandColors = data.brandColors ?? fallbackBrandColors;
-
+/**
+ * Convert database organization record to app Organization type
+ */
+function dbToOrganization(dbOrg: DbOrganization): Organization {
   return {
-    ...fallback,
-    ...data,
-    id: data.id || 'org_default',
+    id: dbOrg.id,
+    name: dbOrg.name,
+    type: dbOrg.type || undefined,
+    website: dbOrg.website || undefined,
+    industry: dbOrg.industry || undefined,
+    ein: dbOrg.ein || undefined,
+    logo: dbOrg.logo_url || undefined,
+    mission: dbOrg.mission || undefined,
+    foundedYear: dbOrg.founded_year || undefined,
+    staffCount: dbOrg.staff_count || undefined,
+    annualBudget: dbOrg.annual_budget || undefined,
+    focusAreas: dbOrg.focus_areas || undefined,
     address: {
-      ...fallback.address,
-      ...data.address,
+      street: dbOrg.address_street || undefined,
+      city: dbOrg.address_city || undefined,
+      state: dbOrg.address_state || undefined,
+      postalCode: dbOrg.address_postal_code || undefined,
+      country: dbOrg.address_country || undefined,
     },
     brandColors: {
-      primary: sourceBrandColors.primary ?? fallbackBrandColors.primary,
-      secondary: sourceBrandColors.secondary ?? fallbackBrandColors.secondary,
+      primary: dbOrg.brand_primary_color,
+      secondary: dbOrg.brand_secondary_color,
     },
-    updatedAt: data.updatedAt || new Date().toISOString(),
+    updatedAt: dbOrg.updated_at,
   };
-};
+}
+
+/**
+ * Convert app Organization type to database insert/update format
+ */
+function organizationToDb(org: Partial<Organization>, ownerId?: string): Partial<DbOrganization> {
+  const dbOrg: Partial<DbOrganization> = {};
+
+  if (org.name !== undefined) dbOrg.name = org.name;
+  if (org.type !== undefined) dbOrg.type = org.type;
+  if (org.website !== undefined) dbOrg.website = org.website;
+  if (org.industry !== undefined) dbOrg.industry = org.industry;
+  if (org.ein !== undefined) dbOrg.ein = org.ein;
+  if (org.logo !== undefined) dbOrg.logo_url = org.logo;
+  if (org.mission !== undefined) dbOrg.mission = org.mission;
+  if (org.foundedYear !== undefined) dbOrg.founded_year = org.foundedYear;
+  if (org.staffCount !== undefined) dbOrg.staff_count = org.staffCount;
+  if (org.annualBudget !== undefined) dbOrg.annual_budget = org.annualBudget;
+  if (org.focusAreas !== undefined) dbOrg.focus_areas = org.focusAreas;
+  
+  if (org.address) {
+    if (org.address.street !== undefined) dbOrg.address_street = org.address.street;
+    if (org.address.city !== undefined) dbOrg.address_city = org.address.city;
+    if (org.address.state !== undefined) dbOrg.address_state = org.address.state;
+    if (org.address.postalCode !== undefined) dbOrg.address_postal_code = org.address.postalCode;
+    if (org.address.country !== undefined) dbOrg.address_country = org.address.country;
+  }
+  
+  if (org.brandColors) {
+    if (org.brandColors.primary) dbOrg.brand_primary_color = org.brandColors.primary;
+    if (org.brandColors.secondary) dbOrg.brand_secondary_color = org.brandColors.secondary;
+  }
+
+  if (ownerId) {
+    dbOrg.owner_id = ownerId;
+  }
+
+  return dbOrg;
+}
 
 export const organizationService = {
-  async getOrganization(): Promise<Organization | null> {
-    if (!hasBrowserStorage()) {
+  /**
+   * Get organization by ID
+   */
+  async getOrganization(organizationId: string): Promise<Organization | null> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', organizationId)
+      .is('deleted_at', null)
+      .single();
+
+    if (error || !data) {
       return null;
     }
 
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        return null;
+    return dbToOrganization(data);
+  },
+
+  /**
+   * Get all organizations for the current user
+   */
+  async getUserOrganizations(): Promise<Array<Organization & { role: string; lastAccessed?: string }>> {
+    const supabase = createClient();
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return [];
+    }
+
+    // Get organizations where user is a member
+    const { data: memberships, error } = await supabase
+      .from('organization_members')
+      .select(`
+        role,
+        last_accessed_at,
+        organizations (*)
+      `)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .is('deleted_at', null)
+      .order('last_accessed_at', { ascending: false, nullsFirst: false });
+
+    if (error || !memberships) {
+      console.error('Error fetching user organizations:', error);
+      return [];
+    }
+
+    return memberships
+      .filter(m => m.organizations && !Array.isArray(m.organizations))
+      .map(m => {
+        const org = m.organizations as unknown as DbOrganization;
+        return {
+          ...dbToOrganization(org),
+          role: m.role,
+          lastAccessed: m.last_accessed_at || undefined,
+        };
+      });
+  },
+
+  /**
+   * Get active organization from user preferences
+   */
+  async getActiveOrganization(): Promise<Organization | null> {
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return null;
+    }
+
+    // Get user's active organization from preferences
+    const { data: prefs } = await supabase
+      .from('user_preferences')
+      .select('active_organization_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!prefs?.active_organization_id) {
+      // No active org set, try to get first org
+      const orgs = await this.getUserOrganizations();
+      if (orgs.length > 0) {
+        // Set first org as active
+        await this.setActiveOrganization(orgs[0].id);
+        return orgs[0];
       }
-
-      const parsed = JSON.parse(raw) as Organization;
-      return sanitizeOrganization(parsed);
-    } catch (error) {
-      console.warn('organizationService.getOrganization: failed to parse saved data', error);
-      window.localStorage.removeItem(STORAGE_KEY);
       return null;
     }
+
+    return this.getOrganization(prefs.active_organization_id);
   },
 
-  async updateOrganization(data: Partial<Organization>): Promise<Organization> {
-    const existing = (await this.getOrganization()) ?? mockOrganizationSettings;
-    const mergedBrandColors: OrganizationBrandColors = {
-      primary: data.brandColors?.primary ?? existing.brandColors?.primary ?? DEFAULT_BRAND_COLORS.primary,
-      secondary: data.brandColors?.secondary ?? existing.brandColors?.secondary ?? DEFAULT_BRAND_COLORS.secondary,
-    };
+  /**
+   * Set active organization for current user
+   */
+  async setActiveOrganization(organizationId: string): Promise<void> {
+    const supabase = createClient();
 
-    const updated = sanitizeOrganization({
-      ...existing,
-      ...data,
-      address: {
-        ...existing.address,
-        ...data.address,
-      },
-      brandColors: mergedBrandColors,
-      updatedAt: new Date().toISOString(),
-    });
-
-    if (hasBrowserStorage()) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
     }
 
-    return updated;
+    // Update user preferences
+    const { error: prefsError } = await supabase
+      .from('user_preferences')
+      .update({ active_organization_id: organizationId })
+      .eq('user_id', user.id);
+
+    if (prefsError) {
+      throw new Error(`Failed to set active organization: ${prefsError.message}`);
+    }
+
+    // Update last_accessed_at for the membership
+    const { error: memberError } = await supabase
+      .from('organization_members')
+      .update({ last_accessed_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .eq('organization_id', organizationId);
+
+    if (memberError) {
+      console.warn('Failed to update last access time:', memberError);
+    }
   },
 
+  /**
+   * Create a new organization (user becomes owner)
+   */
+  async createOrganization(data: Partial<Organization>): Promise<Organization> {
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Validate required fields
+    if (!data.name) {
+      throw new Error('Organization name is required');
+    }
+
+    const dbData = organizationToDb(data, user.id);
+
+    const { data: newOrg, error } = await supabase
+      .from('organizations')
+      .insert(dbData)
+      .select()
+      .single();
+
+    if (error || !newOrg) {
+      throw new Error(`Failed to create organization: ${error?.message || 'Unknown error'}`);
+    }
+
+    // Set as active organization
+    await this.setActiveOrganization(newOrg.id);
+
+    return dbToOrganization(newOrg);
+  },
+
+  /**
+   * Update organization
+   */
+  async updateOrganization(organizationId: string, data: Partial<Organization>): Promise<Organization> {
+    const supabase = createClient();
+
+    const dbData = organizationToDb(data);
+
+    const { data: updated, error } = await supabase
+      .from('organizations')
+      .update(dbData)
+      .eq('id', organizationId)
+      .is('deleted_at', null)
+      .select()
+      .single();
+
+    if (error || !updated) {
+      throw new Error(`Failed to update organization: ${error?.message || 'Unknown error'}`);
+    }
+
+    return dbToOrganization(updated);
+  },
+
+  /**
+   * Delete organization (soft delete)
+   */
+  async deleteOrganization(organizationId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { error } = await supabase
+      .from('organizations')
+      .update({
+        deleted_at: new Date().toISOString(),
+        deleted_by: user.id,
+      })
+      .eq('id', organizationId)
+      .eq('owner_id', user.id); // Only owner can delete
+
+    if (error) {
+      throw new Error(`Failed to delete organization: ${error.message}`);
+    }
+
+    // If this was the active org, clear it
+    const activeOrg = await this.getActiveOrganization();
+    if (activeOrg?.id === organizationId) {
+      const orgs = await this.getUserOrganizations();
+      if (orgs.length > 0) {
+        await this.setActiveOrganization(orgs[0].id);
+      }
+    }
+  },
+
+  /**
+   * Get user's role in organization
+   */
+  async getUserRole(organizationId: string): Promise<string | null> {
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return null;
+    }
+
+    const { data } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', organizationId)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .is('deleted_at', null)
+      .single();
+
+    return data?.role || null;
+  },
+
+  /**
+   * Check if user has permission (Owner or Admin)
+   */
+  async canManageOrganization(organizationId: string): Promise<boolean> {
+    const role = await this.getUserRole(organizationId);
+    return role === 'Owner' || role === 'Admin';
+  },
+
+  /**
+   * Validate organization data
+   */
   validateOrganization(data: Partial<Organization>): { valid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {};
 
@@ -86,11 +339,11 @@ export const organizationService = {
       errors.name = 'Organization name is required';
     }
 
-    if (!data.type || data.type.trim().length === 0) {
+    if (data.type && data.type.trim().length === 0) {
       errors.type = 'Select an organization type';
     }
 
-    if (!data.industry || data.industry.trim().length === 0) {
+    if (data.industry && data.industry.trim().length === 0) {
       errors.industry = 'Industry is required';
     }
 
@@ -98,7 +351,7 @@ export const organizationService = {
       errors.website = 'Please enter a valid URL (https://example.org)';
     }
 
-    if (!data.address?.country) {
+    if (data.address?.country && !data.address?.country.trim()) {
       errors.country = 'Select a country';
     }
 
@@ -110,4 +363,3 @@ export const organizationService = {
 };
 
 export type OrganizationValidationResult = ReturnType<typeof organizationService.validateOrganization>;
-
