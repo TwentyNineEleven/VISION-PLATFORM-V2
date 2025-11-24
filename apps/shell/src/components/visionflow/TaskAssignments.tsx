@@ -2,6 +2,7 @@
  * Task Assignments Component
  * Manages user assignments to tasks with role selection
  * Phase 1: Task Management
+ * Uses Glow UI design system and 2911 Bold Color System
  */
 
 'use client';
@@ -9,6 +10,12 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { GlowButton } from '@/components/glow-ui/GlowButton';
+import { GlowInput } from '@/components/glow-ui/GlowInput';
+import { GlowSelect } from '@/components/glow-ui/GlowSelect';
+import { GlowBadge } from '@/components/glow-ui/GlowBadge';
+import { GlowCard } from '@/components/glow-ui/GlowCard';
+import { X, Plus, Search } from 'lucide-react';
 
 interface User {
   id: string;
@@ -30,16 +37,25 @@ interface TaskAssignmentsProps {
   onAssignmentsChange?: () => void;
 }
 
-const ROLE_LABELS = {
-  OWNER: 'Owner',
-  COLLABORATOR: 'Collaborator',
-  REVIEWER: 'Reviewer',
-};
-
-const ROLE_COLORS = {
-  OWNER: 'bg-purple-100 text-purple-700',
-  COLLABORATOR: 'bg-blue-100 text-blue-700',
-  REVIEWER: 'bg-gray-100 text-gray-700',
+const ROLE_CONFIG = {
+  OWNER: {
+    label: 'Owner',
+    variant: 'default' as const,
+    bgClass: 'bg-vision-purple-50',
+    textClass: 'text-vision-purple-900',
+  },
+  COLLABORATOR: {
+    label: 'Collaborator',
+    variant: 'info' as const,
+    bgClass: 'bg-vision-blue-50',
+    textClass: 'text-vision-blue-950',
+  },
+  REVIEWER: {
+    label: 'Reviewer',
+    variant: 'outline' as const,
+    bgClass: 'bg-vision-gray-50',
+    textClass: 'text-vision-gray-950',
+  },
 };
 
 export function TaskAssignments({
@@ -51,7 +67,9 @@ export function TaskAssignments({
   const [showAddForm, setShowAddForm] = useState(false);
   const [orgMembers, setOrgMembers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'OWNER' | 'COLLABORATOR' | 'REVIEWER'>('COLLABORATOR');
+  const [selectedRole, setSelectedRole] = useState<'OWNER' | 'COLLABORATOR' | 'REVIEWER'>(
+    'COLLABORATOR'
+  );
   const [loading, setLoading] = useState(false);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,100 +189,89 @@ export function TaskAssignments({
       member.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getUserInitial = (name: string) => name.charAt(0).toUpperCase();
+
   return (
     <div className="space-y-3">
       {/* Assigned Users List */}
       {assignments.length > 0 ? (
         <div className="space-y-2">
-          {assignments.map((assignment) => (
-            <div
-              key={assignment.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-3"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                  {assignment.user.avatar_url ? (
-                    <img
-                      src={assignment.user.avatar_url}
-                      alt={assignment.user.name}
-                      className="h-8 w-8 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-vision-blue-100 flex items-center justify-center">
-                      <span className="text-sm font-medium text-vision-blue-700">
-                        {assignment.user.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* User Info */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {assignment.user.name}
-                  </p>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                      ROLE_COLORS[assignment.role]
-                    }`}
-                  >
-                    {ROLE_LABELS[assignment.role]}
-                  </span>
-                </div>
-              </div>
-
-              {/* Remove Button */}
-              <button
-                type="button"
-                onClick={() => handleUnassignUser(assignment.user_id)}
-                disabled={loading}
-                className="flex-shrink-0 text-gray-400 hover:text-red-600 disabled:opacity-50"
-                title="Remove assignment"
+          {assignments.map((assignment) => {
+            const roleConfig = ROLE_CONFIG[assignment.role];
+            return (
+              <GlowCard
+                key={assignment.id}
+                variant="subtle"
+                padding="sm"
+                className="shadow-ambient-card hover:shadow-ambient-card-hover transition-shadow"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0">
+                      {assignment.user.avatar_url ? (
+                        <img
+                          src={assignment.user.avatar_url}
+                          alt={assignment.user.name}
+                          className="h-8 w-8 rounded-full ring-2 ring-white"
+                        />
+                      ) : (
+                        <div className={`h-8 w-8 rounded-full ${roleConfig.bgClass} flex items-center justify-center ring-2 ring-white`}>
+                          <span className={`text-sm font-medium ${roleConfig.textClass}`}>
+                            {getUserInitial(assignment.user.name)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* User Info */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {assignment.user.name}
+                      </p>
+                      <GlowBadge variant={roleConfig.variant} size="sm">
+                        {roleConfig.label}
+                      </GlowBadge>
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <GlowButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleUnassignUser(assignment.user_id)}
+                    disabled={loading}
+                    className="text-muted-foreground hover:text-vision-red-900"
+                  >
+                    <X className="h-4 w-4" />
+                  </GlowButton>
+                </div>
+              </GlowCard>
+            );
+          })}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 italic">No one assigned yet</p>
+        <p className="text-sm text-muted-foreground italic py-2">No one assigned yet</p>
       )}
 
       {/* Add Assignment Form */}
       {showAddForm ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
-          {/* Search/Select User */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search User
-            </label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name or email..."
-              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            />
-          </div>
+        <GlowCard variant="elevated" padding="md" className="space-y-4">
+          {/* Search User */}
+          <GlowInput
+            label="Search User"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            leftIcon={<Search className="h-4 w-4" />}
+            inputSize="sm"
+          />
 
           {/* User List */}
           {loadingMembers ? (
-            <p className="text-sm text-gray-500">Loading members...</p>
+            <p className="text-sm text-muted-foreground">Loading members...</p>
           ) : filteredMembers.length > 0 ? (
-            <div className="max-h-48 overflow-y-auto space-y-1">
+            <div className="max-h-48 overflow-y-auto space-y-1 p-1">
               {filteredMembers.map((member) => (
                 <button
                   key={member.id}
@@ -273,8 +280,10 @@ export function TaskAssignments({
                     setSelectedUserId(member.id);
                     setSearchQuery(member.name);
                   }}
-                  className={`w-full flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white ${
-                    selectedUserId === member.id ? 'bg-blue-50 ring-2 ring-blue-500' : ''
+                  className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
+                    selectedUserId === member.id
+                      ? 'bg-vision-blue-50 ring-2 ring-vision-blue-950 shadow-glow-primary-sm'
+                      : 'hover:bg-muted'
                   }`}
                 >
                   {/* Avatar */}
@@ -285,92 +294,80 @@ export function TaskAssignments({
                       className="h-6 w-6 rounded-full"
                     />
                   ) : (
-                    <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-600">
-                        {member.name.charAt(0).toUpperCase()}
+                    <div className="h-6 w-6 rounded-full bg-vision-gray-100 flex items-center justify-center">
+                      <span className="text-xs font-medium text-vision-gray-700">
+                        {getUserInitial(member.name)}
                       </span>
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {member.name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                   </div>
                 </button>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground py-2">
               {searchQuery ? 'No members found' : 'All members are already assigned'}
             </p>
           )}
 
           {/* Role Selection */}
           {selectedUserId && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <select
-                value={selectedRole}
-                onChange={(e) =>
-                  setSelectedRole(e.target.value as 'OWNER' | 'COLLABORATOR' | 'REVIEWER')
-                }
-                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-              >
-                <option value="COLLABORATOR">Collaborator - Can edit the task</option>
-                <option value="REVIEWER">Reviewer - Can review and comment</option>
-                <option value="OWNER">Owner - Full control</option>
-              </select>
-            </div>
+            <GlowSelect
+              label="Role"
+              value={selectedRole}
+              onChange={(e) =>
+                setSelectedRole(e.target.value as 'OWNER' | 'COLLABORATOR' | 'REVIEWER')
+              }
+              controlSize="sm"
+            >
+              <option value="COLLABORATOR">Collaborator - Can edit the task</option>
+              <option value="REVIEWER">Reviewer - Can review and comment</option>
+              <option value="OWNER">Owner - Full control</option>
+            </GlowSelect>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
-            <button
-              type="button"
+          <div className="flex gap-2 pt-2">
+            <GlowButton
+              variant="default"
+              size="sm"
+              glow="medium"
               onClick={handleAssignUser}
               disabled={!selectedUserId || loading}
-              className="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              loading={loading}
+              className="flex-1"
             >
               {loading ? 'Assigning...' : 'Assign'}
-            </button>
-            <button
-              type="button"
+            </GlowButton>
+            <GlowButton
+              variant="outline"
+              size="sm"
               onClick={() => {
                 setShowAddForm(false);
                 setSelectedUserId('');
                 setSearchQuery('');
               }}
               disabled={loading}
-              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
               Cancel
-            </button>
+            </GlowButton>
           </div>
-        </div>
+        </GlowCard>
       ) : (
-        <button
-          type="button"
+        <GlowButton
+          variant="outline"
+          size="sm"
           onClick={() => setShowAddForm(true)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="w-full"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
+          <Plus className="h-4 w-4 mr-2" />
           Add Assignment
-        </button>
+        </GlowButton>
       )}
     </div>
   );
