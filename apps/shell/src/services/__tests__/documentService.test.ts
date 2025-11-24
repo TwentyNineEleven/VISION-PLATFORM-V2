@@ -5,19 +5,21 @@ import {
   createMockSupabaseClient,
   createMockSupabaseError,
   mockDocument,
-  mockOrganization,
   createMockFile,
 } from '@/test/testUtils';
 
 // Mock the Supabase client
 vi.mock('@/lib/supabase/client');
 
-// Mock upload utility
-vi.mock('@/lib/upload', () => ({
-  uploadFile: vi.fn().mockResolvedValue({
-    path: 'test-path.pdf',
-    url: 'https://test.supabase.co/storage/v1/object/public/test-path.pdf',
-  }),
+// Mock documentParserService
+vi.mock('../documentParserService', () => ({
+  documentParserService: {
+    parseFile: vi.fn().mockResolvedValue({
+      success: true,
+      text: 'Extracted text content',
+      textLength: 20,
+    }),
+  },
 }));
 
 describe('documentService', () => {
@@ -32,6 +34,78 @@ describe('documentService', () => {
     (createClient as any).mockReturnValue(mockSupabase);
   });
 
+  describe('getDocument', () => {
+    it('should fetch document by ID', async () => {
+      const dbDocument = {
+        id: 'doc-123',
+        organization_id: 'org-123',
+        name: 'test-document.pdf',
+        file_path: 'org-123/test-document.pdf',
+        file_size: 1024000,
+        mime_type: 'application/pdf',
+        extension: 'pdf',
+        version_number: 1,
+        current_version_id: 'version-1',
+        tags: [],
+        metadata: {},
+        extracted_text: 'Test content',
+        extracted_text_length: 12,
+        text_extracted_at: new Date().toISOString(),
+        ai_summary: null,
+        ai_keywords: null,
+        ai_topics: null,
+        ai_entities: null,
+        ai_sentiment: null,
+        ai_language: null,
+        ai_metadata: {},
+        content_embeddings: null,
+        ai_provider: null,
+        ai_enabled: false,
+        ai_processing_status: 'disabled',
+        ai_processed_at: null,
+        ai_error: null,
+        view_count: 0,
+        download_count: 0,
+        last_viewed_at: null,
+        last_downloaded_at: null,
+        uploaded_by: 'user-123',
+        updated_by: 'user-123',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        deleted_at: null,
+        deleted_by: null,
+        folder_id: null,
+        description: null,
+      };
+
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().single as any).mockResolvedValue({
+        data: dbDocument,
+        error: null,
+      });
+
+      const result = await documentService.getDocument('doc-123');
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('doc-123');
+      expect(mockSupabase.from).toHaveBeenCalledWith('documents');
+      expect(mockQuery.eq).toHaveBeenCalledWith('id', 'doc-123');
+      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
+    });
+
+    it('should return null when document not found', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().single as any).mockResolvedValue({
+        data: null,
+        error: createMockSupabaseError('Not found', 'PGRST116'),
+      });
+
+      const result = await documentService.getDocument('non-existent');
+
+      expect(result).toBeNull();
+    });
+  });
+
   describe('uploadDocument', () => {
     it('should upload document successfully', async () => {
       const file = createMockFile('test.pdf', 1024000, 'application/pdf');
@@ -43,19 +117,67 @@ describe('documentService', () => {
         tags: ['important'],
       };
 
-      mockSupabase.from().insert().select().single.mockResolvedValue({
-        data: mockDocument,
+      const dbDocument = {
+        id: 'doc-123',
+        organization_id: 'org-123',
+        name: 'Test Document',
+        file_path: 'org-123/Test Document.pdf',
+        file_size: 1024000,
+        mime_type: 'application/pdf',
+        extension: 'pdf',
+        version_number: 1,
+        current_version_id: null,
+        tags: ['important'],
+        metadata: {},
+        extracted_text: 'Extracted text content',
+        extracted_text_length: 20,
+        text_extracted_at: new Date().toISOString(),
+        ai_enabled: false,
+        ai_processing_status: 'disabled',
+        uploaded_by: 'user-123',
+        updated_by: 'user-123',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        deleted_at: null,
+        deleted_by: null,
+        folder_id: null,
+        description: null,
+      };
+
+      // Mock storage upload
+      const mockStorage = mockSupabase.storage.from();
+      (mockStorage.upload as any).mockResolvedValue({
+        data: { path: 'org-123/Test Document.pdf' },
+        error: null,
+      });
+
+      // Mock document insert
+      const mockInsertQuery = mockSupabase.from();
+      (mockInsertQuery.insert().select().single as any).mockResolvedValue({
+        data: dbDocument,
+        error: null,
+      });
+
+      // Mock version creation (called internally)
+      const mockVersionQuery = mockSupabase.from();
+      (mockVersionQuery.insert().select().single as any).mockResolvedValue({
+        data: { id: 'version-1' },
+        error: null,
+      });
+
+      // Mock update for current_version_id
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq as any).mockResolvedValue({
+        data: null,
         error: null,
       });
 
       const result = await documentService.uploadDocument(uploadData);
 
-      expect(result).toMatchObject({
-        id: expect.any(String),
-        organization_id: 'org-123',
-        name: 'Test Document',
-      });
-      expect(mockSupabase.from).toHaveBeenCalledWith('documents');
+      expect(result).not.toBeNull();
+      expect(result.id).toBe('doc-123');
+      expect(mockSupabase.storage.from).toHaveBeenCalledWith('organization-documents');
+      expect(mockStorage.upload).toHaveBeenCalled();
     });
 
     it('should validate file size limit (15MB)', async () => {
@@ -77,7 +199,8 @@ describe('documentService', () => {
         name: 'Test Document',
       };
 
-      mockSupabase.from().insert().select().single.mockResolvedValue({
+      const mockStorage = mockSupabase.storage.from();
+      (mockStorage.upload as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Upload failed'),
       });
@@ -86,44 +209,21 @@ describe('documentService', () => {
     });
   });
 
-  describe('getDocumentById', () => {
-    it('should fetch document by ID', async () => {
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: mockDocument,
-        error: null,
-      });
-
-      const result = await documentService.getDocumentById('doc-123');
-
-      expect(result).toEqual(mockDocument);
-      expect(mockSupabase.from).toHaveBeenCalledWith('documents');
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('id', 'doc-123');
-    });
-
-    it('should return null when document not found', async () => {
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: null,
-        error: createMockSupabaseError('Not found', 'PGRST116'),
-      });
-
-      const result = await documentService.getDocumentById('non-existent');
-
-      expect(result).toBeNull();
-    });
-
-    it('should throw error for other failures', async () => {
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: null,
-        error: createMockSupabaseError('Database error'),
-      });
-
-      await expect(documentService.getDocumentById('doc-123')).rejects.toThrow();
-    });
-  });
-
   describe('searchDocuments', () => {
     it('should search documents with filters', async () => {
-      const documents = [mockDocument, { ...mockDocument, id: 'doc-456' }];
+      const dbDocuments = [
+        {
+          ...mockDocument,
+          id: 'doc-1',
+          name: 'Test Document 1',
+        },
+        {
+          ...mockDocument,
+          id: 'doc-2',
+          name: 'Test Document 2',
+        },
+      ];
+
       const searchParams = {
         organizationId: 'org-123',
         query: 'test',
@@ -134,8 +234,9 @@ describe('documentService', () => {
         offset: 0,
       };
 
-      mockSupabase.from().select.mockResolvedValue({
-        data: documents,
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().contains().order().range as any).mockResolvedValue({
+        data: dbDocuments,
         error: null,
         count: 2,
       });
@@ -155,7 +256,8 @@ describe('documentService', () => {
         offset: 0,
       };
 
-      mockSupabase.from().select.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().eq().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 1,
@@ -164,7 +266,7 @@ describe('documentService', () => {
       const result = await documentService.searchDocuments(searchParams);
 
       expect(result.documents).toHaveLength(1);
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('folder_id', 'folder-123');
+      expect(mockQuery.eq).toHaveBeenCalledWith('folder_id', 'folder-123');
     });
 
     it('should filter by date range', async () => {
@@ -176,7 +278,8 @@ describe('documentService', () => {
         offset: 0,
       };
 
-      mockSupabase.from().select.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().gte().lte().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 1,
@@ -194,7 +297,8 @@ describe('documentService', () => {
         offset: 20,
       };
 
-      mockSupabase.from().select.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 50,
@@ -203,7 +307,8 @@ describe('documentService', () => {
       const result = await documentService.searchDocuments(searchParams);
 
       expect(result.total).toBe(50);
-      expect(mockSupabase.from().range).toHaveBeenCalledWith(20, 29);
+      expect(result.hasMore).toBe(true);
+      expect(mockQuery.range).toHaveBeenCalledWith(20, 29);
     });
   });
 
@@ -215,8 +320,14 @@ describe('documentService', () => {
         tags: ['updated'],
       };
 
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { ...mockDocument, ...updates },
+      const updatedDoc = {
+        ...mockDocument,
+        ...updates,
+      };
+
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().is().select().single as any).mockResolvedValue({
+        data: updatedDoc,
         error: null,
       });
 
@@ -225,10 +336,18 @@ describe('documentService', () => {
       expect(result.name).toBe('Updated Name');
       expect(result.description).toBe('Updated description');
       expect(mockSupabase.from).toHaveBeenCalledWith('documents');
+      expect(mockQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Updated Name',
+          description: 'Updated description',
+          tags: ['updated'],
+        })
+      );
     });
 
     it('should throw error when update fails', async () => {
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().is().select().single as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Update failed'),
       });
@@ -241,26 +360,27 @@ describe('documentService', () => {
 
   describe('deleteDocument', () => {
     it('should soft delete document', async () => {
-      mockSupabase.from().update().eq().mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq as any).mockResolvedValue({
         data: null,
-        error: null,
-      });
-
-      // Mock storage deletion
-      mockSupabase.storage.from().remove.mockResolvedValue({
         error: null,
       });
 
       await documentService.deleteDocument('doc-123');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('documents');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        deleted_at: expect.any(String),
-      });
+      expect(mockQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deleted_at: expect.any(String),
+          deleted_by: expect.any(String),
+        })
+      );
+      expect(mockQuery.eq).toHaveBeenCalledWith('id', 'doc-123');
     });
 
     it('should handle deletion errors', async () => {
-      mockSupabase.from().update().eq().mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Deletion failed'),
       });
@@ -269,136 +389,39 @@ describe('documentService', () => {
     });
   });
 
-  describe('moveDocument', () => {
-    it('should move document to folder', async () => {
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { ...mockDocument, folder_id: 'folder-456' },
+  describe('getDownloadUrl', () => {
+    it('should get signed download URL', async () => {
+      const dbDocument = {
+        ...mockDocument,
+        file_path: 'org-123/test-document.pdf',
+        download_count: 0,
+      };
+
+      // Mock getDocument
+      const mockGetQuery = mockSupabase.from();
+      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
+        data: dbDocument,
         error: null,
       });
 
-      const result = await documentService.moveDocument('doc-123', 'folder-456');
-
-      expect(result.folder_id).toBe('folder-456');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        folder_id: 'folder-456',
-        updated_at: expect.any(String),
-      });
-    });
-
-    it('should move document to root (null folder)', async () => {
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { ...mockDocument, folder_id: null },
+      // Mock storage signed URL
+      const mockStorage = mockSupabase.storage.from();
+      (mockStorage.createSignedUrl as any).mockResolvedValue({
+        data: { signedUrl: 'https://test.supabase.co/storage/v1/object/sign/test-path' },
         error: null,
       });
 
-      const result = await documentService.moveDocument('doc-123', null);
-
-      expect(result.folder_id).toBeNull();
-    });
-  });
-
-  describe('getDocumentVersions', () => {
-    it('should fetch document version history', async () => {
-      const versions = [
-        { ...mockDocument, version: 2 },
-        { ...mockDocument, version: 1 },
-      ];
-
-      mockSupabase.from().select().eq().order.mockResolvedValue({
-        data: versions,
+      // Mock update for download count
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq as any).mockResolvedValue({
+        data: null,
         error: null,
       });
 
-      const result = await documentService.getDocumentVersions('doc-123');
+      const url = await documentService.getDownloadUrl('doc-123');
 
-      expect(result).toHaveLength(2);
-      expect(result[0].version).toBe(2);
-      expect(mockSupabase.from).toHaveBeenCalledWith('document_versions');
-    });
-
-    it('should return empty array when no versions', async () => {
-      mockSupabase.from().select().eq().order.mockResolvedValue({
-        data: [],
-        error: null,
-      });
-
-      const result = await documentService.getDocumentVersions('doc-123');
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('addDocumentTag', () => {
-    it('should add tag to document', async () => {
-      const currentDoc = { ...mockDocument, tags: ['existing'] };
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { ...currentDoc, tags: ['existing', 'new-tag'] },
-        error: null,
-      });
-
-      const result = await documentService.addDocumentTag('doc-123', 'new-tag');
-
-      expect(result.tags).toContain('new-tag');
-      expect(result.tags).toContain('existing');
-    });
-
-    it('should not duplicate tags', async () => {
-      const currentDoc = { ...mockDocument, tags: ['existing'] };
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      const result = await documentService.addDocumentTag('doc-123', 'existing');
-
-      expect(result.tags).toEqual(['existing']);
-    });
-  });
-
-  describe('removeDocumentTag', () => {
-    it('should remove tag from document', async () => {
-      const currentDoc = { ...mockDocument, tags: ['tag1', 'tag2', 'tag3'] };
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { ...currentDoc, tags: ['tag1', 'tag3'] },
-        error: null,
-      });
-
-      const result = await documentService.removeDocumentTag('doc-123', 'tag2');
-
-      expect(result.tags).not.toContain('tag2');
-      expect(result.tags).toHaveLength(2);
-    });
-
-    it('should handle removing non-existent tag', async () => {
-      const currentDoc = { ...mockDocument, tags: ['tag1'] };
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: currentDoc,
-        error: null,
-      });
-
-      const result = await documentService.removeDocumentTag('doc-123', 'non-existent');
-
-      expect(result.tags).toEqual(['tag1']);
+      expect(url).toBe('https://test.supabase.co/storage/v1/object/sign/test-path');
+      expect(mockSupabase.storage.from).toHaveBeenCalledWith('organization-documents');
     });
   });
 
@@ -410,7 +433,8 @@ describe('documentService', () => {
         { ...mockDocument, id: 'doc-3', created_at: '2024-01-01' },
       ];
 
-      mockSupabase.from().select().eq().is().order().limit.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().is().order().limit as any).mockResolvedValue({
         data: recentDocs,
         error: null,
       });
@@ -419,110 +443,137 @@ describe('documentService', () => {
 
       expect(result).toHaveLength(3);
       expect(result[0].id).toBe('doc-1');
-      expect(mockSupabase.from().limit).toHaveBeenCalledWith(10);
+      expect(mockQuery.limit).toHaveBeenCalledWith(10);
     });
 
     it('should exclude deleted documents', async () => {
-      mockSupabase.from().select().eq().is().order().limit.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().is().order().limit as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
       });
 
       await documentService.getRecentDocuments('org-123');
 
-      expect(mockSupabase.from().is).toHaveBeenCalledWith('deleted_at', null);
+      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
     });
   });
 
-  describe('getDocumentStats', () => {
-    it('should return document statistics', async () => {
+  describe('getStorageQuota', () => {
+    it('should return storage quota information', async () => {
       const documents = [
         { ...mockDocument, file_size: 1000000 },
         { ...mockDocument, id: 'doc-2', file_size: 2000000 },
         { ...mockDocument, id: 'doc-3', file_size: 3000000 },
       ];
 
-      mockSupabase.from().select().eq().is.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is as any).mockResolvedValue({
         data: documents,
         error: null,
       });
 
-      const stats = await documentService.getDocumentStats('org-123');
+      const quota = await documentService.getStorageQuota('org-123');
 
-      expect(stats.totalDocuments).toBe(3);
-      expect(stats.totalSize).toBe(6000000);
-      expect(stats.averageSize).toBe(2000000);
+      expect(quota.organizationId).toBe('org-123');
+      expect(quota.used).toBe(6000000);
+      expect(quota.documentCount).toBe(3);
+      expect(quota.percentage).toBeGreaterThan(0);
     });
 
     it('should handle organization with no documents', async () => {
-      mockSupabase.from().select().eq().is.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is as any).mockResolvedValue({
         data: [],
         error: null,
       });
 
-      const stats = await documentService.getDocumentStats('org-123');
+      const quota = await documentService.getStorageQuota('org-123');
 
-      expect(stats.totalDocuments).toBe(0);
-      expect(stats.totalSize).toBe(0);
-      expect(stats.averageSize).toBe(0);
+      expect(quota.totalDocuments).toBe(0);
+      expect(quota.used).toBe(0);
+      expect(quota.percentage).toBe(0);
     });
   });
 
-  describe('bulkDeleteDocuments', () => {
+  describe('bulkOperation', () => {
     it('should delete multiple documents', async () => {
-      const documentIds = ['doc-1', 'doc-2', 'doc-3'];
+      const request = {
+        documentIds: ['doc-1', 'doc-2', 'doc-3'],
+        operation: 'delete' as const,
+      };
 
-      mockSupabase.from().update().in().mockResolvedValue({
+      // Mock getDocument for each delete call
+      const mockGetQuery = mockSupabase.from();
+      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
+        data: mockDocument,
+        error: null,
+      });
+
+      // Mock deleteDocument (update)
+      const mockDeleteQuery = mockSupabase.from();
+      (mockDeleteQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await documentService.bulkDeleteDocuments(documentIds);
+      const result = await documentService.bulkOperation(request);
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('documents');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        deleted_at: expect.any(String),
-      });
-      expect(mockSupabase.from().in).toHaveBeenCalledWith('id', documentIds);
+      expect(result.success).toBe(true);
+      expect(result.successCount).toBe(3);
+      expect(result.failureCount).toBe(0);
     });
 
-    it('should handle empty array', async () => {
-      await expect(documentService.bulkDeleteDocuments([])).rejects.toThrow();
+    it('should move multiple documents', async () => {
+      const request = {
+        documentIds: ['doc-1', 'doc-2'],
+        operation: 'move' as const,
+        params: { folderId: 'folder-123' },
+      };
+
+      // Mock updateDocument
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq().is().select().single as any).mockResolvedValue({
+        data: { ...mockDocument, folder_id: 'folder-123' },
+        error: null,
+      });
+
+      const result = await documentService.bulkOperation(request);
+
+      expect(result.success).toBe(true);
+      expect(result.successCount).toBe(2);
     });
   });
 
-  describe('bulkMoveDocuments', () => {
-    it('should move multiple documents to folder', async () => {
-      const documentIds = ['doc-1', 'doc-2', 'doc-3'];
+  describe('recordView', () => {
+    it('should increment view count', async () => {
+      const dbDocument = {
+        ...mockDocument,
+        view_count: 5,
+      };
 
-      mockSupabase.from().update().in().mockResolvedValue({
+      // Mock getDocument
+      const mockGetQuery = mockSupabase.from();
+      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
+        data: dbDocument,
+        error: null,
+      });
+
+      // Mock update
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await documentService.bulkMoveDocuments(documentIds, 'folder-123');
+      await documentService.recordView('doc-123');
 
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        folder_id: 'folder-123',
-        updated_at: expect.any(String),
-      });
-      expect(mockSupabase.from().in).toHaveBeenCalledWith('id', documentIds);
-    });
-
-    it('should move documents to root', async () => {
-      const documentIds = ['doc-1', 'doc-2'];
-
-      mockSupabase.from().update().in().mockResolvedValue({
-        data: null,
-        error: null,
-      });
-
-      await documentService.bulkMoveDocuments(documentIds, null);
-
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        folder_id: null,
-        updated_at: expect.any(String),
-      });
+      expect(mockUpdateQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          view_count: 6,
+          last_viewed_at: expect.any(String),
+        })
+      );
     });
   });
 });

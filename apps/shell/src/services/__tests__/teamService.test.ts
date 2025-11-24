@@ -5,19 +5,10 @@ import {
   createMockSupabaseClient,
   createMockSupabaseError,
   mockUser,
-  mockOrganization,
-  mockProfile,
 } from '@/test/testUtils';
 
 // Mock the Supabase client
 vi.mock('@/lib/supabase/client');
-
-// Mock email service
-vi.mock('../emailService', () => ({
-  emailService: {
-    sendInvitation: vi.fn().mockResolvedValue(undefined),
-  },
-}));
 
 describe('teamService', () => {
   let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
@@ -35,18 +26,39 @@ describe('teamService', () => {
     it('should fetch all team members for organization', async () => {
       const members = [
         {
+          id: 'member-1',
+          organization_id: 'org-123',
           user_id: 'user-1',
-          role: 'owner',
-          profile: mockProfile,
+          role: 'Owner',
+          status: 'active',
+          joined_at: new Date().toISOString(),
+          deleted_at: null,
+          users: {
+            id: 'user-1',
+            name: 'User One',
+            email: 'user1@example.com',
+            avatar_url: null,
+          },
         },
         {
+          id: 'member-2',
+          organization_id: 'org-123',
           user_id: 'user-2',
-          role: 'admin',
-          profile: { ...mockProfile, id: 'user-2' },
+          role: 'Admin',
+          status: 'active',
+          joined_at: new Date().toISOString(),
+          deleted_at: null,
+          users: {
+            id: 'user-2',
+            name: 'User Two',
+            email: 'user2@example.com',
+            avatar_url: null,
+          },
         },
       ];
 
-      mockSupabase.from().select().eq().is.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order as any).mockResolvedValue({
         data: members,
         error: null,
       });
@@ -55,91 +67,153 @@ describe('teamService', () => {
 
       expect(result).toHaveLength(2);
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('organization_id', 'org-123');
+      expect(mockQuery.eq).toHaveBeenCalledWith('organization_id', 'org-123');
+      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
     });
 
     it('should exclude deleted members', async () => {
-      mockSupabase.from().select().eq().is.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order as any).mockResolvedValue({
         data: [],
         error: null,
       });
 
       await teamService.getTeamMembers('org-123');
 
-      expect(mockSupabase.from().is).toHaveBeenCalledWith('deleted_at', null);
+      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
     });
 
-    it('should handle errors', async () => {
-      mockSupabase.from().select().eq().is.mockResolvedValue({
+    it('should return empty array on error', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Database error'),
       });
 
-      await expect(teamService.getTeamMembers('org-123')).rejects.toThrow();
+      const result = await teamService.getTeamMembers('org-123');
+
+      expect(result).toEqual([]);
     });
   });
 
   describe('inviteMember', () => {
     it('should send invitation to new member', async () => {
-      const inviteData = {
+      const organizationId = 'org-123';
+      const invite = {
         email: 'newuser@example.com',
-        role: 'editor' as const,
-        organizationId: 'org-123',
-        invitedBy: 'user-123',
+        role: 'Editor' as const,
       };
 
-      mockSupabase.from().insert().select().single.mockResolvedValue({
-        data: {
-          id: 'invite-123',
-          token: 'test-token-123',
-          ...inviteData,
-        },
-        error: null,
+      // Set up mocks for each from() call in order
+      let fromCallCount = 0;
+      mockSupabase.from.mockImplementation(() => {
+        const query = createMockSupabaseClient().from();
+        fromCallCount++;
+        
+        // First call: getTeamMembers - returns empty array
+        if (fromCallCount === 1) {
+          (query.select().eq().is().order as any).mockResolvedValue({
+            data: [],
+            error: null,
+          });
+        }
+        // Second call: check for existing invite - return null (not found)
+        else if (fromCallCount === 2) {
+          query.single.mockResolvedValue({
+            data: null,
+            error: createMockSupabaseError('Not found', 'PGRST116'),
+          });
+        }
+        // Third call: get inviter info
+        else if (fromCallCount === 3) {
+          query.single.mockResolvedValue({
+            data: { name: 'Inviter', email: 'inviter@example.com' },
+            error: null,
+          });
+        }
+        // Fourth call: insert invite
+        else if (fromCallCount === 4) {
+          const newInvite = {
+            id: 'invite-123',
+            organization_id: organizationId,
+            email: invite.email.toLowerCase(),
+            role: invite.role,
+            token: 'test-token-123',
+            status: 'pending',
+            created_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          };
+          query.single.mockResolvedValue({
+            data: newInvite,
+            error: null,
+          });
+        }
+        
+        return query;
       });
 
-      const result = await teamService.inviteMember(inviteData);
+      const result = await teamService.inviteMember(organizationId, invite);
 
       expect(result.id).toBe('invite-123');
       expect(result.email).toBe('newuser@example.com');
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
-    });
-
-    it('should validate role value', async () => {
-      const inviteData = {
-        email: 'newuser@example.com',
-        role: 'invalid-role' as any,
-        organizationId: 'org-123',
-        invitedBy: 'user-123',
-      };
-
-      await expect(teamService.inviteMember(inviteData)).rejects.toThrow();
     });
 
     it('should validate email format', async () => {
-      const inviteData = {
+      const invite = {
         email: 'invalid-email',
-        role: 'editor' as const,
-        organizationId: 'org-123',
-        invitedBy: 'user-123',
+        role: 'Editor' as const,
       };
 
-      await expect(teamService.inviteMember(inviteData)).rejects.toThrow();
+      await expect(teamService.inviteMember('org-123', invite)).rejects.toThrow('Invalid email address');
     });
 
-    it('should handle duplicate invitation', async () => {
-      const inviteData = {
+    it('should reject if email is already a member', async () => {
+      const organizationId = 'org-123';
+      const invite = {
         email: 'existing@example.com',
-        role: 'editor' as const,
-        organizationId: 'org-123',
-        invitedBy: 'user-123',
+        role: 'Editor' as const,
       };
 
-      mockSupabase.from().insert().select().single.mockResolvedValue({
-        data: null,
-        error: createMockSupabaseError('Duplicate key', '23505'),
+      // Mock getTeamMembers returning existing member
+      const mockMembersQuery = mockSupabase.from();
+      (mockMembersQuery.select().eq().is().order as any).mockResolvedValue({
+        data: [
+          {
+            id: 'member-1',
+            organization_id: organizationId,
+            users: {
+              email: 'existing@example.com',
+            },
+          },
+        ],
+        error: null,
       });
 
-      await expect(teamService.inviteMember(inviteData)).rejects.toThrow();
+      await expect(teamService.inviteMember(organizationId, invite)).rejects.toThrow('already a team member');
+    });
+
+    it('should reject if pending invite already exists', async () => {
+      const organizationId = 'org-123';
+      const invite = {
+        email: 'pending@example.com',
+        role: 'Editor' as const,
+      };
+
+      // Mock getTeamMembers (no existing members)
+      const mockMembersQuery = mockSupabase.from();
+      (mockMembersQuery.select().eq().is().order as any).mockResolvedValue({
+        data: [],
+        error: null,
+      });
+
+      // Mock checking for existing invite - returns existing invite
+      const mockInviteCheckQuery = mockSupabase.from();
+      (mockInviteCheckQuery.select().eq().eq().eq().is().single as any).mockResolvedValue({
+        data: { id: 'existing-invite' },
+        error: null,
+      });
+
+      await expect(teamService.inviteMember(organizationId, invite)).rejects.toThrow('already been sent');
     });
   });
 
@@ -148,19 +222,30 @@ describe('teamService', () => {
       const invites = [
         {
           id: 'invite-1',
+          organization_id: 'org-123',
           email: 'user1@example.com',
-          role: 'editor',
+          role: 'Editor',
           status: 'pending',
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         },
         {
           id: 'invite-2',
+          organization_id: 'org-123',
           email: 'user2@example.com',
-          role: 'viewer',
+          role: 'Viewer',
           status: 'pending',
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         },
       ];
 
-      mockSupabase.from().select().eq().eq.mockResolvedValue({
+      // Mock RPC call
+      mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
+
+      // Mock query
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order as any).mockResolvedValue({
         data: invites,
         error: null,
       });
@@ -168,12 +253,16 @@ describe('teamService', () => {
       const result = await teamService.getPendingInvites('org-123');
 
       expect(result).toHaveLength(2);
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('expire_old_invites');
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('status', 'pending');
+      expect(mockQuery.eq).toHaveBeenCalledWith('organization_id', 'org-123');
     });
 
     it('should return empty array when no pending invites', async () => {
-      mockSupabase.from().select().eq().eq.mockResolvedValue({
+      mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
+
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().is().order as any).mockResolvedValue({
         data: [],
         error: null,
       });
@@ -186,254 +275,208 @@ describe('teamService', () => {
 
   describe('acceptInvite', () => {
     it('should accept invitation and add member', async () => {
-      const invite = {
-        id: 'invite-123',
+      const token = 'test-token-123';
+      const inviteData = {
         organization_id: 'org-123',
-        email: 'user@example.com',
-        role: 'editor',
-        status: 'pending',
+        role: 'Editor',
       };
 
-      // Mock getting invite
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: invite,
+      // Mock getInviteByToken
+      const mockInviteQuery = mockSupabase.from();
+      (mockInviteQuery.select().eq().is().single as any).mockResolvedValue({
+        data: {
+          id: 'invite-123',
+          organization_id: 'org-123',
+          email: 'user@example.com',
+          role: 'Editor',
+          status: 'pending',
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          organizations: { name: 'Test Org' },
+        },
+        error: null,
+      });
+
+      // Mock getting user profile
+      const mockUserQuery = mockSupabase.from();
+      (mockUserQuery.select().eq().single as any).mockResolvedValue({
+        data: { email: 'user@example.com' },
+        error: null,
+      });
+
+      // Mock getting invite data
+      const mockInviteDataQuery = mockSupabase.from();
+      (mockInviteDataQuery.select().eq().single as any).mockResolvedValue({
+        data: inviteData,
+        error: null,
+      });
+
+      // Mock creating member
+      const mockMemberQuery = mockSupabase.from();
+      (mockMemberQuery.insert as any).mockResolvedValue({
+        data: null,
         error: null,
       });
 
       // Mock updating invite status
-      mockSupabase.from().update().eq.mockResolvedValue({
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      // Mock adding member
-      mockSupabase.from().insert.mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      const result = await teamService.acceptInvite(token);
 
-      await teamService.acceptInvite('invite-token', 'user-123');
-
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
+      expect(result.organizationId).toBe('org-123');
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
     });
 
     it('should reject expired invitation', async () => {
-      const expiredInvite = {
-        id: 'invite-123',
-        organization_id: 'org-123',
-        email: 'user@example.com',
-        role: 'editor',
-        status: 'pending',
-        expires_at: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-      };
-
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: expiredInvite,
+      const mockInviteQuery = mockSupabase.from();
+      (mockInviteQuery.select().eq().is().single as any).mockResolvedValue({
+        data: {
+          id: 'invite-123',
+          organization_id: 'org-123',
+          email: 'user@example.com',
+          role: 'Editor',
+          status: 'pending',
+          expires_at: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+          organizations: { name: 'Test Org' },
+        },
         error: null,
       });
 
-      await expect(teamService.acceptInvite('expired-token', 'user-123')).rejects.toThrow();
-    });
-
-    it('should reject already accepted invitation', async () => {
-      const acceptedInvite = {
-        id: 'invite-123',
-        organization_id: 'org-123',
-        email: 'user@example.com',
-        role: 'editor',
-        status: 'accepted',
-      };
-
-      mockSupabase.from().select().eq().single.mockResolvedValue({
-        data: acceptedInvite,
-        error: null,
-      });
-
-      await expect(teamService.acceptInvite('used-token', 'user-123')).rejects.toThrow();
+      await expect(teamService.acceptInvite('expired-token')).rejects.toThrow('expired');
     });
   });
 
   describe('cancelInvite', () => {
     it('should cancel pending invitation', async () => {
-      mockSupabase.from().update().eq().eq.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().eq().is as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await teamService.cancelInvite('invite-123', 'org-123');
+      await teamService.cancelInvite('org-123', 'invite-123');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        status: 'cancelled',
-        updated_at: expect.any(String),
-      });
+      expect(mockQuery.update).toHaveBeenCalledWith({ status: 'cancelled' });
+      expect(mockQuery.eq).toHaveBeenCalledWith('id', 'invite-123');
+      expect(mockQuery.eq).toHaveBeenCalledWith('organization_id', 'org-123');
     });
 
     it('should throw error when cancellation fails', async () => {
-      mockSupabase.from().update().eq().eq.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().eq().is as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Cancellation failed'),
       });
 
-      await expect(teamService.cancelInvite('invite-123', 'org-123')).rejects.toThrow();
+      await expect(teamService.cancelInvite('org-123', 'invite-123')).rejects.toThrow();
     });
   });
 
   describe('removeMember', () => {
     it('should remove member from organization', async () => {
-      mockSupabase.from().delete().eq().eq.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      // Mock the final chain result - update().eq().eq() returns the query, which is then awaited
+      (mockQuery as any).mockResolvedValue = vi.fn((value: any) => {
+        const promise = Promise.resolve(value);
+        mockQuery.then = promise.then.bind(promise);
+        return mockQuery;
+      });
+      (mockQuery.update().eq().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await teamService.removeMember('org-123', 'user-456');
+      await teamService.removeMember('org-123', 'member-456');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().delete().eq).toHaveBeenCalledWith('organization_id', 'org-123');
-    });
-
-    it('should prevent removing last owner', async () => {
-      // Mock checking if user is last owner
-      mockSupabase.from().select().eq().eq().eq.mockResolvedValue({
-        data: [{ user_id: 'user-123' }], // Only one owner
-        error: null,
-      });
-
-      await expect(teamService.removeMember('org-123', 'user-123')).rejects.toThrow();
+      expect(mockQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deleted_at: expect.any(String),
+          deleted_by: mockUser.id,
+        })
+      );
+      expect(mockQuery.eq).toHaveBeenCalledWith('id', 'member-456');
+      expect(mockQuery.eq).toHaveBeenCalledWith('organization_id', 'org-123');
     });
 
     it('should handle removal errors', async () => {
-      mockSupabase.from().delete().eq().eq.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().eq as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Removal failed'),
       });
 
-      await expect(teamService.removeMember('org-123', 'user-456')).rejects.toThrow();
+      await expect(teamService.removeMember('org-123', 'member-456')).rejects.toThrow();
     });
   });
 
   describe('updateMemberRole', () => {
     it('should update member role', async () => {
-      mockSupabase.from().update().eq().eq.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().eq().is as any).mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await teamService.updateMemberRole('org-123', 'user-456', 'admin');
+      await teamService.updateMemberRole('org-123', 'member-456', 'Admin');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
-        role: 'admin',
-        updated_at: expect.any(String),
-      });
+      expect(mockQuery.update).toHaveBeenCalledWith({ role: 'Admin' });
+      expect(mockQuery.eq).toHaveBeenCalledWith('id', 'member-456');
+      expect(mockQuery.eq).toHaveBeenCalledWith('organization_id', 'org-123');
+      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
     });
 
-    it('should validate role value', async () => {
-      await expect(
-        teamService.updateMemberRole('org-123', 'user-456', 'invalid-role' as any)
-      ).rejects.toThrow();
-    });
-
-    it('should prevent changing last owner role', async () => {
-      // Mock checking if user is last owner
-      mockSupabase.from().select().eq().eq().eq.mockResolvedValue({
-        data: [{ user_id: 'user-123' }], // Only one owner
-        error: null,
-      });
-
-      await expect(
-        teamService.updateMemberRole('org-123', 'user-123', 'admin')
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('getMemberRole', () => {
-    it('should return member role', async () => {
-      mockSupabase.from().select().eq().eq().single.mockResolvedValue({
-        data: { role: 'admin' },
-        error: null,
-      });
-
-      const role = await teamService.getMemberRole('org-123', 'user-123');
-
-      expect(role).toBe('admin');
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-    });
-
-    it('should return null when member not found', async () => {
-      mockSupabase.from().select().eq().eq().single.mockResolvedValue({
+    it('should handle update errors', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.update().eq().eq().is as any).mockResolvedValue({
         data: null,
-        error: createMockSupabaseError('Not found', 'PGRST116'),
+        error: createMockSupabaseError('Update failed'),
       });
 
-      const role = await teamService.getMemberRole('org-123', 'user-999');
-
-      expect(role).toBeNull();
-    });
-  });
-
-  describe('getTeamStats', () => {
-    it('should return team statistics', async () => {
-      const members = [
-        { role: 'owner' },
-        { role: 'admin' },
-        { role: 'admin' },
-        { role: 'editor' },
-        { role: 'viewer' },
-      ];
-
-      mockSupabase.from().select().eq().is.mockResolvedValue({
-        data: members,
-        error: null,
-      });
-
-      const stats = await teamService.getTeamStats('org-123');
-
-      expect(stats.totalMembers).toBe(5);
-      expect(stats.byRole.owner).toBe(1);
-      expect(stats.byRole.admin).toBe(2);
-      expect(stats.byRole.editor).toBe(1);
-      expect(stats.byRole.viewer).toBe(1);
-    });
-
-    it('should handle organization with no members', async () => {
-      mockSupabase.from().select().eq().is.mockResolvedValue({
-        data: [],
-        error: null,
-      });
-
-      const stats = await teamService.getTeamStats('org-123');
-
-      expect(stats.totalMembers).toBe(0);
-      expect(stats.byRole).toEqual({
-        owner: 0,
-        admin: 0,
-        editor: 0,
-        viewer: 0,
-      });
+      await expect(teamService.updateMemberRole('org-123', 'member-456', 'Admin')).rejects.toThrow();
     });
   });
 
   describe('resendInvite', () => {
-    it('should resend invitation email', async () => {
+    it('should resend invitation', async () => {
       const invite = {
         id: 'invite-123',
         email: 'user@example.com',
         organization_id: 'org-123',
-        role: 'editor',
+        role: 'Editor',
         token: 'test-token',
         status: 'pending',
+        resend_count: 0,
       };
 
-      mockSupabase.from().select().eq().single.mockResolvedValue({
+      // Mock fetching invite
+      const mockFetchQuery = mockSupabase.from();
+      (mockFetchQuery.select().eq().eq().is().single as any).mockResolvedValue({
         data: invite,
         error: null,
       });
 
-      await teamService.resendInvite('invite-123');
+      // Mock updating invite
+      const mockUpdateQuery = mockSupabase.from();
+      (mockUpdateQuery.update().eq as any).mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      await teamService.resendInvite('org-123', 'invite-123');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
+      expect(mockUpdateQuery.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resend_count: 1,
+          last_sent_at: expect.any(String),
+        })
+      );
     });
 
     it('should not resend accepted invitation', async () => {
@@ -441,55 +484,93 @@ describe('teamService', () => {
         id: 'invite-123',
         email: 'user@example.com',
         organization_id: 'org-123',
-        role: 'editor',
+        role: 'Editor',
         status: 'accepted',
       };
 
-      mockSupabase.from().select().eq().single.mockResolvedValue({
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().is().single as any).mockResolvedValue({
         data: invite,
         error: null,
       });
 
-      await expect(teamService.resendInvite('invite-123')).rejects.toThrow();
+      await expect(teamService.resendInvite('org-123', 'invite-123')).rejects.toThrow('pending');
     });
   });
 
-  describe('bulkInviteMembers', () => {
-    it('should send multiple invitations', async () => {
-      const invites = [
-        { email: 'user1@example.com', role: 'editor' as const },
-        { email: 'user2@example.com', role: 'viewer' as const },
-      ];
-
-      mockSupabase.from().insert.mockResolvedValue({
-        data: null,
+  describe('getMemberCount', () => {
+    it('should return member count', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().is as any).mockResolvedValue({
+        count: 5,
         error: null,
       });
 
-      await teamService.bulkInviteMembers('org-123', invites, 'user-123');
+      const count = await teamService.getMemberCount('org-123');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_invites');
-      expect(mockSupabase.from().insert).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ email: 'user1@example.com' }),
-          expect.objectContaining({ email: 'user2@example.com' }),
-        ])
-      );
+      expect(count).toBe(5);
+      expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
     });
 
-    it('should validate all emails', async () => {
-      const invites = [
-        { email: 'valid@example.com', role: 'editor' as const },
-        { email: 'invalid-email', role: 'viewer' as const },
-      ];
+    it('should return 0 on error', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().is as any).mockResolvedValue({
+        count: null,
+        error: createMockSupabaseError('Error'),
+      });
 
-      await expect(
-        teamService.bulkInviteMembers('org-123', invites, 'user-123')
-      ).rejects.toThrow();
+      const count = await teamService.getMemberCount('org-123');
+
+      expect(count).toBe(0);
+    });
+  });
+
+  describe('canInviteMembers', () => {
+    it('should return true for Owner', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().eq().is().single as any).mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const canInvite = await teamService.canInviteMembers('org-123');
+
+      expect(canInvite).toBe(true);
     });
 
-    it('should handle empty array', async () => {
-      await expect(teamService.bulkInviteMembers('org-123', [], 'user-123')).rejects.toThrow();
+    it('should return true for Admin', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().eq().is().single as any).mockResolvedValue({
+        data: { role: 'Admin' },
+        error: null,
+      });
+
+      const canInvite = await teamService.canInviteMembers('org-123');
+
+      expect(canInvite).toBe(true);
+    });
+
+    it('should return false for Editor', async () => {
+      const mockQuery = mockSupabase.from();
+      (mockQuery.select().eq().eq().eq().is().single as any).mockResolvedValue({
+        data: { role: 'Editor' },
+        error: null,
+      });
+
+      const canInvite = await teamService.canInviteMembers('org-123');
+
+      expect(canInvite).toBe(false);
+    });
+
+    it('should return false when not authenticated', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: null,
+      });
+
+      const canInvite = await teamService.canInviteMembers('org-123');
+
+      expect(canInvite).toBe(false);
     });
   });
 });

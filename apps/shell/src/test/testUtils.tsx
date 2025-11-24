@@ -7,17 +7,13 @@ import { ReactElement, ReactNode } from 'react';
  */
 
 // ============================================================================
+// Supabase Mocking - Re-export from dedicated file
+// ============================================================================
+export * from './supabaseMocks';
+
+// ============================================================================
 // Mock Data Generators
 // ============================================================================
-
-export const mockUser = {
-  id: 'user-123',
-  email: 'test@example.com',
-  app_metadata: {},
-  user_metadata: {},
-  aud: 'authenticated',
-  created_at: new Date().toISOString(),
-};
 
 export const mockOrganization = {
   id: 'org-123',
@@ -63,85 +59,6 @@ export const mockFolder = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
-
-// ============================================================================
-// Supabase Mock Helpers
-// ============================================================================
-
-/**
- * Creates a mock Supabase client with chainable methods
- */
-export function createMockSupabaseClient(overrides?: any) {
-  const mockData = overrides?.data || [];
-  const mockError = overrides?.error || null;
-
-  const mockQuery = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    like: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: mockData[0] || null, error: mockError }),
-    maybeSingle: vi.fn().mockResolvedValue({ data: mockData[0] || null, error: mockError }),
-    then: vi.fn((resolve) => resolve({ data: mockData, error: mockError })),
-  };
-
-  return {
-    from: vi.fn(() => mockQuery),
-    auth: {
-      getUser: vi.fn().mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      }),
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { user: mockUser } },
-        error: null,
-      }),
-      signIn: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
-      signOut: vi.fn().mockResolvedValue({ error: null }),
-      signUp: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
-      admin: {
-        inviteUserByEmail: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
-        createUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
-        deleteUser: vi.fn().mockResolvedValue({ error: null }),
-      },
-    },
-    storage: {
-      from: vi.fn(() => ({
-        upload: vi.fn().mockResolvedValue({ data: { path: 'test-path' }, error: null }),
-        download: vi.fn().mockResolvedValue({ data: new Blob(), error: null }),
-        remove: vi.fn().mockResolvedValue({ error: null }),
-        getPublicUrl: vi.fn().mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/test-path' },
-        }),
-      })),
-    },
-  };
-}
-
-/**
- * Mock Supabase error
- */
-export function createMockSupabaseError(message: string, code = 'PGRST116') {
-  return {
-    message,
-    details: '',
-    hint: '',
-    code,
-  };
-}
 
 // ============================================================================
 // React Testing Library Helpers

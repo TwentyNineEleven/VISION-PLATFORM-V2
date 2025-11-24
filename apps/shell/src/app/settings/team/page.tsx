@@ -318,21 +318,19 @@ export default function TeamSettingsPage() {
                   disabled={!canManage || isInviting}
                   required
                 />
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Role</label>
-                  <select
-                    value={inviteForm.role}
-                    onChange={(e) => setInviteForm((prev) => ({ ...prev, role: e.target.value as TeamRole }))}
-                    disabled={!canManage || isInviting}
-                    className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <GlowSelect
+                  label="Role"
+                  value={inviteForm.role}
+                  onChange={(e) => setInviteForm((prev) => ({ ...prev, role: e.target.value as TeamRole }))}
+                  disabled={!canManage || isInviting}
+                  data-testid="invite-role-select"
+                >
+                  {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </GlowSelect>
                 <div className="flex items-end">
                   <GlowButton 
                     type="submit" 
@@ -478,18 +476,18 @@ export default function TeamSettingsPage() {
                     </GlowBadge>
                     {canManage && member.role !== 'Owner' && (
                       <>
-                        <select
+                        <GlowSelect
                           value={member.role}
                           onChange={(e) => handleUpdateRole(member.id, e.target.value as TeamRole, member.user_name || member.user_email)}
                           disabled={isUpdating || isRemoving}
-                          className="h-9 rounded-md border border-input bg-transparent px-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          data-testid={`member-role-${member.id}`}
                         >
                           {(['Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
                             <option key={role} value={role}>
                               {role}
                             </option>
                           ))}
-                        </select>
+                        </GlowSelect>
                         <ConfirmDialog
                           title="Remove member"
                           description={`Remove ${member.user_name || member.user_email} from this workspace? They will lose access immediately.`}
