@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Stack,
@@ -12,7 +12,9 @@ import {
   GlowButton,
   GlowBadge,
 } from '@/components/glow-ui';
-import { mockApps, mockNotifications, type Notification } from '@/lib/mock-data';
+import { mockNotifications } from '@/lib/mock-data';
+import type { Notification } from '@/types/notification';
+import { notificationService } from '@/services/notificationService';
 import {
   Bell,
   Check,
@@ -51,8 +53,34 @@ const notificationIcon = (type: Notification['type'], priority?: string) => {
 };
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<FilterOption>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadNotifications = useCallback(async () => {
+    try {
+      // Initialize with mock data if no notifications exist
+      const convertedMockNotifications = mockNotifications.map((n) => ({
+        ...n,
+        createdAt: n.timestamp.toISOString(),
+        timestamp: undefined,
+        icon: undefined,
+      })) as unknown as Notification[];
+
+      await notificationService.initializeMockNotifications(convertedMockNotifications);
+
+      const data = await notificationService.getNotifications();
+      setNotifications(data);
+    } catch (err) {
+      setError('Failed to load notifications');
+      console.error(err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const filteredNotifications = useMemo(() => {
     return notifications.filter((notification) => {
@@ -62,22 +90,104 @@ export default function NotificationsPage() {
     });
   }, [notifications, filter]);
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.read).length,
+    [notifications]
+  );
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)));
+  const readCount = useMemo(
+    () => notifications.filter((notification) => notification.read).length,
+    [notifications]
+  );
+
+  const markAsRead = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await notificationService.markAsRead(id);
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      setError('Failed to mark as read');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
+  const markAllAsRead = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await notificationService.markAllAsRead();
+      // Update local state
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      setError('Failed to mark all as read');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  const deleteNotification = async (id: string) => {
+    const notification = notifications.find((n) => n.id === id);
+    if (!notification) return;
+
+    // Confirm before deleting
+    if (
+      !confirm(
+        `Delete notification "${notification.title}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await notificationService.deleteNotification(id);
+      // Update local state
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      setError('Failed to delete notification');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const clearAll = () => {
-    setNotifications([]);
+  const deleteAllRead = async () => {
+    if (readCount === 0) {
+      return;
+    }
+
+    if (
+      !confirm(
+        `Delete ${readCount} read notification(s)? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await notificationService.deleteAllRead();
+      // Update local state
+      setNotifications((prev) => prev.filter((n) => !n.read));
+    } catch (err) {
+      setError('Failed to delete read notifications');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -92,48 +202,76 @@ export default function NotificationsPage() {
                         : 'You are all caught up!'}
                     </Text>
                   </Stack>
+                  {error && (
+                    <div className="bg-vision-red-50 border border-vision-red-600 text-vision-red-700 px-4 py-3 rounded">
+                      {error}
+                    </div>
+                  )}
                   <Group spacing="md">
-                    <GlowButton variant="outline" leftIcon={<CheckCheck size={16} />} onClick={markAllAsRead} disabled={unreadCount === 0}>
+                    <GlowButton
+                      variant="outline"
+                      leftIcon={<CheckCheck size={16} />}
+                      onClick={markAllAsRead}
+                      disabled={isLoading || unreadCount === 0}
+                      aria-label="Mark all notifications as read"
+                    >
                       Mark all read
                     </GlowButton>
-                    <GlowButton variant="ghost" leftIcon={<Trash size={16} />} onClick={clearAll} disabled={notifications.length === 0}>
-                      Clear all
+                    <GlowButton
+                      variant="ghost"
+                      leftIcon={<Trash size={16} />}
+                      onClick={deleteAllRead}
+                      disabled={isLoading || readCount === 0}
+                      aria-label="Delete all read notifications"
+                    >
+                      Delete Read
                     </GlowButton>
                   </Group>
                 </Stack>
 
                 <GlowCard variant="flat">
                   <GlowCardContent>
-                    <Group spacing="md">
-                      {(['all', 'unread', 'read'] as FilterOption[]).map((option) => (
-                        <GlowButton
-                          key={option}
-                          variant={filter === option ? 'default' : 'ghost'}
-                          size="sm"
-                          className="border border-border"
-                          onClick={() => setFilter(option)}
-                        >
-                          {filterLabels[option]}{' '}
-                          <span className="ml-1 text-xs text-muted-foreground">
-                            {option === 'all' && notifications.length}
-                            {option === 'unread' && unreadCount}
-                            {option === 'read' && notifications.length - unreadCount}
-                          </span>
-                        </GlowButton>
-                      ))}
-                    </Group>
+                    <div role="tablist" aria-label="Notification filters">
+                      <Group spacing="md">
+                        {(['all', 'unread', 'read'] as FilterOption[]).map((option) => (
+                          <GlowButton
+                            key={option}
+                            role="tab"
+                            aria-selected={filter === option}
+                            aria-controls="notifications-list"
+                            variant={filter === option ? 'default' : 'ghost'}
+                            size="sm"
+                            className="border border-border"
+                            onClick={() => setFilter(option)}
+                          >
+                            {filterLabels[option]}{' '}
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              {option === 'all' && notifications.length}
+                              {option === 'unread' && unreadCount}
+                              {option === 'read' && notifications.length - unreadCount}
+                            </span>
+                          </GlowButton>
+                        ))}
+                      </Group>
+                    </div>
                   </GlowCardContent>
                 </GlowCard>
 
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                  {error}
+                  {isLoading && 'Processing...'}
+                </div>
+
                 <GlowCard variant="elevated">
                   <GlowCardContent>
-                    {filteredNotifications.length > 0 ? (
-                      <Stack spacing="lg">
+                    <div id="notifications-list" role="tabpanel">
+                      {filteredNotifications.length > 0 ? (
+                        <Stack spacing="lg">
                         {filteredNotifications.map((notification) => (
                           <GlowCard
                             key={notification.id}
                             variant="flat"
-                            className={notification.read ? '' : 'bg-blue-50/50'}
+                            className={notification.read ? '' : 'bg-vision-blue-50'}
                           >
                             <Stack spacing="md">
                               <Group justify="between" align="start">
@@ -145,7 +283,10 @@ export default function NotificationsPage() {
                                     <Group spacing="xs" align="center">
                                       <Title level={5}>{notification.title}</Title>
                                       {!notification.read && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                        <span className="inline-flex items-center">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                          <span className="sr-only">unread notification</span>
+                                        </span>
                                       )}
                                       {notification.priority === 'high' && (
                                         <GlowBadge variant="destructive" size="sm">
@@ -161,7 +302,7 @@ export default function NotificationsPage() {
                                         {notification.type}
                                       </GlowBadge>
                                       <Text size="xs" color="tertiary">
-                                        {new Date(notification.timestamp).toLocaleString()}
+                                        {new Date(notification.createdAt).toLocaleString()}
                                       </Text>
                                     </Group>
                                   </Stack>
@@ -173,6 +314,8 @@ export default function NotificationsPage() {
                                       size="sm"
                                       leftIcon={<Check size={16} />}
                                       onClick={() => markAsRead(notification.id)}
+                                      disabled={isLoading}
+                                      aria-label={`Mark "${notification.title}" as read`}
                                     >
                                       Mark read
                                     </GlowButton>
@@ -182,6 +325,8 @@ export default function NotificationsPage() {
                                     size="sm"
                                     leftIcon={<Trash size={16} />}
                                     onClick={() => deleteNotification(notification.id)}
+                                    disabled={isLoading}
+                                    aria-label={`Delete "${notification.title}" notification`}
                                   >
                                     Delete
                                   </GlowButton>
@@ -193,10 +338,9 @@ export default function NotificationsPage() {
                                   size="sm"
                                   rightIcon={<ArrowRight size={16} />}
                                   onClick={() => {
-                                    if (notification.actionUrl) {
-                                      window.location.href = notification.actionUrl;
-                                    }
+                                    window.location.href = notification.actionUrl!;
                                   }}
+                                  aria-label={`${notification.actionLabel} for ${notification.title}`}
                                 >
                                   {notification.actionLabel}
                                 </GlowButton>
@@ -204,24 +348,25 @@ export default function NotificationsPage() {
                             </Stack>
                           </GlowCard>
                         ))}
-                      </Stack>
-                    ) : (
-                      <Stack spacing="md" align="center" className="py-12">
-                        <AlertCircle size={64} className="text-muted-foreground" />
-                        <Text size="sm" color="secondary">
-                          {filter === 'unread'
-                            ? 'No unread notifications'
-                            : filter === 'read'
-                              ? 'No read notifications'
-                              : 'No notifications yet'}
-                        </Text>
-                        <Text size="xs" color="tertiary">
-                          You&apos;ll see notifications here when something important happens.
-                        </Text>
-                      </Stack>
-                    )}
+                        </Stack>
+                      ) : (
+                        <Stack spacing="md" align="center" className="py-12">
+                          <AlertCircle size={64} className="text-muted-foreground" />
+                          <Text size="sm" color="secondary">
+                            {filter === 'unread'
+                              ? 'No unread notifications'
+                              : filter === 'read'
+                                ? 'No read notifications'
+                                : 'No notifications yet'}
+                          </Text>
+                          <Text size="xs" color="tertiary">
+                            You&apos;ll see notifications here when something important happens.
+                          </Text>
+                        </Stack>
+                      )}
+                    </div>
                   </GlowCardContent>
-        </GlowCard>
+                </GlowCard>
       </Stack>
     </Container>
   );

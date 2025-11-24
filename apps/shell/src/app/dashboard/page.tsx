@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Stack } from '@/components/glow-ui';
 
 // Hero & Metrics
 import { HeroWelcome } from '@/components/dashboard/HeroWelcome';
@@ -62,72 +61,84 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <Stack spacing="xl">
-        {/* Hero Section */}
-        <HeroWelcome
-          user={currentUser}
-          organization={currentOrg}
-          onAskVisionAI={handleAskVisionAI}
-        />
-
-        {/* Key Metrics Row - 4 Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpis.map((kpi) => (
-            <DashboardStatCard
-              key={kpi.id}
-              id={kpi.id}
-              label={kpi.label}
-              value={kpi.value}
-              sublabel={kpi.sublabel}
-              semantic={kpi.semantic}
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-6 py-8 pb-16">
+        <div className="flex flex-col gap-8">
+          {/* Hero Section */}
+          <section className="w-full">
+            <HeroWelcome
+              user={currentUser}
+              organization={currentOrg}
+              onAskVisionAI={handleAskVisionAI}
             />
-          ))}
-        </div>
+          </section>
 
-        {/* Primary Column (8 cols) + Sidebar (4 cols) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Primary Column - Left (8 cols) */}
-          <div className="lg:col-span-8 space-y-6">
-            <TaskListCard tasks={tasksToday} />
-            <DeadlinesCard deadlines={upcomingDeadlines} />
-            <ApprovalsCard approvals={approvals} />
-          </div>
+          {/* Key Metrics Row - 4 Stat Cards */}
+          <section className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {kpis.map((kpi) => (
+                <DashboardStatCard
+                  key={kpi.id}
+                  id={kpi.id}
+                  label={kpi.label}
+                  value={kpi.value}
+                  sublabel={kpi.sublabel}
+                  semantic={kpi.semantic}
+                />
+              ))}
+            </div>
+          </section>
 
-          {/* Sidebar Column - Right (4 cols) */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Recent Apps */}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Recent apps
-              </h3>
-              <div className="space-y-4">
-                {recentApps.map((activity) => (
-                  <MiniAppCard
-                    key={activity.appId}
-                    activity={activity}
-                    onLaunch={handleLaunchApp}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                ))}
+          {/* Primary Column (8 cols) + Sidebar (4 cols) */}
+          <section className="w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Primary Column - Left (8 cols) */}
+              <div className="lg:col-span-8 flex flex-col gap-6">
+                <TaskListCard tasks={tasksToday} />
+                <DeadlinesCard deadlines={upcomingDeadlines} />
+                <ApprovalsCard approvals={approvals} />
+              </div>
+
+              {/* Sidebar Column - Right (4 cols) */}
+              <div className="lg:col-span-4 flex flex-col gap-6">
+                {/* Recent Apps */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Recent apps
+                  </h3>
+                  <div className="flex flex-col gap-4">
+                    {recentApps.map((activity) => (
+                      <MiniAppCard
+                        key={activity.appId}
+                        activity={activity}
+                        onLaunch={handleLaunchApp}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Transformation Snapshot */}
+                <TransformationSnapshotCard areas={transformationSnapshot} />
               </div>
             </div>
+          </section>
 
-            {/* Transformation Snapshot */}
-            <TransformationSnapshotCard areas={transformationSnapshot} />
-          </div>
+          {/* Recent Documents & Drafts - Full Width */}
+          <section className="w-full">
+            <RecentDocumentsCard documents={recentDocuments} />
+          </section>
+
+          {/* App Catalog Banner - Full Width */}
+          <section className="w-full">
+            <CatalogBanner
+              totalApps={Object.keys(appMetadata).length}
+              onOpenCatalog={handleOpenCatalog}
+              onLearnMore={handleLearnMore}
+            />
+          </section>
         </div>
-
-        {/* Recent Documents & Drafts - Full Width */}
-        <RecentDocumentsCard documents={recentDocuments} />
-
-        {/* App Catalog Banner - Full Width */}
-        <CatalogBanner
-          totalApps={Object.keys(appMetadata).length}
-          onOpenCatalog={handleOpenCatalog}
-          onLearnMore={handleLearnMore}
-        />
-      </Stack>
+      </div>
     </div>
   );
 }

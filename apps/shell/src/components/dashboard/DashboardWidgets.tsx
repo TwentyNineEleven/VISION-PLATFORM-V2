@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShoppingCart, Users, TrendingUp, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlowButton } from '@/components/glow-ui';
 
 interface MetricWidgetProps {
   title: string;
@@ -25,16 +26,22 @@ function MetricWidget({ title, value, icon, trend, chart, className }: MetricWid
       )}
     >
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded-md flex items-center justify-center shrink-0 text-gray-600">
             {icon}
           </div>
           <p className="text-sm font-medium text-gray-600 truncate">{title}</p>
         </div>
-        <button className="p-2 rounded-md hover:bg-gray-100 text-gray-500 shrink-0">
+        <GlowButton
+          variant="ghost"
+          size="icon"
+          glow="none"
+          className="text-gray-500 hover:text-gray-700"
+          aria-label="More metrics"
+        >
           <MoreVertical className="w-4 h-4" />
-        </button>
+        </GlowButton>
       </div>
 
       {/* Value and Trend */}

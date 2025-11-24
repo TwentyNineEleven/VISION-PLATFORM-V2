@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, Stack, Text } from '@/components/glow-ui';
 import { type TransformationArea } from '@/lib/dashboard/mockDashboardData';
-import { phaseLabels, phaseColorMap, phaseSoftColorMap } from '@/lib/phase-colors';
+import { phaseLabels, getPhaseTokenClasses } from '@/lib/phase-colors';
 import type { Phase } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
 
 export interface TransformationSnapshotCardProps {
   areas: TransformationArea[];
@@ -21,18 +22,18 @@ const phaseDescriptions: Record<Phase, string> = {
 };
 
 function TransformationRow({ area }: { area: TransformationArea }) {
-  const phaseColor = phaseColorMap[area.phase];
-  const phaseSoftColor = phaseSoftColorMap[area.phase];
   const label = phaseLabels[area.phase];
   const description = phaseDescriptions[area.phase];
+
+  // Use Bold Color System tokens via getPhaseTokenClasses
+  const phaseClasses = getPhaseTokenClasses(area.phase);
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-lg border border-border/50 bg-card/50 px-4 py-3 transition hover:border-border hover:shadow-sm">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <div
-            className="h-2 w-2 rounded-full flex-shrink-0"
-            style={{ backgroundColor: phaseColor }}
+            className={cn('h-2 w-2 rounded-full flex-shrink-0', phaseClasses.iconText)}
           />
           <Text size="sm" weight="medium" className="truncate">
             {label}
@@ -46,11 +47,11 @@ function TransformationRow({ area }: { area: TransformationArea }) {
         <GlowBadge
           variant="outline"
           size="sm"
-          className="border-transparent text-[10px] font-semibold"
-          style={{
-            backgroundColor: phaseSoftColor,
-            color: phaseColor,
-          }}
+          className={cn(
+            'border-transparent text-[10px] font-semibold',
+            phaseClasses.badgeBackground,
+            phaseClasses.badgeText
+          )}
         >
           {area.activeApps} app{area.activeApps !== 1 ? 's' : ''}
         </GlowBadge>

@@ -10,8 +10,8 @@ import {
   ArrowUpDown,
 } from 'lucide-react';
 import { APP_MODULES, APP_CATEGORIES, type AppModuleKey, type AppCategory as RegistryCategory } from '@/lib/vision-apps';
-import { moduleColors, moduleSoftColors } from '@/lib/vision-theme';
 import { moduleShortLabel } from '@/lib/module-utils';
+import { getPhaseTokenClasses, type Phase } from '@/lib/phase-colors';
 import { AppCard } from '@/components/AppCard';
 import { mapAppToCardProps } from '@/lib/app-card';
 
@@ -217,8 +217,13 @@ export function AppLauncher({
           {moduleFilters.map((module) => {
             const isActive = selectedModule === module.key;
             const isAll = module.key === 'all';
-            const color = isAll ? '#2D2D2D' : moduleColors[module.key as AppModuleKey];
-            const soft = isAll ? 'rgba(0,0,0,0.05)' : moduleSoftColors[module.key as AppModuleKey];
+
+            // Use Bold Color System tokens via getPhaseTokenClasses
+            // Map module key (lowercase) to Phase (uppercase)
+            const phaseClasses = !isAll
+              ? getPhaseTokenClasses(module.key.toUpperCase() as Phase)
+              : { badgeBackground: 'bg-vision-gray-50', badgeText: 'text-vision-gray-950', iconText: 'text-vision-gray-950' };
+
             return (
               <button
                 key={module.key}
@@ -228,16 +233,19 @@ export function AppLauncher({
                 }}
                 className={cn(
                   'relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all',
-                  isActive ? 'shadow-ambient-card-hover' : 'border border-border bg-card hover:border-muted-foreground/40'
+                  isActive
+                    ? cn('shadow-ambient-card-hover', phaseClasses.badgeBackground, phaseClasses.badgeText)
+                    : 'border border-border bg-card hover:border-muted-foreground/40'
                 )}
-                style={isActive ? { backgroundColor: soft, color } : undefined}
               >
                 <span>{module.label}</span>
                 <span className="text-xs text-muted-foreground">({module.count})</span>
-                {!isAll && (
+                {!isAll && isActive && (
                   <span
-                    className="absolute inset-x-4 -bottom-1 h-0.5 rounded-full"
-                    style={{ backgroundColor: color, opacity: 0.75 }}
+                    className={cn(
+                      'absolute inset-x-4 -bottom-1 h-0.5 rounded-full opacity-75',
+                      phaseClasses.iconText.replace('text-', 'bg-')
+                    )}
                   />
                 )}
               </button>

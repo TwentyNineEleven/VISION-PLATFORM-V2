@@ -9,9 +9,7 @@ import {
   GlowCardDescription,
 } from '@/components/glow-ui/GlowCard';
 import { GlowInput, GlowButton, GlowBadge, GlowSelect } from '@/components/glow-ui';
-import { mockTeamMembers, mockPendingInvites } from '@/lib/mock-data';
-import { teamService } from '@/services/teamService';
-import type { TeamMember, PendingInvite, TeamRole } from '@/types/team';
+import { mockTeamMembers, mockPendingInvites, TeamRole } from '@/lib/mock-data';
 import { PermissionsMatrix } from '@/components/settings/PermissionsMatrix';
 import { ConfirmDialog } from '@/components/settings/ConfirmDialog';
 import { Plus, Send, Users, Clock3, RefreshCcw } from 'lucide-react';
@@ -160,19 +158,24 @@ export default function TeamSettingsPage() {
                 leftIcon={<Users className="h-4 w-4" />}
                 disabled={isLoading}
               />
-              <GlowSelect
-                label="Role"
-                value={inviteForm.role}
-                onChange={(e) => setInviteForm((prev) => ({ ...prev, role: e.target.value as TeamRole }))}
-                disabled={isLoading}
-              >
-                {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </GlowSelect>
-              <GlowButton type="submit" leftIcon={<Send className="h-4 w-4" />} disabled={isLoading || !inviteForm.email}>
+              <div className="space-y-2">
+                <GlowSelect
+                  label="Role"
+                  name="invite-role"
+                  data-testid="invite-role-select"
+                  value={inviteForm.role}
+                  onChange={(e) => setInviteForm((prev) => ({ ...prev, role: e.target.value as TeamRole }))}
+                  className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                  data-glow-select="true"
+                >
+                  {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </GlowSelect>
+              </div>
+              <GlowButton type="submit" leftIcon={<Send className="h-4 w-4" />}>
                 Send invite
               </GlowButton>
             </Grid>
@@ -278,10 +281,17 @@ export default function TeamSettingsPage() {
                     {member.role}
                   </GlowBadge>
                   <GlowSelect
+                    aria-label={`${member.name} role`}
+                    name={`member-role-${member.id}`}
+                    data-testid={`member-role-${member.id}`}
                     value={member.role}
-                    onChange={(e) => handleUpdateRole(member.id, e.target.value as TeamRole)}
-                    controlSize="sm"
-                    disabled={isLoading}
+                    onChange={(e) =>
+                      setMembers((prev) =>
+                        prev.map((m) => (m.id === member.id ? { ...m, role: e.target.value as TeamRole } : m))
+                      )
+                    }
+                    className="h-9 rounded-md border border-input bg-transparent px-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                    data-glow-select="true"
                   >
                     {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
                       <option key={role} value={role}>

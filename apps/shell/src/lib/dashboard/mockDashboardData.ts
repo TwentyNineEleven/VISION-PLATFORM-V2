@@ -64,6 +64,16 @@ export interface AppActivity {
   note?: string;
 }
 
+export interface AppItem {
+  id: string;
+  name: string;
+  description: string;
+  href: string;
+  lastUsed?: string;
+  pinnedBy?: 'user' | 'funder';
+  note?: string;
+}
+
 export interface RecommendedApp {
   appId: string;
   description: string;

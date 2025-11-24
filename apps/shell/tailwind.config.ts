@@ -1,10 +1,35 @@
 import type { Config } from 'tailwindcss';
 
-const config: Config = {
+const config = {
   darkMode: 'class',
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     '../../packages/ui/src/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  // @ts-expect-error - safelist is supported in Tailwind but not in v4 alpha types yet
+  safelist: [
+    // Bold Color System - Phase Colors (used by getPhaseTokenClasses())
+    // Background colors
+    'bg-vision-green-50', 'bg-vision-green-500', 'bg-vision-green-600', 'bg-vision-green-700',
+    'bg-vision-orange-50', 'bg-vision-orange-800', 'bg-vision-orange-900',
+    'bg-vision-blue-50', 'bg-vision-blue-700', 'bg-vision-blue-950',
+    'bg-vision-purple-50', 'bg-vision-purple-600', 'bg-vision-purple-700', 'bg-vision-purple-900',
+    'bg-vision-gray-50', 'bg-vision-gray-100', 'bg-vision-gray-700', 'bg-vision-gray-950',
+    'bg-vision-red-50', 'bg-vision-red-900',
+
+    // Text colors
+    'text-vision-green-500', 'text-vision-green-600', 'text-vision-green-700', 'text-vision-green-900',
+    'text-vision-orange-900',
+    'text-vision-blue-700', 'text-vision-blue-950',
+    'text-vision-purple-600', 'text-vision-purple-700', 'text-vision-purple-900',
+    'text-vision-gray-0', 'text-vision-gray-700', 'text-vision-gray-950',
+    'text-vision-red-700', 'text-vision-red-900',
+
+    // Hover colors
+    'hover:bg-vision-green-700',
+    'hover:bg-vision-orange-800',
+    'hover:bg-vision-blue-700', 'hover:bg-vision-blue-950',
+    'hover:bg-vision-purple-700', 'hover:bg-vision-purple-900',
   ],
   theme: {
     container: {
@@ -184,6 +209,6 @@ const config: Config = {
     },
   },
   plugins: [require('tailwindcss-animate')],
-};
+} satisfies Config;
 
 export default config;

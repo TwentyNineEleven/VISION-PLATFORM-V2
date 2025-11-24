@@ -2,6 +2,7 @@
 
 import { User } from 'lucide-react';
 import Image from 'next/image';
+import { GlowButton } from '@/components/glow-ui';
 
 interface UserMenuProps {
   user: {
@@ -14,7 +15,10 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   return (
-    <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+    <GlowButton
+      variant="ghost"
+      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+    >
       {user.avatar ? (
         <Image
           src={user.avatar}
@@ -32,6 +36,6 @@ export function UserMenu({ user }: UserMenuProps) {
         <p className="text-sm font-medium text-gray-900">{user.name}</p>
         <p className="text-xs text-gray-500">{user.role}</p>
       </div>
-    </button>
+    </GlowButton>
   );
 }

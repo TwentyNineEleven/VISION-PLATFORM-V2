@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { GlowCard, GlowCardContent } from '@/components/glow-ui/GlowCard';
 import { MoreVertical, TrendingUp } from 'lucide-react';
+import { GlowButton } from '@/components/glow-ui';
 import { SimpleBarChart } from './SimpleBarChart';
 import { cn } from '@/lib/utils';
 
@@ -44,9 +45,15 @@ export function MetricWidget({
               </div>
             </div>
           </div>
-          <button className="p-2 rounded-md hover:bg-accent transition-colors">
-            <MoreVertical className="w-4 h-4 text-foreground" />
-          </button>
+          <GlowButton
+            variant="ghost"
+            size="icon"
+            glow="none"
+            className="text-foreground hover:text-foreground transition-colors"
+            aria-label="More options"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </GlowButton>
         </div>
         <div className="flex gap-0.5 items-end overflow-hidden w-full">
           <div className="flex flex-1 gap-0.5 items-end min-w-0">
@@ -95,4 +102,3 @@ export function MetricWidget({
     </GlowCard>
   );
 }
-
