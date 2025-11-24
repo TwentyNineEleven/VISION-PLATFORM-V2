@@ -30,5 +30,28 @@ export default defineConfig({
     setupFiles: [shellVitestSetup],
     include: [path.resolve(shellRoot, 'src/**/*.test.{ts,tsx}')],
     isolate: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      include: [
+        'apps/shell/src/services/**/*.ts',
+        'apps/shell/src/lib/**/*.ts',
+        'apps/shell/src/utils/**/*.ts',
+        'apps/shell/src/app/api/**/*.ts',
+      ],
+      exclude: [
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        '**/types/**',
+        '**/*.d.ts',
+        '**/node_modules/**',
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 65,
+        statements: 70,
+      },
+    },
   },
 });
