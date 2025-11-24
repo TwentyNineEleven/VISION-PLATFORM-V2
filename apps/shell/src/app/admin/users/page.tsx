@@ -215,7 +215,7 @@ export default function AdminUsersPage() {
                     {roles.map((role) => (
                       <td key={role} className="px-3 py-3 text-center">
                         {row.roles[role] ? (
-                          <ShieldCheck className="mx-auto h-4 w-4 text-emerald-500" />
+                          <ShieldCheck className="mx-auto h-4 w-4 text-vision-success-600" />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}

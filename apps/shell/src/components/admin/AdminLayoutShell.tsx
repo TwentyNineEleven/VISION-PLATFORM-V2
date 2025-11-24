@@ -8,13 +8,13 @@ import { getCurrentUser } from '@/lib/session';
 import { isFunderAdmin } from '@/lib/auth';
 
 const ADMIN_NAV = [
-  { id: 'overview', label: 'Overview', href: '/dashboard/admin' },
-  { id: 'organizations', label: 'Organizations', href: '/dashboard/admin/organizations' },
-  { id: 'users', label: 'Users & Roles', href: '/dashboard/admin/users' },
-  { id: 'apps', label: 'Apps', href: '/dashboard/admin/apps' },
-  { id: 'billing', label: 'Billing', href: '/dashboard/admin/billing' },
-  { id: 'settings', label: 'Settings', href: '/dashboard/admin/settings' },
-  { id: 'cohorts', label: 'Cohorts', href: '/dashboard/admin/cohorts', requiresFunder: true },
+  { id: 'overview', label: 'Overview', href: '/admin' },
+  { id: 'organizations', label: 'Organizations', href: '/admin/organizations' },
+  { id: 'users', label: 'Users & Roles', href: '/admin/users' },
+  { id: 'apps', label: 'Apps', href: '/admin/apps' },
+  { id: 'billing', label: 'Billing', href: '/admin/billing' },
+  { id: 'settings', label: 'Settings', href: '/admin/settings' },
+  { id: 'cohorts', label: 'Cohorts', href: '/admin/cohorts', requiresFunder: true },
 ];
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
@@ -32,7 +32,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-2">
         {navItems.map((item) => {
           const isActive =
-            item.href === '/dashboard/admin' ? pathname === item.href : pathname.startsWith(item.href);
+            item.href === '/admin' ? pathname === item.href : pathname.startsWith(item.href);
           return (
             <Link
               key={item.id}
