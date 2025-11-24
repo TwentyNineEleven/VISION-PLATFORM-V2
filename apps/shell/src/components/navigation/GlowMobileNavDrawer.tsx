@@ -74,7 +74,7 @@ export function GlowMobileNavDrawer({
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#F9FAFB] transition-colors text-[#64748B] hover:text-[#1F2937]"
+            className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-lg hover:bg-vision-gray-100 transition-colors text-vision-gray-700 hover:text-foreground"
             aria-label="Close navigation"
           >
             <X className="w-5 h-5" />

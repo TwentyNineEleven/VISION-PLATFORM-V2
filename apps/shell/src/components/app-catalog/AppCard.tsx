@@ -94,22 +94,11 @@ export function AppCard({
   return (
     <div
       className={cn(
-        'group relative flex flex-col rounded-lg border bg-white p-6 transition-all',
-        'hover:shadow-md',
+        'group relative flex flex-col rounded-lg border border-border bg-card p-6 transition-all',
+        'hover:shadow-md hover:border-primary',
         isDisabled && 'opacity-60',
         className
       )}
-      style={{
-        borderColor: '#E2E8F0',
-      }}
-      onMouseEnter={(e) => {
-        if (!isDisabled) {
-          e.currentTarget.style.borderColor = phaseColor;
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '#E2E8F0';
-      }}
     >
       {/* Top Row: Phase Tag (left) + Favorite (right) */}
       <div className="mb-4 flex items-start justify-between">
@@ -129,8 +118,8 @@ export function AppCard({
           onClick={handleFavorite}
           className={cn(
             'flex items-center justify-center rounded p-1 transition-colors',
-            'hover:bg-[#F1F5F9]',
-            isFavorite && 'text-[#C2410C]'
+            'hover:bg-vision-gray-50',
+            isFavorite && 'text-vision-orange-900'
           )}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-pressed={isFavorite}
@@ -141,8 +130,8 @@ export function AppCard({
             className={cn(
               'transition-all',
               isFavorite 
-                ? `fill-[${phaseColor}] text-[${phaseColor}]` 
-                : 'text-[#64748B]'
+                ? `fill-current text-current` 
+                : 'text-vision-gray-700'
             )}
             style={isFavorite ? { fill: phaseColor, color: phaseColor } : undefined}
           />
@@ -162,17 +151,17 @@ export function AppCard({
       </div>
 
       {/* App Name (centered) */}
-      <h3 className="mb-1 text-center text-lg font-bold text-[#1F2937]">
+      <h3 className="mb-1 text-center text-lg font-bold text-foreground">
         {app.name}
       </h3>
 
       {/* Category Line (centered) */}
-      <p className="mb-3 text-center text-xs text-[#64748B]">
+      <p className="mb-3 text-center text-xs text-vision-gray-700">
         {app.category}
       </p>
 
       {/* Description (centered, 1-2 lines) */}
-      <p className="mb-4 text-center text-sm text-[#64748B] leading-relaxed line-clamp-2">
+      <p className="mb-4 text-center text-sm text-vision-gray-700 leading-relaxed line-clamp-2">
         {app.description}
       </p>
 
@@ -182,10 +171,10 @@ export function AppCard({
           <span
             className={cn(
               'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide',
-              app.status === 'beta' && 'border border-[#C2410C] text-[#C2410C] bg-[#FFEDD5]',
-              app.status === 'coming-soon' && 'border border-[#64748B] text-[#64748B] bg-[#F1F5F9]',
-              app.status === 'preview' && 'border border-[#2563EB] text-[#2563EB] bg-[#DBEAFE]',
-              app.status === 'funder-only' && 'border border-[#6D28D9] text-[#6D28D9] bg-[#EDE9FE]'
+              app.status === 'beta' && 'border border-vision-orange-900 text-vision-orange-900 bg-vision-orange-50',
+              app.status === 'coming-soon' && 'border border-vision-gray-700 text-vision-gray-700 bg-vision-gray-50',
+              app.status === 'preview' && 'border border-vision-blue-700 text-vision-blue-700 bg-vision-blue-50',
+              app.status === 'funder-only' && 'border border-vision-purple-900 text-vision-purple-900 bg-vision-purple-50'
             )}
           >
             {app.status === 'beta' && 'Beta'}
@@ -197,7 +186,7 @@ export function AppCard({
       )}
 
       {/* Action Row (bottom) */}
-      <div className="mt-auto space-y-2 pt-4 border-t border-[#E2E8F0]">
+      <div className="mt-auto space-y-2 pt-4 border-t border-border">
         {/* Launch Button - MUST match phase accent color */}
         <button
           onClick={handleLaunch}
@@ -205,11 +194,12 @@ export function AppCard({
           className={cn(
             'w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all',
             'hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50',
-            'focus:outline-none focus:ring-2 focus:ring-offset-2'
+            'focus:outline-none focus:ring-2',
+            isDisabled && 'bg-vision-gray-500'
           )}
           style={
             isDisabled
-              ? { backgroundColor: '#94A3B8' }
+              ? undefined
               : {
                   backgroundColor: phaseColor,
                   '--hover-color': phaseHoverColor,
@@ -246,7 +236,7 @@ export function AppCard({
         {onViewDetails && (
           <button
             onClick={handleViewDetails}
-            className="w-full text-center text-xs font-medium text-[#0047AB] hover:text-[#1E3A8A] transition-colors"
+            className="w-full text-center text-xs font-medium text-primary hover:opacity-90 transition-all"
           >
             View details
           </button>

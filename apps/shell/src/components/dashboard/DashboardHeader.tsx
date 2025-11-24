@@ -25,13 +25,13 @@ export function DashboardHeader() {
   const [dateFilter, setDateFilter] = React.useState('Last 30 days');
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+    <div className="bg-background border-b border-border px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
       <div className="flex flex-col gap-6">
         {/* Title and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-2xl font-medium text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-medium text-foreground">Dashboard</h1>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <GlowButton variant="ghost" size="icon" className="shadow-none text-gray-600 hover:text-gray-900">
+            <GlowButton variant="ghost" size="icon" className="shadow-none text-vision-gray-700 hover:text-foreground">
               <MoreHorizontal className="w-5 h-5" />
             </GlowButton>
             <GlowSelect
@@ -58,7 +58,7 @@ export function DashboardHeader() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 sm:gap-3 border-b border-gray-200 overflow-x-auto">
+        <div className="flex items-center gap-2 sm:gap-3 border-b border-border overflow-x-auto">
           {tabs.map((tab) => (
             <GlowButton
               key={tab.id}
@@ -68,8 +68,8 @@ export function DashboardHeader() {
               className={cn(
                 'flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium border-b-2 rounded-none',
                 selectedTab === tab.id || tab.active
-                  ? 'text-gray-900 border-blue-600'
-                  : 'text-gray-600 border-transparent hover:text-gray-900'
+                  ? 'text-foreground border-primary'
+                  : 'text-vision-gray-700 border-transparent hover:text-foreground'
               )}
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
@@ -79,7 +79,7 @@ export function DashboardHeader() {
           <GlowButton
             variant="ghost"
             size="sm"
-            className="flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium text-vision-gray-700 hover:text-foreground transition-colors"
           >
             <Plus className="w-4 h-4" />
           </GlowButton>

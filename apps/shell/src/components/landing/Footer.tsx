@@ -50,10 +50,23 @@ export function Footer() {
               </Stack>
             ))}
           </Grid>
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <Text size="sm">
-              &copy; {new Date().getFullYear()} VISION Platform. All rights reserved.
-            </Text>
+          <div className="border-t border-gray-800 pt-8">
+            <Stack spacing="md" align="center" className="text-center">
+              <Stack spacing="sm">
+                <Title level={5} className="text-white">
+                  About TwentyNine Eleven Impact Partners, LLC
+                </Title>
+                <Text size="sm" className="max-w-2xl">
+                  We build tools and provide capacity-building support that strengthens mission-driven organizations and the communities they serve.
+                </Text>
+                <Text size="sm" className="max-w-2xl">
+                  The VISION Platform is part of our commitment to sustainable, community-centered impact.
+                </Text>
+              </Stack>
+              <Text size="sm">
+                &copy; {new Date().getFullYear()} TwentyNine Eleven Impact Partners, LLC. All rights reserved.
+              </Text>
+            </Stack>
           </div>
         </Stack>
       </Container>

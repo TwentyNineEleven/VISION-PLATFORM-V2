@@ -3,39 +3,54 @@ import { Check } from 'lucide-react';
 
 const plans = [
   {
-    name: 'Starter',
-    price: '$0',
-    description: 'Perfect for small teams getting started',
-    features: ['Up to 3 apps', '5 team members', 'Basic support', '5GB storage', 'Community resources'],
-    cta: 'Start Free',
+    name: 'Individual',
+    price: 'Coming Soon',
+    description: 'For solo practitioners and consultants',
+    features: ['Full access to VISION', 'AI support', 'Unlimited exports', 'Personal workspace', 'Community support'],
+    cta: 'Join Waitlist',
     highlighted: false,
   },
   {
-    name: 'Pro',
-    price: '$249',
-    description: 'For growing organizations',
+    name: 'Organization',
+    price: 'Coming Soon',
+    description: 'For nonprofits and social enterprises',
     features: [
-      'All 21 apps',
-      'Unlimited team members',
+      'Full access to VISION',
+      'AI support',
+      'Unlimited exports',
+      'Team collaboration',
       'Priority support',
-      '100GB storage',
-      'Advanced analytics',
-      'Custom integrations',
+      'Custom branding',
     ],
-    cta: 'Start Trial',
+    cta: 'Join Waitlist',
     highlighted: true,
   },
   {
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'For large organizations and funders',
+    name: 'Consultant',
+    price: 'Coming Soon',
+    description: 'For consultants supporting multiple clients',
     features: [
-      'Everything in Pro',
+      'Full access to VISION',
+      'AI support',
+      'Unlimited exports',
+      'Multi-organization management',
+      'White-label options',
+      'Dedicated support',
+    ],
+    cta: 'Join Waitlist',
+    highlighted: false,
+  },
+  {
+    name: 'Funder Cohort',
+    price: 'Custom',
+    description: 'For foundations supporting grantee cohorts',
+    features: [
+      'Full access for all grantees',
+      'AI support',
+      'Unlimited exports',
+      'Cohort management',
+      'Aggregate reporting',
       'Dedicated account manager',
-      'Custom training',
-      'Unlimited storage',
-      'SSO & advanced security',
-      'SLA guarantees',
     ],
     cta: 'Contact Sales',
     highlighted: false,
@@ -48,13 +63,13 @@ export function Pricing() {
       <Container>
         <Stack spacing="xl">
           <Stack spacing="sm" align="center" className="text-center">
-            <Title level={2}>Simple, Transparent Pricing</Title>
+            <Title level={2}>Simple, clear pricing.</Title>
             <Text size="lg" color="secondary">
-              Choose the plan that fits your organization
+              All plans include full access to VISION, AI support, and unlimited exports.
             </Text>
           </Stack>
 
-          <Grid columns={3} gap="lg">
+          <Grid columns={2} gap="lg" className="md:grid-cols-4">
             {plans.map((plan) => (
               <GlowCard
                 key={plan.name}

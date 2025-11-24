@@ -108,7 +108,7 @@ export function AppLauncherModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/50 transition-opacity"
+        className="fixed inset-0 z-50 bg-black opacity-50 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -116,15 +116,15 @@ export function AppLauncherModal({
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 sm:p-8">
         <div
-          className="w-full max-w-4xl rounded-lg border border-[#E2E8F0] bg-white shadow-2xl"
+          className="w-full max-w-4xl rounded-lg border border-border bg-card shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#E2E8F0] px-6 py-4">
-            <h2 className="text-lg font-semibold text-[#1F2937]">App Launcher</h2>
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <h2 className="text-lg font-semibold text-foreground">App Launcher</h2>
             <button
               onClick={onClose}
-              className="flex items-center justify-center rounded-lg p-2 text-[#64748B] transition-colors hover:bg-[#F1F5F9]"
+              className="flex items-center justify-center rounded-lg p-2 text-vision-gray-700 transition-colors hover:bg-vision-gray-50"
               aria-label="Close launcher"
             >
               <X size={20} />
@@ -136,17 +136,17 @@ export function AppLauncherModal({
             {/* 1. Search Bar */}
             <div className="mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search apps…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-[#CBD5E1] bg-white px-10 py-3 text-base text-[#1F2937] placeholder:text-[#94A3B8] focus:border-[#0047AB] focus:outline-none focus:ring-2 focus:ring-[#0047AB]/20"
+                  className="w-full rounded-lg border border-input bg-background px-10 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <kbd className="rounded border border-[#CBD5E1] bg-[#F1F5F9] px-2 py-1 text-xs text-[#64748B]">
+                  <kbd className="rounded border border-input bg-vision-gray-50 px-2 py-1 text-xs text-vision-gray-700">
                     ⌘K
                   </kbd>
                 </div>
@@ -156,13 +156,13 @@ export function AppLauncherModal({
             {/* 2. Pinned Apps (Favorites) */}
             {favoriteApps.length > 0 && !searchQuery && (
               <div className="mb-6">
-                <h3 className="mb-3 text-sm font-semibold text-[#1F2937]">Pinned</h3>
+                <h3 className="mb-3 text-sm font-semibold text-foreground">Pinned</h3>
                 <div className="flex flex-wrap gap-2">
                   {favoriteApps.map((app) => (
                     <button
                       key={app.id}
                       onClick={() => handleLaunch(app)}
-                      className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-medium text-[#1F2937] transition-all hover:border-[#0047AB] hover:bg-[#F1F5F9]"
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-all hover:border-primary hover:bg-vision-gray-50"
                     >
                       <AppIcon app={app} size="sm" showBackground={false} className="h-8 w-8 shrink-0" />
                       <span>{app.name}</span>
@@ -175,7 +175,7 @@ export function AppLauncherModal({
             {/* 3. Recently Used Apps */}
             {recentlyUsedApps.length > 0 && !searchQuery && (
               <div className="mb-6">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Clock size={16} />
                   Recently Used
                 </h3>
@@ -184,16 +184,16 @@ export function AppLauncherModal({
                     <button
                       key={app.id}
                       onClick={() => handleLaunch(app)}
-                      className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-white p-3 text-left transition-all hover:border-[#0047AB] hover:bg-[#F1F5F9]"
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary hover:bg-vision-gray-50"
                     >
                       <AppIcon app={app} size="sm" showBackground={false} className="h-8 w-8 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-[#1F2937] truncate">
+                        <div className="text-sm font-medium text-foreground truncate">
                           {app.name}
                         </div>
                         <div
                           className="text-xs font-semibold uppercase tracking-wide"
-                          style={{ color: app.phase ? getPhaseColor(app.phase) : '#0047AB' }}
+                          style={{ color: app.phase ? getPhaseColor(app.phase) : undefined }}
                         >
                           {app.transformationArea || app.phase || ''}
                         </div>
@@ -206,7 +206,7 @@ export function AppLauncherModal({
 
             {/* 4. All Apps (Compact Grid/List) */}
             <div>
-              <h3 className="mb-3 text-sm font-semibold text-[#1F2937]">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">
                 {searchQuery ? 'Search Results' : 'All Apps'}
               </h3>
               {filteredApps.length > 0 ? (
@@ -217,29 +217,29 @@ export function AppLauncherModal({
                       <button
                         key={app.id}
                         onClick={() => handleLaunch(app)}
-                        className="group flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-white p-3 text-left transition-all hover:border-[#0047AB] hover:bg-[#F1F5F9]"
+                        className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary hover:bg-vision-gray-50"
                       >
                         <AppIcon app={app} size="md" className="h-10 w-10" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#1F2937] truncate">
+                            <span className="text-sm font-medium text-foreground truncate">
                               {app.name}
                             </span>
                             {isFavorite && (
                               <Star
                                 size={14}
-                                className="flex-shrink-0 fill-[#C2410C] text-[#C2410C]"
+                                className="flex-shrink-0 fill-vision-orange-900 text-vision-orange-900"
                               />
                             )}
                           </div>
                           <div
                             className="text-xs font-semibold uppercase tracking-wide"
-                            style={{ color: app.phase ? getPhaseColor(app.phase) : '#0047AB' }}
+                            style={{ color: app.phase ? getPhaseColor(app.phase) : undefined }}
                           >
                             {app.transformationArea || app.phase || ''}
                           </div>
                         </div>
-                        <span className="text-xs font-medium text-[#0047AB] opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
                           Open →
                         </span>
                       </button>
@@ -248,7 +248,7 @@ export function AppLauncherModal({
                 </div>
               ) : (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-[#64748B]">No apps found</p>
+                  <p className="text-sm text-muted-foreground">No apps found</p>
                 </div>
               )}
             </div>

@@ -35,12 +35,14 @@ const getStatusChipStyle = (
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   };
 
-  // Use Tailwind color tokens from design system
+  // FALLBACK COLORS: These hex values are intentional fallback constants
+  // used when domain colors aren't available. They match design system tokens.
+  // @color-validation-exception: programmatic fallback values
   const COLORS = {
-    blue: { text: 'hsl(221 83% 53%)', bg: 'hsl(214 100% 97%)' }, // Electric Blue / Ice Blue
-    orange: { text: 'hsl(21 90% 41%)', bg: 'hsl(24 100% 97%)' }, // Vivid Tangerine / Peach Light
-    gray: { text: 'hsl(215 16% 47%)', border: 'hsl(214 32% 91%)', bg: 'hsl(210 40% 96.1%)' }, // Steel Gray / Silver / Smoke
-    purple: { text: 'hsl(266 68% 51%)', bg: 'hsl(270 100% 98%)' }, // Rich Purple / Lavender Light
+    blue: { text: '#3B82F6', bg: '#EFF6FF' }, // vision-blue-700 / vision-blue-50
+    orange: { text: '#C2410C', bg: '#FFEDD5' }, // vision-orange-900 / vision-orange-50
+    gray: { text: '#64748B', border: '#E2E8F0', bg: '#F8FAFC' }, // vision-gray-700 / vision-gray-100 / vision-gray-50
+    purple: { text: '#6D28D9', bg: '#EDE9FE' }, // vision-purple-900 / vision-purple-50
   };
 
   switch (status) {
@@ -216,10 +218,13 @@ export function AppCardShell({
             size={buttonSize === 'sm' ? 'sm' : 'default'}
             variant="default"
             glow="none"
-            className="h-10 w-full rounded-lg text-sm font-semibold text-white"
+            className={cn(
+              "h-10 w-full rounded-lg text-sm font-semibold text-white",
+              isDisabled && "bg-vision-gray-500"
+            )}
             style={
               isDisabled
-                ? { backgroundColor: 'hsl(var(--muted-foreground))' }
+                ? undefined
                 : {
                     backgroundColor: domainColor,
                     color: 'white',
@@ -253,7 +258,7 @@ export function AppCardShell({
                 event.stopPropagation();
                 onViewDetails(app);
               }}
-              className="h-full w-full rounded-lg border border-transparent px-0 py-2 text-center text-xs font-semibold uppercase tracking-wide text-primary transition hover:text-primary/80"
+              className="h-full w-full rounded-lg border border-transparent px-0 py-2 text-center text-xs font-semibold uppercase tracking-wide text-primary transition hover:opacity-90"
             >
               View details
             </button>

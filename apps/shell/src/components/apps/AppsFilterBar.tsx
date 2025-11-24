@@ -196,7 +196,7 @@ export function AppsFilterBar({
             {activeFilterCount > 0 && (
               <button
                 onClick={clearAllFilters}
-                className="flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                className="flex items-center gap-1.5 text-sm font-medium text-primary transition-all hover:opacity-90"
               >
                 <X size={16} />
                 Reset
@@ -273,4 +273,3 @@ export function AppsFilterBar({
     </div>
   );
 }
-

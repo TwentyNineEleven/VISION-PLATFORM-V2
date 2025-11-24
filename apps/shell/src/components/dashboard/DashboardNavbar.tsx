@@ -105,22 +105,22 @@ export function DashboardNavbar({ onAppSwitcherClick }: DashboardNavbarProps) {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className="bg-white border-b border-gray-200 h-18 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+    <nav className="bg-background border-b border-border h-18 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
       {/* Left: Breadcrumbs */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={index}>
               {index > 0 && (
-                <ChevronRight className="w-3 h-3 text-gray-400 shrink-0" />
+                <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
               )}
               <Link
                 href={crumb.href as any}
                 className={cn(
                   'text-sm font-medium transition-colors',
                   index === breadcrumbs.length - 1
-                    ? 'text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-foreground'
+                    : 'text-vision-gray-700 hover:text-foreground'
                 )}
               >
                 {crumb.label}
@@ -138,7 +138,7 @@ export function DashboardNavbar({ onAppSwitcherClick }: DashboardNavbarProps) {
             <button
               type="button"
               onClick={openSearch}
-              className="hidden lg:flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="hidden lg:flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary hover:bg-vision-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <SearchIcon className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Search...</span>
@@ -155,11 +155,11 @@ export function DashboardNavbar({ onAppSwitcherClick }: DashboardNavbarProps) {
           {/* App Switcher Button */}
           <button
             onClick={onAppSwitcherClick}
-            className="p-2.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors relative group"
+            className="p-2.5 rounded-full hover:bg-vision-gray-100 text-vision-gray-700 transition-colors relative group"
           title="Open app switcher (Cmd+K)"
           >
             <Grid3x3 className="w-5 h-5" />
-            <div className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-gray-800 text-white rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-vision-gray-950 text-primary-foreground rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
               <Command className="w-2.5 h-2.5" />
               <span>K</span>
             </div>

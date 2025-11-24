@@ -6,7 +6,6 @@ const config = {
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     '../../packages/ui/src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  // @ts-expect-error - safelist is supported in Tailwind but not in v4 alpha types yet
   safelist: [
     // Bold Color System - Phase Colors (used by getPhaseTokenClasses())
     // Background colors

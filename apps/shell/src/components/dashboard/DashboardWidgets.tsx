@@ -21,23 +21,23 @@ function MetricWidget({ title, value, icon, trend, chart, className }: MetricWid
   return (
     <div
       className={cn(
-        'bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4',
+        'bg-card border border-border rounded-xl p-5 flex flex-col gap-4',
         className
       )}
     >
       {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded-md flex items-center justify-center shrink-0 text-gray-600">
+          <div className="w-10 h-10 bg-vision-gray-100 border border-border rounded-md flex items-center justify-center shrink-0 text-vision-gray-700">
             {icon}
           </div>
-          <p className="text-sm font-medium text-gray-600 truncate">{title}</p>
+          <p className="text-sm font-medium text-vision-gray-700 truncate">{title}</p>
         </div>
         <GlowButton
           variant="ghost"
           size="icon"
           glow="none"
-          className="text-gray-500 hover:text-gray-700"
+          className="text-muted-foreground hover:text-vision-gray-700"
           aria-label="More metrics"
         >
           <MoreVertical className="w-4 h-4" />
@@ -47,14 +47,14 @@ function MetricWidget({ title, value, icon, trend, chart, className }: MetricWid
       {/* Value and Trend */}
       <div className="flex items-end gap-2">
         <div className="flex items-end gap-1 flex-1 min-w-0">
-          <span className="text-4xl font-normal text-gray-900 leading-none">{value}</span>
+          <span className="text-4xl font-normal text-foreground leading-none">{value}</span>
           {trend && (
             <div
               className={cn(
                 'flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-medium',
                 trend.isPositive
-                  ? 'border-green-200 text-green-700 bg-green-50'
-                  : 'border-red-200 text-red-700 bg-red-50'
+                  ? 'border-vision-green-100 text-vision-green-700 bg-vision-green-50'
+                  : 'border-vision-red-100 text-vision-red-700 bg-vision-red-50'
               )}
             >
               <TrendingUp
@@ -86,7 +86,7 @@ function MiniLineChart() {
           .map((y, i) => `${(i / (normalized.length - 1)) * 80},${48 - y}`)
           .join(' ')}
         fill="none"
-        stroke="#3c61dd"
+        stroke="#2563EB"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -109,7 +109,7 @@ function MiniPieChart() {
         cy="24"
         r={radius}
         fill="none"
-        stroke="#ebedef"
+        stroke="#F1F5F9"
         strokeWidth="4"
       />
       <circle
@@ -117,7 +117,7 @@ function MiniPieChart() {
         cy="24"
         r={radius}
         fill="none"
-        stroke="#3c61dd"
+        stroke="#2563EB"
         strokeWidth="4"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
@@ -144,7 +144,7 @@ function BarChart({ data }: { data: number[] }) {
               className="w-full rounded-sm"
               style={{
                 height: `${height}%`,
-                background: `linear-gradient(to top, #3c61dd 50%, #adbff5 50%)`,
+                background: `linear-gradient(to top, #2563EB 50%, #DBEAFE 50%)`,
                 minHeight: '2px',
               }}
             />
@@ -152,7 +152,7 @@ function BarChart({ data }: { data: number[] }) {
         ))}
       </div>
       {/* Month Labels */}
-      <div className="flex items-center justify-between text-xs text-gray-600 border-t border-gray-200 pt-2.5 pb-0">
+      <div className="flex items-center justify-between text-xs text-vision-gray-700 border-t border-border pt-2.5 pb-0">
         {displayMonths.map((month, i) => (
           <span key={i} className="text-xs">{month}</span>
         ))}

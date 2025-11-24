@@ -2,7 +2,8 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { sync as globSync } from 'glob';
+import pkg from 'glob';
+const { sync: globSync } = pkg;
 
 const INLINE_COLOR_PATTERNS: RegExp[] = [
   /#[0-9A-Fa-f]{3,6}/,
@@ -68,7 +69,9 @@ function validateColors(stagedOnly = false) {
     });
     console.error('\n⚠️  Only Bold Color System tokens are allowed (vision-*)');
     console.error('   Replace inline colors/generic Tailwind tokens with the approved set.\n');
-    process.exit(1);
+    // Use process.exitCode for proper Node.js termination in TypeScript
+    process.exitCode = 1;
+    return;
   }
 
   console.log('✅ Color token validation passed! No inline colors detected.');

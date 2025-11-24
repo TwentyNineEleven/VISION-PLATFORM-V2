@@ -12,10 +12,10 @@
  * - Help & Support at bottom
  * - Collapsible behavior (expanded: ~280px, collapsed: ~80px)
  * 
- * Uses 2911 Bold Color System:
- * - Primary: #0047AB (Bold Royal Blue)
- * - Text Secondary: #64748B (Steel Gray)
- * - Brand Tertiary BG: #DBEAFE (Sky Light)
+ * Uses Bold Color System v3.0:
+ * - Primary actions and branding
+ * - Vision gray tokens for text and backgrounds
+ * - Semantic tokens for borders and surfaces
  */
 
 import * as React from 'react';
@@ -66,7 +66,7 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
   return (
     <aside
       className={cn(
-        'flex flex-col h-screen bg-white border-r border-[#E6E8EB] transition-all duration-300',
+        'flex flex-col h-screen bg-background border-r border-border transition-all duration-300',
         collapsed ? 'w-20' : 'w-[280px]',
         className
       )}
@@ -76,15 +76,15 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
         {!collapsed && (
           <div className="flex-1">
             {/* Logo placeholder - replace with actual logo */}
-            <div className="h-8 w-[125px] bg-[#0047AB] rounded flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">VISION</span>
+            <div className="h-8 w-[125px] bg-primary rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold text-sm">VISION</span>
             </div>
           </div>
         )}
         {collapsed && (
           <div className="mx-auto">
-            <div className="h-8 w-8 bg-[#0047AB] rounded flex items-center justify-center">
-              <span className="text-white font-semibold text-xs">V</span>
+            <div className="h-8 w-8 bg-primary rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold text-xs">V</span>
             </div>
           </div>
         )}
@@ -95,7 +95,7 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
             glow="none"
             onClick={onToggleCollapse}
             className={cn(
-              'text-[#64748B] hover:text-[#1F2937]'
+              'text-vision-gray-700 hover:text-foreground'
             )}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!collapsed}
@@ -138,8 +138,8 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
                   'flex items-center gap-2 h-10 px-[10px] rounded-lg transition-all',
                   'text-sm font-medium',
                   isActive
-                    ? 'bg-[#DBEAFE] text-[#0047AB]' // Brand tertiary bg, brand text
-                    : 'bg-white text-[#64748B] hover:bg-[#F9FAFB]', // Default state
+                    ? 'bg-vision-blue-50 text-primary'
+                    : 'bg-background text-vision-gray-700 hover:bg-vision-gray-100',
                   collapsed && 'justify-center px-2'
                 )}
                 aria-current={isActive ? 'page' : undefined}
@@ -147,14 +147,16 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
                 <GlowIcon
                   name={item.icon}
                   size={20}
-                  className="flex-shrink-0"
-                  color={isActive ? '#0047AB' : '#64748B'}
+                  className={cn(
+                    'flex-shrink-0',
+                    isActive ? 'text-primary' : 'text-vision-gray-700'
+                  )}
                 />
                 {!collapsed && (
                   <>
                     <span className="flex-1">{item.label}</span>
                     {showBadgeCount && (
-                      <span className="flex items-center justify-center min-w-[18px] min-h-[18px] px-1 rounded-full bg-[#0047AB] text-white text-xs font-semibold">
+                      <span className="flex items-center justify-center min-w-[18px] min-h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                         {badgeLabel}
                       </span>
                     )}
@@ -175,8 +177,8 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
                           'flex items-center pl-[18px] pr-1.5 py-2 border-l-2 transition-colors',
                           'text-sm font-medium',
                           isSubActive
-                            ? 'border-[#0047AB] text-[#0047AB]' // Brand border and text
-                            : 'border-[#D7DBDF] text-[#64748B] hover:bg-[#F9FAFB]'
+                            ? 'border-primary text-primary'
+                            : 'border-border text-vision-gray-700 hover:bg-vision-gray-100'
                         )}
                         aria-current={isSubActive ? 'page' : undefined}
                       >
@@ -194,10 +196,10 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
       {/* Alert Card (Used Space) */}
       {!collapsed && (
         <div className="px-3 pt-4 pb-0 flex-shrink-0">
-          <div className="bg-[#F9FAFB] rounded-lg p-2.5 flex flex-col gap-4">
+          <div className="bg-vision-gray-50 rounded-lg p-2.5 flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-[#64748B]">Used space</p>
-              <p className="text-xs text-[#94A3B8]">
+              <p className="text-sm font-medium text-vision-gray-700">Used space</p>
+              <p className="text-xs text-muted-foreground">
                 Your workspace has used <span className="font-semibold">782</span> of your{' '}
                 <span className="font-semibold">1000</span> block storage limit
               </p>
@@ -205,9 +207,9 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
             <GlowButton
               variant="outline"
               size="sm"
-              className="flex items-center justify-center gap-2 px-2.5 py-1.5 border-[#ADBFF5] text-[#0047AB]"
+              className="flex items-center justify-center gap-2 px-2.5 py-1.5 border-vision-blue-200 text-primary"
             >
-              <GlowIcon name="crown-light" size={16} color="#0047AB" />
+              <GlowIcon name="crown-light" size={16} className="text-primary" />
               <span>Upgrade</span>
             </GlowButton>
           </div>
@@ -217,7 +219,7 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
       {/* Divider */}
       {!collapsed && (
         <div className="px-4 py-4 flex-shrink-0">
-          <div className="h-px bg-[#EBEDEF]" />
+          <div className="h-px bg-border" />
         </div>
       )}
 
@@ -227,7 +229,7 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
             href={{ pathname: helpNavItem.href }}
             className={cn(
             'flex items-center gap-2 h-10 px-[10px] rounded-lg transition-all',
-            'text-sm font-medium bg-white text-[#64748B] hover:bg-[#F9FAFB]',
+            'text-sm font-medium bg-background text-vision-gray-700 hover:bg-vision-gray-100',
             collapsed && 'justify-center px-2'
           )}
         >

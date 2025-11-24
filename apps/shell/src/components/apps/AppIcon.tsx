@@ -69,7 +69,7 @@ export function AppIcon({ app, size = 'md', className, showBackground = true }: 
       )}
       style={{
         backgroundColor: showBackground ? phaseColor : 'transparent',
-        color: showBackground ? '#FFFFFF' : phaseColor,
+        color: showBackground ? 'white' : phaseColor,
       }}
       aria-label={`${app.name} icon`}
       title={app.name}

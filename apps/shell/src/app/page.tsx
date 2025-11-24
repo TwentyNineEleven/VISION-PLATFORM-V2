@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { GlowButton } from '@/components/glow-ui';
 import { Hero } from '@/components/landing/Hero';
-import { Features } from '@/components/landing/Features';
-import { HowItWorks } from '@/components/landing/HowItWorks';
+import { ProblemStatement } from '@/components/landing/ProblemStatement';
+import { CompletePlatform } from '@/components/landing/CompletePlatform';
+import { TEIFFramework } from '@/components/landing/TEIFFramework';
+import { ModulesShowcase } from '@/components/landing/ModulesShowcase';
+import { AICapabilities } from '@/components/landing/AICapabilities';
+import { TargetAudience } from '@/components/landing/TargetAudience';
 import { Pricing } from '@/components/landing/Pricing';
 import { Footer } from '@/components/landing/Footer';
 
@@ -39,8 +43,12 @@ export default function LandingPage() {
       </nav>
 
       <Hero />
-      <Features />
-      <HowItWorks />
+      <ProblemStatement />
+      <CompletePlatform />
+      <TEIFFramework />
+      <ModulesShowcase />
+      <AICapabilities />
+      <TargetAudience />
       <div id="pricing">
         <Pricing />
       </div>

@@ -12,12 +12,12 @@ export interface KpiTileRowProps {
   kpis: Kpi[];
 }
 
-// Semantic color mapping to 2911 Bold Palette
+// Semantic color mapping to Bold Color System v3.0
 const semanticColors = {
-  info: '#0047AB',      // Bold Royal Blue
-  warning: '#C2410C',   // Vivid Tangerine
-  error: '#B91C1C',     // Electric Scarlet
-  success: '#047857',   // Vivid Forest Green
+  info: '#0047AB',      // Bold Royal Blue (vision-blue-950)
+  warning: '#C2410C',   // Vivid Tangerine (vision-orange-900)
+  error: '#B91C1C',     // Electric Scarlet (vision-red-900)
+  success: '#047857',   // Vivid Forest Green (vision-green-900)
 } as const;
 
 const iconMap = {

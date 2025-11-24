@@ -72,24 +72,24 @@ export function FiltersBar({
   };
 
   return (
-    <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
       {/* Search Input */}
       <div className="mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by app name or description…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-[#CBD5E1] bg-white px-10 py-2.5 text-sm text-[#1F2937] placeholder:text-[#94A3B8] focus:border-[#0047AB] focus:outline-none focus:ring-2 focus:ring-[#0047AB]/20"
+            className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>
 
       {/* Phase Filter Chips (Row 1) */}
       <div className="mb-4">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-vision-gray-700">
           Phase
         </div>
         <div className="flex flex-wrap gap-2">
@@ -98,8 +98,8 @@ export function FiltersBar({
             className={cn(
               'rounded-full px-4 py-2 text-sm font-semibold transition-all',
               filters.phase === 'All'
-                ? 'bg-[#0047AB] text-white shadow-md'
-                : 'bg-[#F1F5F9] text-[#1F2937] hover:border hover:border-[#CBD5E1]'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
             )}
           >
             All phases
@@ -113,12 +113,13 @@ export function FiltersBar({
                 onClick={() => handlePhaseClick(phase)}
                 className={cn(
                   'rounded-full px-4 py-2 text-sm font-semibold transition-all',
-                  isSelected && 'text-white shadow-md'
+                  isSelected && 'text-white shadow-md',
+                  !isSelected && 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
                 )}
                 style={
                   isSelected
                     ? { backgroundColor: phaseColor }
-                    : { backgroundColor: '#F1F5F9', color: '#1F2937' }
+                    : undefined
                 }
               >
                 {phaseLabels[phase]}
@@ -130,7 +131,7 @@ export function FiltersBar({
 
       {/* Audience Filter Chips (Row 2) */}
       <div className="mb-4">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-vision-gray-700">
           Audience
         </div>
         <div className="flex flex-wrap gap-2">
@@ -139,8 +140,8 @@ export function FiltersBar({
             className={cn(
               'rounded-full px-4 py-2 text-sm font-semibold transition-all',
               filters.audience === 'All'
-                ? 'bg-[#0047AB] text-white shadow-md'
-                : 'bg-[#F1F5F9] text-[#1F2937] hover:border hover:border-[#CBD5E1]'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
             )}
           >
             All audiences
@@ -152,8 +153,8 @@ export function FiltersBar({
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-semibold transition-all',
                 filters.audience === audience
-                  ? 'bg-[#0047AB] text-white shadow-md'
-                  : 'bg-[#F1F5F9] text-[#1F2937] hover:border hover:border-[#CBD5E1]'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
               )}
             >
               {audience}
@@ -165,7 +166,7 @@ export function FiltersBar({
       {/* Focus Filter Chips (Row 3) */}
       {availableFocusTags.length > 0 && (
         <div className="mb-4">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-vision-gray-700">
             Focus
           </div>
           <div className="flex flex-wrap gap-2">
@@ -174,8 +175,8 @@ export function FiltersBar({
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-semibold transition-all',
                 filters.focusTags.length === 0
-                  ? 'bg-[#0047AB] text-white shadow-md'
-                  : 'bg-[#F1F5F9] text-[#1F2937] hover:border hover:border-[#CBD5E1]'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
               )}
             >
               All areas
@@ -189,8 +190,8 @@ export function FiltersBar({
                   className={cn(
                     'rounded-full px-4 py-2 text-sm font-semibold transition-all',
                     isSelected
-                      ? 'bg-[#0047AB] text-white shadow-md'
-                      : 'bg-[#F1F5F9] text-[#1F2937] hover:border hover:border-[#CBD5E1]'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-vision-gray-100 text-foreground hover:bg-vision-gray-50'
                   )}
                 >
                   {tag}
@@ -203,13 +204,13 @@ export function FiltersBar({
 
       {/* Clear Filters / Filter Count */}
       {activeFilterCount > 0 && (
-        <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-4">
-          <span className="text-sm text-[#64748B]">
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <span className="text-sm text-vision-gray-700">
             Active filters: {activeFilterCount}
           </span>
           <button
             onClick={clearAllFilters}
-            className="flex items-center gap-2 text-sm font-medium text-[#0047AB] hover:text-[#1E3A8A] transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-primary hover:opacity-90 transition-all"
           >
             <X size={16} />
             Clear filters ({activeFilterCount})

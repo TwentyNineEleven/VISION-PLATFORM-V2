@@ -133,13 +133,13 @@ export function AppCatalogPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       {/* 1. Page Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-4xl font-bold text-[#1F2937]">
+        <h1 className="mb-2 text-4xl font-bold text-foreground">
           VISION Apps
         </h1>
-        <p className="text-lg text-[#64748B]">
+        <p className="text-lg text-muted-foreground">
           Browse every tool in the platform, filter by phase or audience, and launch with one click.
         </p>
       </div>
@@ -156,7 +156,7 @@ export function AppCatalogPage({
 
       {/* Sort Dropdown (optional, above grid) */}
       <div className="mb-6 flex items-center justify-between">
-        <div className="text-sm text-[#64748B]">
+        <div className="text-sm text-vision-gray-700">
           {filteredApps.length} {filteredApps.length === 1 ? 'app' : 'apps'}
         </div>
         <select
@@ -164,7 +164,7 @@ export function AppCatalogPage({
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, sortBy: e.target.value as SortOption }))
           }
-          className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-2 text-sm text-[#1F2937] focus:border-[#0047AB] focus:outline-none"
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option} value={option}>
@@ -189,11 +189,11 @@ export function AppCatalogPage({
         </div>
       ) : (
         /* 4. Empty State */
-        <div className="flex flex-col items-center justify-center rounded-lg border border-[#E2E8F0] bg-white p-12 text-center">
-          <p className="mb-2 text-lg font-semibold text-[#1F2937]">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card p-12 text-center">
+          <p className="mb-2 text-lg font-semibold text-foreground">
             No apps match these filters
           </p>
-          <p className="text-sm text-[#64748B]">
+          <p className="text-sm text-muted-foreground">
             Try clearing filters or adjusting your search.
           </p>
         </div>
