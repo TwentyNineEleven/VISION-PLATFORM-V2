@@ -36,15 +36,15 @@ const filterLabels: Record<FilterOption, string> = {
 };
 
 const notificationIcon = (type: Notification['type'], priority?: string) => {
-  const iconClass = priority === 'high' ? 'text-destructive' : 'text-primary';
-  const iconProps = { size: 18, className: iconClass };
+  const iconClass = 'text-current';
+  const iconProps = { size: 20, className: iconClass, strokeWidth: 2.5 };
   switch (type) {
     case 'system':
       return <Settings {...iconProps} />;
     case 'organization':
       return <Users {...iconProps} />;
     case 'application':
-      return <Bell {...iconProps} />;
+      return <CheckCheck {...iconProps} />;
     case 'personal':
       return <Info {...iconProps} />;
     default:
@@ -268,46 +268,62 @@ export default function NotificationsPage() {
                       {filteredNotifications.length > 0 ? (
                         <Stack spacing="lg">
                         {filteredNotifications.map((notification) => (
-                          <GlowCard
+                          <div
                             key={notification.id}
-                            variant="flat"
-                            className={notification.read ? '' : 'bg-vision-blue-50'}
+                            className={`
+                              rounded-xl border-2 transition-all duration-200
+                              ${!notification.read
+                                ? 'border-primary/30 bg-primary/5 shadow-lg hover:border-primary/50'
+                                : 'border-border bg-background hover:border-primary/30'
+                              }
+                            `}
                           >
-                            <Stack spacing="md">
-                              <Group justify="between" align="start">
-                                <Group spacing="md" align="center">
-                                  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+                            <div className="p-5">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-4 flex-1">
+                                  <div className={`
+                                    w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ring-2 ring-offset-2 ring-offset-background
+                                    ${!notification.read
+                                      ? 'bg-primary text-white ring-primary/30'
+                                      : 'bg-muted/50 text-muted-foreground ring-border/50'
+                                    }
+                                  `}>
                                     {notificationIcon(notification.type, notification.priority)}
                                   </div>
-                                  <Stack spacing="sm">
-                                    <Group spacing="xs" align="center">
-                                      <Title level={5}>{notification.title}</Title>
+                                  <div className="flex-1 space-y-2">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <h4 className="text-base font-bold text-foreground">{notification.title}</h4>
                                       {!notification.read && (
-                                        <span className="inline-flex items-center">
-                                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                          <span className="sr-only">unread notification</span>
-                                        </span>
+                                        <div className="flex items-center gap-1.5 rounded-full bg-primary px-2 py-0.5">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                          <span className="text-xs font-bold text-white">Unread</span>
+                                        </div>
                                       )}
                                       {notification.priority === 'high' && (
-                                        <GlowBadge variant="destructive" size="sm">
+                                        <GlowBadge variant="destructive" size="sm" className="font-bold">
                                           Urgent
                                         </GlowBadge>
                                       )}
-                                    </Group>
-                                    <Text size="sm" color="secondary">
+                                    </div>
+                                    <p className="text-sm text-muted-foreground leading-relaxed">
                                       {notification.message}
-                                    </Text>
-                                    <Group spacing="xs" align="center">
-                                      <GlowBadge variant="secondary" size="sm">
+                                    </p>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <GlowBadge variant="secondary" size="sm" className="font-semibold">
                                         {notification.type}
                                       </GlowBadge>
-                                      <Text size="xs" color="tertiary">
-                                        {new Date(notification.createdAt).toLocaleString()}
-                                      </Text>
-                                    </Group>
-                                  </Stack>
-                                </Group>
-                                <Group spacing="sm">
+                                      <span className="text-xs font-medium text-muted-foreground">
+                                        {new Date(notification.createdAt).toLocaleString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: 'numeric',
+                                          minute: '2-digit'
+                                        })}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                                   {!notification.read && (
                                     <GlowButton
                                       variant="ghost"
@@ -316,6 +332,7 @@ export default function NotificationsPage() {
                                       onClick={() => markAsRead(notification.id)}
                                       disabled={isLoading}
                                       aria-label={`Mark "${notification.title}" as read`}
+                                      className="font-semibold"
                                     >
                                       Mark read
                                     </GlowButton>
@@ -327,26 +344,30 @@ export default function NotificationsPage() {
                                     onClick={() => deleteNotification(notification.id)}
                                     disabled={isLoading}
                                     aria-label={`Delete "${notification.title}" notification`}
+                                    className="font-semibold text-destructive hover:text-destructive"
                                   >
                                     Delete
                                   </GlowButton>
-                                </Group>
-                              </Group>
+                                </div>
+                              </div>
                               {notification.actionUrl && notification.actionLabel && (
-                                <GlowButton
-                                  variant="outline"
-                                  size="sm"
-                                  rightIcon={<ArrowRight size={16} />}
-                                  onClick={() => {
-                                    window.location.href = notification.actionUrl!;
-                                  }}
-                                  aria-label={`${notification.actionLabel} for ${notification.title}`}
-                                >
-                                  {notification.actionLabel}
-                                </GlowButton>
+                                <div className="mt-4 pt-4 border-t border-border">
+                                  <GlowButton
+                                    variant="outline"
+                                    size="sm"
+                                    rightIcon={<ArrowRight size={16} />}
+                                    onClick={() => {
+                                      window.location.href = notification.actionUrl!;
+                                    }}
+                                    aria-label={`${notification.actionLabel} for ${notification.title}`}
+                                    className="font-semibold w-full sm:w-auto"
+                                  >
+                                    {notification.actionLabel}
+                                  </GlowButton>
+                                </div>
                               )}
-                            </Stack>
-                          </GlowCard>
+                            </div>
+                          </div>
                         ))}
                         </Stack>
                       ) : (

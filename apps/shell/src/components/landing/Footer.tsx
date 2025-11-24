@@ -25,7 +25,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-[#001A33] text-gray-300">
       <Container className="py-12">
         <Stack spacing="lg">
           <Grid columns={4} gap="lg">
@@ -39,7 +39,7 @@ export function Footer() {
                     <a
                       key={link.name}
                       href={link.href}
-                      className="hover:text-white transition-colors"
+                      className="hover:text-[#007F5F] transition-colors"
                     >
                       <Text size="sm" as="span">
                         {link.name}
@@ -56,14 +56,17 @@ export function Footer() {
                 <Title level={5} className="text-white">
                   About TwentyNine Eleven Impact Partners, LLC
                 </Title>
-                <Text size="sm" className="max-w-2xl">
-                  We build tools and provide capacity-building support that strengthens mission-driven organizations and the communities they serve.
+                <Text size="sm" className="max-w-3xl text-gray-300">
+                  Built by practitioners and strategists who understand mission-driven work.
                 </Text>
-                <Text size="sm" className="max-w-2xl">
-                  The VISION Platform is part of our commitment to sustainable, community-centered impact.
+                <Text size="sm" className="max-w-3xl text-gray-300">
+                  The Vision Impact Hub and VISION AI™ were developed by experts in community work, evaluation, nonprofit leadership, organizational development, and capacity building.
+                </Text>
+                <Text size="sm" className="max-w-3xl text-white font-medium">
+                  We exist to equip mission-driven leaders with the infrastructure and intelligence needed to create lasting impact.
                 </Text>
               </Stack>
-              <Text size="sm">
+              <Text size="sm" className="text-gray-400">
                 &copy; {new Date().getFullYear()} TwentyNine Eleven Impact Partners, LLC. All rights reserved.
               </Text>
             </Stack>

@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GlowIcon } from './GlowIcons';
+import { UserDropdown } from './UserDropdown';
 import { Search, Bell, MoreVertical, ChevronRight, Grid3x3 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +29,7 @@ export interface GlowTopHeaderProps {
   onMenuToggle?: () => void;
   onSearch?: (query: string) => void;
   onAppLauncherOpen?: () => void;
+  onSignOut?: () => void;
   notifications?: number;
   user?: {
     name: string;
@@ -42,6 +44,7 @@ export function GlowTopHeader({
   onMenuToggle,
   onSearch,
   onAppLauncherOpen,
+  onSignOut,
   notifications = 0,
   user,
   className,
@@ -195,23 +198,9 @@ export function GlowTopHeader({
           </button>
         </div>
 
-        {/* User Avatar */}
+        {/* User Dropdown with Organization Switcher */}
         {user && (
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-vision-blue-50 flex items-center justify-center text-sm font-semibold text-primary">
-              {user.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={user.name}
-                  width={40}
-                  height={40}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span>{userInitials}</span>
-              )}
-            </div>
-          </div>
+          <UserDropdown user={user} onSignOut={onSignOut} />
         )}
       </div>
     </header>

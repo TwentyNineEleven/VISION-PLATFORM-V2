@@ -42,11 +42,40 @@ export default function SignInPage() {
     setIsSubmitting(true);
     setError(null);
 
+    console.log('🔐 Attempting sign in with:', data.email);
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+
+      console.log('📡 Supabase client created');
+
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      console.log('📨 Sign in response:', {
+        success: !signInError,
+        error: signInError?.message,
+        hasSession: !!signInData?.session,
+        hasUser: !!signInData?.user
+      });
+
+      if (signInError) {
+        console.error('❌ Sign in error:', signInError);
+        setError(signInError.message || 'Invalid email or password. Please try again.');
+        return;
+      }
+
+      console.log('✅ Sign in successful, redirecting...');
+
+      // Success! Redirect to dashboard
       router.push('/dashboard');
+      router.refresh();
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      console.error('❌ Unexpected error during sign in:', err);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

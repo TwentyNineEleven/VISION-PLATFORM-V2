@@ -1,343 +1,564 @@
+/**
+ * Files Page - Document Management
+ * 
+ * Main page for document library with folder navigation
+ */
+
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import {
-  GlowButton,
-} from '@/components/glow-ui';
-import { fileService } from '@/services/fileService';
-import {
-  formatBytes,
-  formatRelativeTime,
-  getFileIcon,
-  getFileTypeDescription
-} from '@/lib/utils';
-import type { FileItem } from '@/types/file';
-import {
-  Upload,
-  Download,
-  Trash2,
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { File, Folder, Upload, Search, Grid, List, Filter } from 'lucide-react';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import UploadModal from '@/components/documents/UploadModal';
+import DocumentDetailModal from '@/components/documents/DocumentDetailModal';
+import FolderTree from '@/components/documents/FolderTree';
+import CreateFolderModal from '@/components/documents/CreateFolderModal';
+
+// Types
+interface Document {
+  id: string;
+  name: string;
+  mimeType: string;
+  fileSize: number;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  folderId: string | null;
+}
+
+interface FolderItem {
+  id: string;
+  name: string;
+  parentId: string | null;
+  color?: string;
+  icon?: string;
+  children?: FolderItem[];
+}
 
 export default function FilesPage() {
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [statusMessage, setStatusMessage] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
+  const { activeOrganization } = useOrganization();
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
 
+  const organizationId = activeOrganization?.id;
+
+  // Load folders on mount
   useEffect(() => {
-    loadFiles();
-  }, []);
-
-  const loadFiles = async () => {
-    try {
-      const data = await fileService.getFiles();
-      setFiles(data);
-    } catch (err) {
-      setError('Failed to load files');
+    if (organizationId) {
+      loadFolders();
     }
-  };
+  }, [organizationId]);
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+  // Load documents when folder changes
+  useEffect(() => {
+    if (organizationId) {
+      loadDocuments();
+    }
+  }, [organizationId, currentFolderId, searchQuery]);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (!selectedFile) return;
-
-    setIsLoading(true);
-    setError(null);
-    setStatusMessage('Uploading file...');
-
+  const loadFolders = async () => {
+    if (!organizationId) return;
+    
     try {
-      const result = await fileService.uploadFile({ file: selectedFile });
-
+      const response = await fetch(
+        `/api/v1/folders?organizationId=${organizationId}&tree=true`
+      );
+      const result = await response.json();
       if (result.success) {
-        // Add to local state
-        setFiles((prev) => [result.fileItem, ...prev]);
-        setStatusMessage(`${selectedFile.name} uploaded successfully`);
-        setTimeout(() => setStatusMessage(''), 3000);
+        setFolders(result.data);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload file';
-      setError(errorMessage);
-      setStatusMessage(errorMessage);
-    } finally {
-      setIsLoading(false);
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+    } catch (error) {
+      console.error('Failed to load folders:', error);
+    }
+  };
+
+  const loadDocuments = async () => {
+    if (!organizationId) return;
+    
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        organizationId,
+        ...(currentFolderId && { folderId: currentFolderId }),
+        ...(searchQuery && { query: searchQuery }),
+        sortBy: 'updated_at',
+        sortOrder: 'desc',
+        limit: '50',
+      });
+
+      const response = await fetch(`/api/v1/documents?${params}`);
+      const result = await response.json();
+      if (result.success) {
+        setDocuments(result.data.documents || []);
       }
-    }
-  };
-
-  const handleDownload = async (fileId: string) => {
-    const file = files.find((f) => f.id === fileId);
-    if (!file) return;
-
-    setIsLoading(true);
-    setError(null);
-    setStatusMessage(`Downloading ${file.name}...`);
-
-    try {
-      await fileService.downloadFile(fileId);
-      setStatusMessage(`${file.name} downloaded successfully`);
-      setTimeout(() => setStatusMessage(''), 3000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to download file';
-      setError(errorMessage);
-      setStatusMessage(errorMessage);
+    } catch (error) {
+      console.error('Failed to load documents:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (fileId: string) => {
-    const file = files.find((f) => f.id === fileId);
-    if (!file) return;
+  const handleUpload = () => {
+    setIsUploadModalOpen(true);
+  };
 
-    if (!confirm(`Delete "${file.name}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleUploadComplete = () => {
+    // Refresh documents after upload
+    loadDocuments();
+  };
 
-    setIsLoading(true);
-    setError(null);
-    setStatusMessage(`Deleting ${file.name}...`);
+  const handleDocumentClick = (doc: Document) => {
+    setSelectedDocumentId(doc.id);
+  };
 
+  const handleDocumentUpdate = () => {
+    // Refresh documents after update
+    loadDocuments();
+  };
+
+  const handleDocumentDelete = () => {
+    // Refresh documents after delete
+    loadDocuments();
+    setSelectedDocumentId(null);
+  };
+
+  const handleFolderClick = (folderId: string | null) => {
+    setCurrentFolderId(folderId);
+  };
+
+  const handleFolderCreated = () => {
+    // Refresh folders after creation
+    loadFolders();
+  };
+
+  const handleBulkMove = async () => {
+    if (selectedDocs.size === 0) return;
+
+    // TODO: Show folder selection modal
+    const targetFolderId = prompt('Enter target folder ID (or leave empty for root):');
+    
     try {
-      await fileService.deleteFile(fileId);
-      // Update local state
-      setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      setStatusMessage(`${file.name} deleted successfully`);
-      setTimeout(() => setStatusMessage(''), 3000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete file';
-      setError(errorMessage);
-      setStatusMessage(errorMessage);
-    } finally {
-      setIsLoading(false);
+      const promises = Array.from(selectedDocs).map(docId =>
+        fetch(`/api/v1/documents/${docId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folderId: targetFolderId || null }),
+        })
+      );
+
+      await Promise.all(promises);
+      
+      // Clear selection and refresh
+      setSelectedDocs(new Set());
+      loadDocuments();
+    } catch (error) {
+      console.error('Failed to move documents:', error);
+      alert('Failed to move some documents');
     }
   };
 
-  const handleDeleteSelected = async () => {
-    if (selectedFiles.size === 0) return;
+  const handleBulkTag = async () => {
+    if (selectedDocs.size === 0) return;
 
-    if (
-      !confirm(
-        `Delete ${selectedFiles.size} selected file(s)? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
+    const tagsInput = prompt('Enter tags (comma-separated):');
+    if (!tagsInput) return;
 
-    setIsLoading(true);
-    setError(null);
-    setStatusMessage(`Deleting ${selectedFiles.size} files...`);
-
+    const newTags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+    
     try {
-      await fileService.deleteFiles(Array.from(selectedFiles));
-      // Update local state
-      setFiles((prev) => prev.filter((f) => !selectedFiles.has(f.id)));
-      setSelectedFiles(new Set());
-      setStatusMessage(`${selectedFiles.size} files deleted successfully`);
-      setTimeout(() => setStatusMessage(''), 3000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete files';
-      setError(errorMessage);
-      setStatusMessage(errorMessage);
-    } finally {
-      setIsLoading(false);
+      const promises = Array.from(selectedDocs).map(async docId => {
+        const response = await fetch(`/api/v1/documents/${docId}`);
+        const result = await response.json();
+        const existingTags = result.data?.tags || [];
+        const combinedTags = [...new Set([...existingTags, ...newTags])];
+
+        return fetch(`/api/v1/documents/${docId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: combinedTags }),
+        });
+      });
+
+      await Promise.all(promises);
+      
+      // Clear selection and refresh
+      setSelectedDocs(new Set());
+      loadDocuments();
+    } catch (error) {
+      console.error('Failed to tag documents:', error);
+      alert('Failed to tag some documents');
     }
   };
 
-  const toggleFileSelection = (fileId: string) => {
-    setSelectedFiles((prev) => {
-      const next = new Set(prev);
-      if (next.has(fileId)) {
-        next.delete(fileId);
-      } else {
-        next.add(fileId);
-      }
-      return next;
-    });
+  const handleBulkDelete = async () => {
+    if (selectedDocs.size === 0) return;
+
+    const confirmed = confirm(
+      `Are you sure you want to delete ${selectedDocs.size} document(s)? This action can be undone.`
+    );
+
+    if (!confirmed) return;
+    
+    try {
+      const promises = Array.from(selectedDocs).map(docId =>
+        fetch(`/api/v1/documents/${docId}`, { method: 'DELETE' })
+      );
+
+      await Promise.all(promises);
+      
+      // Clear selection and refresh
+      setSelectedDocs(new Set());
+      loadDocuments();
+    } catch (error) {
+      console.error('Failed to delete documents:', error);
+      alert('Failed to delete some documents');
+    }
   };
 
-  const toggleSelectAll = () => {
-    if (selectedFiles.size === files.length && files.length > 0) {
-      setSelectedFiles(new Set());
+  const toggleSelection = (docId: string) => {
+    const newSelection = new Set(selectedDocs);
+    if (newSelection.has(docId)) {
+      newSelection.delete(docId);
     } else {
-      setSelectedFiles(new Set(files.map((f) => f.id)));
+      newSelection.add(docId);
     }
+    setSelectedDocs(newSelection);
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-vision-gray-950 text-3xl font-bold">Files</h1>
-          <p className="text-vision-gray-700 mt-1">
-            {files.length} file{files.length !== 1 ? 's' : ''} total
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  if (!organizationId) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-500">No organization selected</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Please select an organization to access files
           </p>
         </div>
+      </div>
+    );
+  }
 
-        <div className="flex gap-2">
-          {selectedFiles.size > 0 && (
-            <GlowButton
-              variant="ghost"
-              onClick={handleDeleteSelected}
-              disabled={isLoading}
-              aria-label={`Delete ${selectedFiles.size} selected files`}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Selected ({selectedFiles.size})
-            </GlowButton>
-          )}
-
-          <GlowButton
-            onClick={handleUploadClick}
-            disabled={isLoading}
-            aria-label="Upload file"
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Files</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage your organization's documents
+            </p>
+          </div>
+          <button
+            onClick={handleUpload}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload File
-          </GlowButton>
+            <Upload className="w-4 h-4" />
+            Upload
+          </button>
+        </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleFileSelect}
-            aria-label="File input"
-          />
+        {/* Search and View Controls */}
+        <div className="mt-4 flex items-center gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search documents..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setView('grid')}
+              className={`p-2 rounded-lg transition-colors ${
+                view === 'grid'
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Grid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setView('list')}
+              className={`p-2 rounded-lg transition-colors ${
+                view === 'list'
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Status and Error Messages */}
-      <div aria-live="polite" aria-atomic="true" className="mb-4">
-        {error && (
-          <div className="bg-vision-red-50 border border-vision-red-600 text-vision-red-900 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        {statusMessage && !error && (
-          <div className="sr-only">
-            {statusMessage}
-          </div>
-        )}
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Folder Sidebar */}
+        <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto">
+          {organizationId && (
+            <FolderTree
+              organizationId={organizationId}
+              currentFolderId={currentFolderId}
+              onFolderClick={handleFolderClick}
+              onCreateFolder={() => setIsFolderModalOpen(true)}
+            />
+          )}
+        </div>
 
-      <div className="bg-white rounded-lg border border-vision-gray-300 overflow-hidden shadow-sm">
-        <table className="min-w-full">
-          <caption className="sr-only">
-            List of uploaded files with name, size, modified date, and available actions
-          </caption>
-          <thead className="bg-vision-gray-50 border-b border-vision-gray-300">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left w-12">
-                <input
-                  type="checkbox"
-                  checked={files.length > 0 && selectedFiles.size === files.length}
-                  onChange={toggleSelectAll}
-                  aria-label="Select all files"
-                  className="rounded border-vision-gray-300 text-vision-blue-700 focus:ring-vision-blue-700"
-                />
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium text-vision-gray-700">
-                File Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium text-vision-gray-700">
-                Size
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-sm font-medium text-vision-gray-700">
-                Modified
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-sm font-medium text-vision-gray-700">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-vision-gray-300">
-            {files.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center">
-                  <div role="status" aria-live="polite">
-                    <p className="text-vision-gray-700">
-                      No files uploaded yet. Click &quot;Upload File&quot; to get started.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              files.map((file) => (
-                <tr
-                  key={file.id}
-                  className="hover:bg-vision-blue-50 transition-colors"
+        {/* Document List/Grid */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Loading...</div>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <File className="w-16 h-16 text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No documents yet
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Upload your first document to get started
+              </p>
+              <button
+                onClick={handleUpload}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Document
+              </button>
+            </div>
+          ) : view === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  onClick={() => handleDocumentClick(doc)}
+                  className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:shadow-lg transition-shadow"
                 >
-                  <td className="px-6 py-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-lg">
+                      <File className="w-6 h-6" />
+                    </div>
                     <input
                       type="checkbox"
-                      checked={selectedFiles.has(file.id)}
-                      onChange={() => toggleFileSelection(file.id)}
-                      aria-label={`Select ${file.name}`}
-                      className="rounded border-vision-gray-300 text-vision-blue-700 focus:ring-vision-blue-700"
+                      checked={selectedDocs.has(doc.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleSelection(doc.id);
+                      }}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                     />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl" aria-hidden="true">
-                        {getFileIcon(file.type)}
-                      </span>
-                      <span className="sr-only">{getFileTypeDescription(file.type)}</span>
-                      <span className="text-sm font-medium text-vision-gray-950">
-                        {file.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-vision-gray-700">
-                    {formatBytes(file.size)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-vision-gray-700">
-                    {formatRelativeTime(file.modifiedAt)}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <GlowButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownload(file.id)}
-                        disabled={isLoading}
-                        aria-label={`Download ${file.name}`}
+                  </div>
+                  <h3 className="font-medium text-gray-900 truncate mb-1">
+                    {doc.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {formatFileSize(doc.fileSize)}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {doc.tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded"
                       >
-                        <Download className="w-4 h-4 mr-1" />
-                        Download
-                      </GlowButton>
-
-                      <GlowButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(file.id)}
-                        disabled={isLoading}
-                        aria-label={`Delete ${file.name}`}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </GlowButton>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                        {tag}
+                      </span>
+                    ))}
+                    {doc.tags.length > 2 && (
+                      <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                        +{doc.tags.length - 2}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-400">
+                    {formatDate(doc.updatedAt)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="w-10 px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Size
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tags
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Modified
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {documents.map((doc) => (
+                    <tr
+                      key={doc.id}
+                      onClick={() => handleDocumentClick(doc)}
+                      className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedDocs.has(doc.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleSelection(doc.id);
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded">
+                            <File className="w-4 h-4" />
+                          </div>
+                          <span className="font-medium text-gray-900">
+                            {doc.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {formatFileSize(doc.fileSize)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {doc.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {doc.tags.length > 3 && (
+                            <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                              +{doc.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {formatDate(doc.updatedAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Loading state announcement for screen readers */}
-      {isLoading && (
-        <div className="sr-only" aria-live="assertive" aria-atomic="true">
-          Processing file operation...
+      {/* Bulk Actions Bar (shown when documents are selected) */}
+      {selectedDocs.size > 0 && (
+        <div className="border-t border-gray-200 bg-white px-6 py-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-700">
+              {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
+            </p>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleBulkMove}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Move
+              </button>
+              <button 
+                onClick={handleBulkTag}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Tag
+              </button>
+              <button 
+                onClick={handleBulkDelete}
+                className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Upload Modal */}
+      {organizationId && (
+        <UploadModal
+          isOpen={isUploadModalOpen}
+          onClose={() => setIsUploadModalOpen(false)}
+          organizationId={organizationId}
+          folderId={currentFolderId}
+          onUploadComplete={handleUploadComplete}
+        />
+      )}
+
+      {/* Document Detail Modal */}
+      {selectedDocumentId && (
+        <DocumentDetailModal
+          isOpen={!!selectedDocumentId}
+          onClose={() => setSelectedDocumentId(null)}
+          documentId={selectedDocumentId}
+          onUpdate={handleDocumentUpdate}
+          onDelete={handleDocumentDelete}
+        />
+      )}
+
+      {/* Create Folder Modal */}
+      {organizationId && (
+        <CreateFolderModal
+          isOpen={isFolderModalOpen}
+          onClose={() => setIsFolderModalOpen(false)}
+          organizationId={organizationId}
+          parentFolderId={currentFolderId}
+          onSuccess={handleFolderCreated}
+        />
       )}
     </div>
   );

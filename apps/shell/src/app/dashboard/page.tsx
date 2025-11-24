@@ -20,6 +20,13 @@ import { TransformationSnapshotCard } from '@/components/dashboard/Transformatio
 import { RecentDocumentsCard } from '@/components/dashboard/RecentDocumentsCard';
 import { CatalogBanner } from '@/components/dashboard/CatalogBanner';
 
+// Document Management Widgets
+import {
+  RecentDocumentsWidget,
+  StorageUsageWidget,
+  DocumentActivityWidget,
+} from '@/components/dashboard/DashboardWidgets';
+
 // Mock Data
 import {
   currentUser,
@@ -86,6 +93,15 @@ export default function DashboardPage() {
                   semantic={kpi.semantic}
                 />
               ))}
+            </div>
+          </section>
+
+          {/* Document Management Widgets - 3 Column Grid */}
+          <section className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <RecentDocumentsWidget />
+              <StorageUsageWidget />
+              <DocumentActivityWidget />
             </div>
           </section>
 

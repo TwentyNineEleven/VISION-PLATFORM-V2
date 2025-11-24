@@ -245,7 +245,7 @@ export const teamService = {
     const { error } = await supabase
       .from('organization_invites')
       .update({
-        resend_count: invite.resend_count + 1,
+        resend_count: (invite.resend_count ?? 0) + 1,
         last_sent_at: new Date().toISOString(),
       })
       .eq('id', inviteId);

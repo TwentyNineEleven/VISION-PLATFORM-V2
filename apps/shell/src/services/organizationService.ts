@@ -34,8 +34,8 @@ function dbToOrganization(dbOrg: DbOrganization): Organization {
       country: dbOrg.address_country || undefined,
     },
     brandColors: {
-      primary: dbOrg.brand_primary_color,
-      secondary: dbOrg.brand_secondary_color,
+      primary: dbOrg.brand_primary_color ?? '',
+      secondary: dbOrg.brand_secondary_color ?? '',
     },
     updatedAt: dbOrg.updated_at,
   };
@@ -113,33 +113,54 @@ export const organizationService = {
     }
 
     // Get organizations where user is a member
-    const { data: memberships, error } = await supabase
+    // First get the memberships
+    const { data: memberships, error: memberError } = await supabase
       .from('organization_members')
-      .select(`
-        role,
-        last_accessed_at,
-        organizations (*)
-      `)
+      .select('organization_id, role, last_accessed_at')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .is('deleted_at', null)
       .order('last_accessed_at', { ascending: false, nullsFirst: false });
 
-    if (error || !memberships) {
-      console.error('Error fetching user organizations:', error);
+    if (memberError || !memberships || memberships.length === 0) {
+      console.error('Error fetching memberships:', {
+        error: memberError,
+        message: memberError?.message,
+        details: memberError?.details,
+        hint: memberError?.hint,
+        code: memberError?.code
+      });
       return [];
     }
 
-    return memberships
-      .filter(m => m.organizations && !Array.isArray(m.organizations))
-      .map(m => {
-        const org = m.organizations as unknown as DbOrganization;
-        return {
-          ...dbToOrganization(org),
-          role: m.role,
-          lastAccessed: m.last_accessed_at || undefined,
-        };
+    // Then get the organizations
+    const orgIds = memberships.map(m => m.organization_id);
+    const { data: orgs, error } = await supabase
+      .from('organizations')
+      .select('*')
+      .in('id', orgIds)
+      .is('deleted_at', null);
+
+    if (error || !orgs) {
+      console.error('Error fetching organizations:', {
+        error,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
       });
+      return [];
+    }
+
+    // Combine memberships with organizations
+    return orgs.map(org => {
+      const membership = memberships.find(m => m.organization_id === org.id);
+      return {
+        ...dbToOrganization(org),
+        role: membership?.role || 'Member',
+        lastAccessed: membership?.last_accessed_at || undefined,
+      };
+    });
   },
 
   /**
@@ -227,7 +248,7 @@ export const organizationService = {
 
     const { data: newOrg, error } = await supabase
       .from('organizations')
-      .insert(dbData)
+      .insert(dbData as any)
       .select()
       .single();
 
@@ -251,7 +272,7 @@ export const organizationService = {
 
     const { data: updated, error } = await supabase
       .from('organizations')
-      .update(dbData)
+      .update(dbData as any)
       .eq('id', organizationId)
       .is('deleted_at', null)
       .select()

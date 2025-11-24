@@ -67,7 +67,7 @@ export async function POST(
     const { data: updated, error: updateError } = await supabase
       .from('organization_invites')
       .update({
-        resend_count: invite.resend_count + 1,
+        resend_count: (invite.resend_count ?? 0) + 1,
         last_sent_at: new Date().toISOString(),
       })
       .eq('id', inviteId)

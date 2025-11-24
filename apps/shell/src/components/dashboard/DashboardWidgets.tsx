@@ -196,7 +196,12 @@ export function ReturningUsersCountWidget({ data }: { data?: number[] }) {
       icon={<Users className="w-5 h-5" />}
       trend={{ value: 23, isPositive: true }}
       chart={<BarChart data={barData} />}
-      className="flex-1 min-h-[456px]"
+      className="flex-1 in-h-[456px]"
     />
   );
 }
+
+// Export document management widgets
+export { RecentDocumentsWidget } from './RecentDocumentsWidget';
+export { StorageUsageWidget } from './StorageUsageWidget';
+export { DocumentActivityWidget } from './DocumentActivityWidget';

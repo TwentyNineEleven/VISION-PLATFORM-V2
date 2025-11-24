@@ -1,128 +1,86 @@
-import { Container, Stack, Grid, Group, Title, Text, GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowButton, GlowBadge } from '@/components/glow-ui';
-import { Check } from 'lucide-react';
-
-const plans = [
-  {
-    name: 'Individual',
-    price: 'Coming Soon',
-    description: 'For solo practitioners and consultants',
-    features: ['Full access to VISION', 'AI support', 'Unlimited exports', 'Personal workspace', 'Community support'],
-    cta: 'Join Waitlist',
-    highlighted: false,
-  },
-  {
-    name: 'Organization',
-    price: 'Coming Soon',
-    description: 'For nonprofits and social enterprises',
-    features: [
-      'Full access to VISION',
-      'AI support',
-      'Unlimited exports',
-      'Team collaboration',
-      'Priority support',
-      'Custom branding',
-    ],
-    cta: 'Join Waitlist',
-    highlighted: true,
-  },
-  {
-    name: 'Consultant',
-    price: 'Coming Soon',
-    description: 'For consultants supporting multiple clients',
-    features: [
-      'Full access to VISION',
-      'AI support',
-      'Unlimited exports',
-      'Multi-organization management',
-      'White-label options',
-      'Dedicated support',
-    ],
-    cta: 'Join Waitlist',
-    highlighted: false,
-  },
-  {
-    name: 'Funder Cohort',
-    price: 'Custom',
-    description: 'For foundations supporting grantee cohorts',
-    features: [
-      'Full access for all grantees',
-      'AI support',
-      'Unlimited exports',
-      'Cohort management',
-      'Aggregate reporting',
-      'Dedicated account manager',
-    ],
-    cta: 'Contact Sales',
-    highlighted: false,
-  },
-];
+import { Container, Stack, Title, Text, GlowButton, Grid } from '@/components/glow-ui';
+import { ArrowRight, Check, Sparkles } from 'lucide-react';
 
 export function Pricing() {
-  return (
-    <section className="py-20 bg-white">
-      <Container>
-        <Stack spacing="xl">
-          <Stack spacing="sm" align="center" className="text-center">
-            <Title level={2}>Simple, clear pricing.</Title>
-            <Text size="lg" color="secondary">
-              All plans include full access to VISION, AI support, and unlimited exports.
-            </Text>
-          </Stack>
+  const included = [
+    'Complete Core Infrastructure',
+    'VISION AI™ Intelligence Layer',
+    'All 6 Transformation Areas',
+    'All 21 Applications',
+    'Unlimited Users & Data',
+    'Priority Support',
+  ];
 
-          <Grid columns={2} gap="lg" className="md:grid-cols-4">
-            {plans.map((plan) => (
-              <GlowCard
-                key={plan.name}
-                variant={plan.highlighted ? 'elevated' : 'interactive'}
-                className={plan.highlighted ? 'ring-2 ring-blue-500' : ''}
-              >
-                <GlowCardHeader>
-                  <Group justify="between" align="start">
-                    <GlowCardTitle>{plan.name}</GlowCardTitle>
-                    {plan.highlighted && (
-                      <GlowBadge variant="info" size="sm">
-                        Popular
-                      </GlowBadge>
-                    )}
-                  </Group>
-                  <Stack spacing="xs" className="mt-4">
-                    <Group spacing="xs" align="baseline">
-                      <Text size="xl" weight="bold" className="text-4xl">
-                        {plan.price}
-                      </Text>
-                      {plan.price !== 'Custom' && (
-                        <Text color="secondary">/month</Text>
-                      )}
-                    </Group>
-                    <Text size="sm" color="secondary">
-                      {plan.description}
+  return (
+    <section className="py-28 bg-gradient-to-br from-white via-gray-50 to-white">
+      <Container>
+        <div className="max-w-5xl mx-auto">
+          <Stack spacing="2xl">
+            {/* Section Header */}
+            <Stack spacing="md" align="center" className="text-center">
+              <Title level={2} className="text-4xl sm:text-5xl font-bold text-[#001A33]">
+                Simple, All-Inclusive Pricing
+              </Title>
+              <div className="w-20 h-1.5 bg-gradient-to-r from-[#007F5F] to-[#00B88D] mx-auto rounded-full"></div>
+              <Text size="lg" className="max-w-3xl text-gray-600 mt-4">
+                One platform. One price. Everything included. No hidden fees or tiered limitations.
+              </Text>
+            </Stack>
+
+            {/* Pricing Card */}
+            <div className="relative group mt-12">
+              {/* Gradient glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#007F5F] via-[#00B88D] to-[#007F5F] rounded-3xl opacity-20 group-hover:opacity-30 blur transition duration-500"></div>
+
+              <div className="relative bg-white p-10 rounded-2xl border-2 border-gray-200 shadow-xl">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#007F5F]/10 border border-[#007F5F]/20 mb-4">
+                    <Sparkles className="w-4 h-4 text-[#007F5F]" />
+                    <Text size="sm" weight="bold" className="text-[#007F5F]">
+                      Complete Platform Access
                     </Text>
-                  </Stack>
-                </GlowCardHeader>
-                <GlowCardContent>
-                  <Stack spacing="lg">
-                    <Stack spacing="sm">
-                      {plan.features.map((feature) => (
-                        <Group key={feature} spacing="sm" align="start">
-                          <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <Text size="sm">{feature}</Text>
-                        </Group>
-                      ))}
-                    </Stack>
-                    <GlowButton
-                      variant={plan.highlighted ? 'default' : 'outline'}
-                      size="lg"
-                      className="w-full"
-                      glow={plan.highlighted ? 'subtle' : undefined}
-                    >
-                      {plan.cta}
-                    </GlowButton>
-                  </Stack>
-                </GlowCardContent>
-              </GlowCard>
-            ))}
-          </Grid>
-        </Stack>
+                  </div>
+
+                  <Text size="xl" className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
+                    Pricing is structured to support organizations, consultants, and funders at any scale.
+                  </Text>
+                </div>
+
+                {/* What's Included */}
+                <div className="mt-8 mb-10">
+                  <Text weight="bold" size="lg" className="text-[#001A33] text-center mb-6">
+                    Everything Included
+                  </Text>
+                  <Grid columns={2} gap="md">
+                    {included.map((item, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#007F5F]/10 flex items-center justify-center">
+                          <Check className="w-4 h-4 text-[#007F5F]" />
+                        </div>
+                        <Text size="sm" className="text-gray-700">
+                          {item}
+                        </Text>
+                      </div>
+                    ))}
+                  </Grid>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center">
+                  <GlowButton
+                    size="lg"
+                    variant="default"
+                    glow="strong"
+                    rightIcon={<ArrowRight />}
+                    className="bg-[#007F5F] hover:bg-[#00B88D] text-lg px-10 py-7 shadow-xl hover:shadow-2xl transition-all duration-300"
+                  >
+                    Talk to Us About Pricing
+                  </GlowButton>
+                </div>
+              </div>
+            </div>
+          </Stack>
+        </div>
       </Container>
     </section>
   );

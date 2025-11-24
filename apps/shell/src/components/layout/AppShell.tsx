@@ -27,6 +27,8 @@ import { mockUser, mockNotifications, getUnreadNotificationCount } from '@/lib/m
 import { updateNotificationBadge } from '@/lib/nav-config';
 import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
 import { useRouter } from 'next/navigation';
+import { OrganizationProvider } from '@/contexts/OrganizationContext';
+import { createClient } from '@/lib/supabase/client';
 
 const PUBLIC_ROUTES = new Set([
   '/',
@@ -68,10 +70,49 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [appLauncherOpen, setAppLauncherOpen] = React.useState(false);
+  const [user, setUser] = React.useState<{ name: string; email: string; initials: string } | null>(null);
 
   const isShellRoute = React.useMemo(() => {
     return !PUBLIC_ROUTES.has(pathname);
   }, [pathname]);
+
+  // Load authenticated user
+  React.useEffect(() => {
+    async function loadUser() {
+      try {
+        const supabase = createClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (authUser) {
+          // Get user details from public.users table
+          const { data: userData } = await supabase
+            .from('users')
+            .select('name, email')
+            .eq('id', authUser.id)
+            .single();
+
+          if (userData) {
+            setUser({
+              name: userData.name,
+              email: userData.email,
+              initials: userData.name
+                .split(' ')
+                .map(n => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2),
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
+
+    if (isShellRoute) {
+      loadUser();
+    }
+  }, [isShellRoute]);
 
   // Update notification badge count
   React.useEffect(() => {
@@ -134,61 +175,63 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AppShellContext.Provider value={contextValue}>
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:block lg:fixed lg:inset-y-0">
-          <GlowSideNav
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebar}
-          />
-        </aside>
+      <OrganizationProvider>
+        <div className="flex">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block lg:fixed lg:inset-y-0">
+            <GlowSideNav
+              collapsed={sidebarCollapsed}
+              onToggleCollapse={toggleSidebar}
+            />
+          </aside>
 
-        {/* Mobile Navigation Drawer */}
-        <GlowMobileNavDrawer
-          open={mobileNavOpen}
-          onClose={closeMobileNav}
-        />
-
-        {/* Main Content Area */}
-        <div
-          className={cn(
-            'flex min-h-screen flex-1 flex-col bg-[#F8FAFC]',
-            sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'
-          )}
-        >
-          {/* Top Header */}
-          <GlowTopHeader
-            className="sticky top-0 z-20"
-            onMenuToggle={openMobileNav}
-            onAppLauncherOpen={openAppLauncher}
-            user={{
-              name: mockUser.name,
-              email: mockUser.email,
-              initials: mockUser.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2),
-            }}
-            notifications={getUnreadNotificationCount(mockNotifications)}
+          {/* Mobile Navigation Drawer */}
+          <GlowMobileNavDrawer
+            open={mobileNavOpen}
+            onClose={closeMobileNav}
           />
 
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto bg-[#F8FAFC] px-4 py-6 sm:px-6 lg:px-8 overscroll-contain">
-            {children}
-          </main>
+          {/* Main Content Area */}
+          <div
+            className={cn(
+              'flex min-h-screen flex-1 flex-col bg-[#F8FAFC]',
+              sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'
+            )}
+          >
+            {/* Top Header */}
+            <GlowTopHeader
+              className="sticky top-0 z-20"
+              onMenuToggle={openMobileNav}
+              onAppLauncherOpen={openAppLauncher}
+              user={user || {
+                name: mockUser.name,
+                email: mockUser.email,
+                initials: mockUser.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2),
+              }}
+              notifications={getUnreadNotificationCount(mockNotifications)}
+            />
+
+            {/* Page Content */}
+            <main className="flex-1 overflow-y-auto bg-[#F8FAFC] px-4 py-6 sm:px-6 lg:px-8 overscroll-contain">
+              {children}
+            </main>
+          </div>
+
+          {/* App Launcher Modal */}
+          <AppLauncherModal
+            isOpen={appLauncherOpen}
+            onClose={closeAppLauncher}
+            apps={APP_CATALOG_DATA}
+            onLaunchApp={handleLaunchApp}
+            onToggleFavorite={handleToggleFavorite}
+          />
         </div>
-
-        {/* App Launcher Modal */}
-        <AppLauncherModal
-          isOpen={appLauncherOpen}
-          onClose={closeAppLauncher}
-          apps={APP_CATALOG_DATA}
-          onLaunchApp={handleLaunchApp}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      </div>
+      </OrganizationProvider>
     </AppShellContext.Provider>
   );
 }

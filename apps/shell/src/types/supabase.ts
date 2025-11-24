@@ -12,8 +12,538 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      document_activity: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_name: string | null
+          created_at: string | null
+          details: Json | null
+          document_id: string | null
+          folder_id: string | null
+          id: string
+          ip_address: unknown
+          new_values: Json | null
+          old_values: Json | null
+          organization_id: string
+          user_agent: string | null
+          version_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string | null
+          details?: Json | null
+          document_id?: string | null
+          folder_id?: string | null
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          organization_id: string
+          user_agent?: string | null
+          version_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string | null
+          details?: Json | null
+          document_id?: string | null
+          folder_id?: string | null
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          organization_id?: string
+          user_agent?: string | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_activity_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activity_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activity_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activity_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activity_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "document_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_shares: {
+        Row: {
+          allow_download: boolean | null
+          allow_reshare: boolean | null
+          created_at: string | null
+          created_by: string | null
+          document_id: string | null
+          expires_at: string | null
+          folder_id: string | null
+          id: string
+          metadata: Json | null
+          password_hash: string | null
+          permission: string
+          require_password: boolean | null
+          revoked_at: string | null
+          revoked_by: string | null
+          shared_with_role: string | null
+          shared_with_user_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_download?: boolean | null
+          allow_reshare?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          document_id?: string | null
+          expires_at?: string | null
+          folder_id?: string | null
+          id?: string
+          metadata?: Json | null
+          password_hash?: string | null
+          permission: string
+          require_password?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          shared_with_role?: string | null
+          shared_with_user_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_download?: boolean | null
+          allow_reshare?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          document_id?: string | null
+          expires_at?: string | null
+          folder_id?: string | null
+          id?: string
+          metadata?: Json | null
+          password_hash?: string | null
+          permission?: string
+          require_password?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          shared_with_role?: string | null
+          shared_with_user_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_shares_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_shared_with_user_id_fkey"
+            columns: ["shared_with_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          change_notes: string | null
+          changes_summary: Json | null
+          created_at: string | null
+          created_by: string | null
+          document_id: string
+          file_path: string
+          file_size: number
+          id: string
+          metadata: Json | null
+          mime_type: string
+          version_number: number
+        }
+        Insert: {
+          change_notes?: string | null
+          changes_summary?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          document_id: string
+          file_path: string
+          file_size: number
+          id?: string
+          metadata?: Json | null
+          mime_type: string
+          version_number: number
+        }
+        Update: {
+          change_notes?: string | null
+          changes_summary?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          document_id?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          metadata?: Json | null
+          mime_type?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          ai_enabled: boolean | null
+          ai_entities: Json | null
+          ai_error: string | null
+          ai_keywords: string[] | null
+          ai_language: string | null
+          ai_metadata: Json | null
+          ai_processed_at: string | null
+          ai_processing_status: string | null
+          ai_provider: string | null
+          ai_sentiment: string | null
+          ai_summary: string | null
+          ai_topics: string[] | null
+          created_at: string | null
+          current_version_id: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          download_count: number | null
+          extension: string | null
+          extracted_text: string | null
+          extracted_text_length: number | null
+          file_path: string
+          file_size: number
+          folder_id: string | null
+          id: string
+          last_downloaded_at: string | null
+          last_viewed_at: string | null
+          metadata: Json | null
+          mime_type: string
+          name: string
+          organization_id: string
+          tags: string[] | null
+          text_extracted_at: string | null
+          updated_at: string | null
+          updated_by: string | null
+          uploaded_by: string | null
+          version_number: number | null
+          view_count: number | null
+        }
+        Insert: {
+          ai_enabled?: boolean | null
+          ai_entities?: Json | null
+          ai_error?: string | null
+          ai_keywords?: string[] | null
+          ai_language?: string | null
+          ai_metadata?: Json | null
+          ai_processed_at?: string | null
+          ai_processing_status?: string | null
+          ai_provider?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          ai_topics?: string[] | null
+          created_at?: string | null
+          current_version_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          download_count?: number | null
+          extension?: string | null
+          extracted_text?: string | null
+          extracted_text_length?: number | null
+          file_path: string
+          file_size: number
+          folder_id?: string | null
+          id?: string
+          last_downloaded_at?: string | null
+          last_viewed_at?: string | null
+          metadata?: Json | null
+          mime_type: string
+          name: string
+          organization_id: string
+          tags?: string[] | null
+          text_extracted_at?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          uploaded_by?: string | null
+          version_number?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          ai_enabled?: boolean | null
+          ai_entities?: Json | null
+          ai_error?: string | null
+          ai_keywords?: string[] | null
+          ai_language?: string | null
+          ai_metadata?: Json | null
+          ai_processed_at?: string | null
+          ai_processing_status?: string | null
+          ai_provider?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          ai_topics?: string[] | null
+          created_at?: string | null
+          current_version_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          download_count?: number | null
+          extension?: string | null
+          extracted_text?: string | null
+          extracted_text_length?: number | null
+          file_path?: string
+          file_size?: number
+          folder_id?: string | null
+          id?: string
+          last_downloaded_at?: string | null
+          last_viewed_at?: string | null
+          metadata?: Json | null
+          mime_type?: string
+          name?: string
+          organization_id?: string
+          tags?: string[] | null
+          text_extracted_at?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          uploaded_by?: string | null
+          version_number?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_documents_current_version"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "document_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          depth: number | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_system: boolean | null
+          metadata: Json | null
+          name: string
+          organization_id: string
+          parent_folder_id: string | null
+          path: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          depth?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_system?: boolean | null
+          metadata?: Json | null
+          name: string
+          organization_id: string
+          parent_folder_id?: string | null
+          path?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          depth?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_system?: boolean | null
+          metadata?: Json | null
+          name?: string
+          organization_id?: string
+          parent_folder_id?: string | null
+          path?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_audit_log: {
         Row: {
           action: string
@@ -506,6 +1036,18 @@ export type Database = {
       }
     }
     Functions: {
+      can_delete_document: {
+        Args: { doc_id: string; user_id: string }
+        Returns: boolean
+      }
+      can_edit_document: {
+        Args: { doc_id: string; user_id: string }
+        Returns: boolean
+      }
+      can_view_document: {
+        Args: { doc_id: string; user_id: string }
+        Returns: boolean
+      }
       expire_old_invites: { Args: never; Returns: undefined }
       generate_invite_token: { Args: never; Returns: string }
       get_user_org_role: {
@@ -522,6 +1064,10 @@ export type Database = {
           organization_name: string
           user_role: string
         }[]
+      }
+      has_organization_role: {
+        Args: { org_id: string; required_role: string[]; user_id: string }
+        Returns: boolean
       }
       is_organization_member: {
         Args: { org_id: string; user_id: string }
@@ -673,6 +1219,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

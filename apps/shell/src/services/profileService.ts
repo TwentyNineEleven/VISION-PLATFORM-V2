@@ -32,7 +32,7 @@ export const profileService = {
         email: data.email,
         displayName: data.name,
         avatar: data.avatar_url,
-        preferences: data.user_preferences?.[0] || null,
+        preferences: Array.isArray(data.user_preferences) ? data.user_preferences[0] || null : null,
         updatedAt: data.updated_at,
       } as UserProfile;
     } catch (err) {
