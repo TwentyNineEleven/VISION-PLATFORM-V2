@@ -1,6 +1,6 @@
 /**
  * Documents API Route
- * 
+ *
  * GET /api/v1/documents - List documents with filters
  * POST /api/v1/documents - Upload a new document
  */
@@ -9,12 +9,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { documentService } from '@/services/documentService';
 import type { DocumentSearchParams } from '@/types/document';
+import { handleApiError } from '@/lib/api-error-handler';
+import { logApiRequest } from '@/lib/logger';
 
 // ============================================================================
 // GET - List Documents
 // ============================================================================
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const supabase = await createServerSupabaseClient();
 
@@ -74,19 +78,28 @@ export async function GET(request: NextRequest) {
     // Search documents
     const result = await documentService.searchDocuments(params);
 
+    // Log successful request
+    const duration = Date.now() - startTime;
+    logApiRequest({
+      method: 'GET',
+      path: '/api/v1/documents',
+      userId: user.id,
+      organizationId,
+      duration,
+      statusCode: 200,
+    });
+
     return NextResponse.json({
       success: true,
       data: result,
     });
   } catch (error) {
-    console.error('Error fetching documents:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch documents',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, {
+      method: 'GET',
+      path: '/api/v1/documents',
+      userId: (await createServerSupabaseClient()).auth.getUser().then(r => r.data.user?.id),
+      organizationId: request.nextUrl.searchParams.get('organizationId') || undefined,
+    });
   }
 }
 
