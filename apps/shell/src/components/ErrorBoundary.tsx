@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex gap-3">
               <GlowButton
-                variant="primary"
+                variant="default"
                 onClick={this.handleReset}
                 className="flex items-center gap-2"
               >

@@ -460,7 +460,7 @@ export const visionflowService = {
     // Get task counts by status
     const { data: taskCounts, error: taskError } = await supabase
       .from('tasks')
-      .select('status')
+      .select('status, due_date')
       .is('deleted_at', null);
 
     if (taskError) {
