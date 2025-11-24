@@ -128,15 +128,18 @@ export default function AdminOrganizationsPage() {
 
         <GlowCardContent className="overflow-x-auto">
           <table className="w-full text-left text-sm">
+            <caption className="sr-only">
+              List of organizations with name, type, plan, active apps, users, status, and actions
+            </caption>
             <thead>
               <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-3 py-2 font-semibold">Organization</th>
-                <th className="px-3 py-2 font-semibold">Type</th>
-                <th className="px-3 py-2 font-semibold">Plan</th>
-                <th className="px-3 py-2 font-semibold">Active apps</th>
-                <th className="px-3 py-2 font-semibold">Users</th>
-                <th className="px-3 py-2 font-semibold">Status</th>
-                <th className="px-3 py-2 font-semibold">Actions</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Organization</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Type</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Plan</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Active apps</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Users</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Status</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
