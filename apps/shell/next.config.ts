@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+
+  // Redirects for legacy routes
+  async redirects() {
+    return [
+      {
+        source: '/app-catalog',
+        destination: '/applications',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
