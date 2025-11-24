@@ -14,10 +14,55 @@ import {
 } from '@/components/glow-ui';
 import { GlowTabs } from '@/components/glow-ui/GlowTabs';
 import { mockAdminSettings } from '@/lib/mock-admin';
+import { platformSettingsService } from '@/services/platformSettingsService';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = React.useState(mockAdminSettings);
   const [tab, setTab] = React.useState('branding');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
+
+  // Clear messages after 5 seconds
+  React.useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
+
+  // Load settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const saved = await platformSettingsService.getSettings();
+        if (saved) {
+          setSettings(saved);
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await platformSettingsService.saveSettings(settings);
+      setSuccess('Settings saved successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save settings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const brandingTab = (
     <GlowCard variant="interactive">
@@ -231,6 +276,22 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div
+          className="rounded-lg border border-vision-error-600 bg-vision-error-50 px-4 py-3 text-vision-error-600"
+          role="alert"
+        >
+          <strong className="font-semibold">Error:</strong> {error}
+        </div>
+      )}
+      {success && (
+        <div
+          className="rounded-lg border border-vision-success-600 bg-vision-success-50 px-4 py-3 text-vision-success-600"
+          role="status"
+        >
+          <strong className="font-semibold">Success:</strong> {success}
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold text-foreground">Admin settings</h1>
         <p className="text-sm text-muted-foreground">Govern the platform experience for every tenant.</p>
@@ -248,7 +309,9 @@ export default function AdminSettingsPage() {
       />
 
       <div className="flex justify-end">
-        <GlowButton glow="subtle">Save settings</GlowButton>
+        <GlowButton glow="subtle" onClick={handleSaveSettings} disabled={isLoading}>
+          {isLoading ? 'Saving...' : 'Save settings'}
+        </GlowButton>
       </div>
     </div>
   );
