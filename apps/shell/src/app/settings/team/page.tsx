@@ -8,7 +8,7 @@ import {
   GlowCardTitle,
   GlowCardDescription,
 } from '@/components/glow-ui/GlowCard';
-import { GlowInput, GlowButton, GlowBadge } from '@/components/glow-ui';
+import { GlowInput, GlowButton, GlowBadge, GlowSelect } from '@/components/glow-ui';
 import { mockTeamMembers, mockPendingInvites, TeamRole } from '@/lib/mock-data';
 import { PermissionsMatrix } from '@/components/settings/PermissionsMatrix';
 import { ConfirmDialog } from '@/components/settings/ConfirmDialog';
@@ -57,18 +57,21 @@ export default function TeamSettingsPage() {
                 leftIcon={<Users className="h-4 w-4" />}
               />
               <div className="space-y-2">
-                <label className="text-sm font-medium">Role</label>
-                <select
+                <GlowSelect
+                  label="Role"
+                  name="invite-role"
+                  data-testid="invite-role-select"
                   value={inviteForm.role}
                   onChange={(e) => setInviteForm((prev) => ({ ...prev, role: e.target.value as TeamRole }))}
                   className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                  data-glow-select="true"
                 >
                   {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
                     <option key={role} value={role}>
                       {role}
                     </option>
                   ))}
-                </select>
+                </GlowSelect>
               </div>
               <GlowButton type="submit" leftIcon={<Send className="h-4 w-4" />}>
                 Send invite
@@ -173,7 +176,10 @@ export default function TeamSettingsPage() {
                   <GlowBadge variant="outline" size="sm">
                     {member.role}
                   </GlowBadge>
-                  <select
+                  <GlowSelect
+                    aria-label={`${member.name} role`}
+                    name={`member-role-${member.id}`}
+                    data-testid={`member-role-${member.id}`}
                     value={member.role}
                     onChange={(e) =>
                       setMembers((prev) =>
@@ -181,13 +187,14 @@ export default function TeamSettingsPage() {
                       )
                     }
                     className="h-9 rounded-md border border-input bg-transparent px-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                    data-glow-select="true"
                   >
                     {(['Owner', 'Admin', 'Editor', 'Viewer'] as TeamRole[]).map((role) => (
                       <option key={role} value={role}>
                         {role}
                       </option>
                     ))}
-                  </select>
+                  </GlowSelect>
                   <ConfirmDialog
                     title="Remove member"
                     description={`Remove ${member.name} from this workspace? They will lose access immediately.`}

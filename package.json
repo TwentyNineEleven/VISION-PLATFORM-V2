@@ -11,7 +11,12 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "type-check": "turbo run type-check",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "test": "vitest",
+    "validate:colors": "tsx scripts/validate-colors.ts",
+    "validate:colors:staged": "tsx scripts/validate-colors.ts --staged",
+    "validate:components": "tsx scripts/validate-components.ts",
+    "validate:components:staged": "tsx scripts/validate-components.ts --staged"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^8.6.14",
@@ -24,6 +29,8 @@
     "@storybook/react-vite": "^8.6.14",
     "@storybook/test": "^8.6.14",
     "@turbo/gen": "^2.4.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^14.3.1",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "prettier": "^3.3.3",
@@ -32,7 +39,12 @@
     "storybook": "^8.6.14",
     "turbo": "^2.4.0",
     "typescript": "^5.0.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^2.1.9",
+    "jsdom": "^22.1.0",
+    "glob": "^8.1.0",
+    "tsx": "^3.12.0"
   },
   "packageManager": "pnpm@10.18.1",
   "engines": {

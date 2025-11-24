@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, Group, Stack, Text } from '@/components/glow-ui';
 import { ArrowRight, Circle } from 'lucide-react';
 import { type Task, formatDueDate } from '@/lib/dashboard/mockDashboardData';
-import { getAppMeta, getPhaseColor, getPhaseLabel, getPhaseSoftColor } from '@/lib/apps/appMetadata';
+import { getAppMeta, getPhaseLabel } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
 
 export interface TaskListCardProps {
   tasks: Task[];
@@ -13,18 +15,18 @@ export interface TaskListCardProps {
 
 const statusConfig = {
   overdue: {
-    color: '#B91C1C', // Electric Scarlet
-    bg: 'rgba(185, 28, 28, 0.12)',
+    textColor: 'text-vision-red-900',       // Bold Color System
+    bgColor: 'bg-vision-red-50',            // Bold Color System
     label: 'Overdue',
   },
   'due-today': {
-    color: '#C2410C', // Vivid Tangerine
-    bg: 'rgba(194, 65, 12, 0.12)',
+    textColor: 'text-vision-orange-900',    // Bold Color System
+    bgColor: 'bg-vision-orange-50',         // Bold Color System
     label: 'Due today',
   },
   upcoming: {
-    color: '#0047AB', // Bold Royal Blue
-    bg: 'rgba(0, 71, 171, 0.12)',
+    textColor: 'text-vision-blue-950',      // Bold Color System
+    bgColor: 'bg-vision-blue-50',           // Bold Color System
     label: 'Due in',
   },
 } as const;
@@ -34,14 +36,20 @@ function TaskRow({ task }: { task: Task }) {
   const appMeta = getAppMeta(task.appId);
   const appName = appMeta?.name || task.appId;
   const phaseLabel = appMeta ? getPhaseLabel(appMeta.phase) : task.context;
-  const phaseColor = appMeta ? getPhaseColor(appMeta.phase) : '#64748B';
-  const phaseSoftColor = appMeta ? getPhaseSoftColor(appMeta.phase) : 'rgba(100, 116, 139, 0.12)';
+
+  // Use Bold Color System tokens via getPhaseTokenClasses
+  const phaseClasses = appMeta
+    ? getPhaseTokenClasses(appMeta.phase)
+    : { badgeBackground: 'bg-vision-gray-100', badgeText: 'text-vision-gray-700' };
 
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/50 px-4 py-3 transition hover:border-border hover:shadow-sm">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 mt-0.5"
-        style={{ backgroundColor: config.bg, color: config.color }}
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 mt-0.5',
+          config.bgColor,
+          config.textColor
+        )}
       >
         <Circle className="h-3 w-3 fill-current" />
       </div>
@@ -53,33 +61,33 @@ function TaskRow({ task }: { task: Task }) {
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[10px] font-medium"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[10px] font-medium',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {appName}
           </GlowBadge>
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[10px] font-medium uppercase tracking-wide"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'border-transparent text-[10px] font-medium uppercase tracking-wide',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
           >
             {phaseLabel}
           </GlowBadge>
           <GlowBadge
             variant="outline"
             size="sm"
-            className="border-transparent text-[10px] font-semibold"
-            style={{
-              backgroundColor: config.bg,
-              color: config.color,
-            }}
+            className={cn(
+              'border-transparent text-[10px] font-semibold',
+              config.bgColor,
+              config.textColor
+            )}
           >
             {formatDueDate(task.dueDate, task.status)}
           </GlowBadge>

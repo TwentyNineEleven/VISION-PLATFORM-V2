@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { GlowIcon } from './GlowIcons';
 import { navConfig, helpNavItem, getActiveNavItem, getActiveSubmenuItem } from '@/lib/nav-config';
 import { Menu, X } from 'lucide-react';
+import { GlowButton } from '@/components/glow-ui';
 
 export interface GlowSideNavProps {
   collapsed?: boolean;
@@ -88,17 +89,19 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
           </div>
         )}
         {onToggleCollapse && (
-          <button
+          <GlowButton
+            variant="ghost"
+            size="icon"
+            glow="none"
             onClick={onToggleCollapse}
             className={cn(
-              'flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#F9FAFB] transition-colors',
               'text-[#64748B] hover:text-[#1F2937]'
             )}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!collapsed}
           >
             <GlowIcon name="line-3-light" size={20} />
-          </button>
+          </GlowButton>
         )}
       </div>
 
@@ -199,10 +202,14 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
                 <span className="font-semibold">1000</span> block storage limit
               </p>
             </div>
-            <button className="flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md bg-white border border-[#ADBFF5] text-sm font-medium text-[#0047AB] hover:bg-[#DBEAFE] transition-colors">
+            <GlowButton
+              variant="outline"
+              size="sm"
+              className="flex items-center justify-center gap-2 px-2.5 py-1.5 border-[#ADBFF5] text-[#0047AB]"
+            >
               <GlowIcon name="crown-light" size={16} color="#0047AB" />
               <span>Upgrade</span>
-            </button>
+            </GlowButton>
           </div>
         </div>
       )}

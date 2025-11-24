@@ -39,9 +39,15 @@ export function ListWidget({ title, items, onViewAll, className }: ListWidgetPro
               </div>
             </div>
           </div>
-          <button className="p-2 rounded-md hover:bg-accent transition-colors">
-            <MoreVertical className="w-4 h-4 text-foreground" />
-          </button>
+          <GlowButton
+            variant="ghost"
+            size="icon"
+            glow="none"
+            className="text-foreground hover:text-foreground transition-colors"
+            aria-label="More list settings"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </GlowButton>
         </div>
         <div className="flex flex-1 flex-col gap-0 items-start min-h-0 overflow-hidden py-3 w-full">
           {items.map((item) => (
@@ -107,4 +113,3 @@ export function ListWidget({ title, items, onViewAll, className }: ListWidgetPro
     </GlowCard>
   );
 }
-

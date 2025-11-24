@@ -4,7 +4,8 @@ import * as React from 'react';
 import { GlowCard, GlowBadge, GlowButton } from '@/components/glow-ui';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getAppMeta, getPhaseColor, getPhaseLabel, getPhaseSoftColor } from '@/lib/apps/appMetadata';
+import { getAppMeta, getPhaseLabel } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses } from '@/lib/phase-colors';
 import { formatRelativeTime } from '@/lib/dashboard/mockDashboardData';
 import type { AppActivity } from '@/lib/dashboard/mockDashboardData';
 
@@ -24,8 +25,7 @@ export function MiniAppCard({
   const meta = getAppMeta(activity.appId);
   if (!meta) return null;
 
-  const phaseColor = getPhaseColor(meta.phase);
-  const phaseSoftColor = getPhaseSoftColor(meta.phase);
+  const phaseClasses = getPhaseTokenClasses(meta.phase);
   const phaseLabel = getPhaseLabel(meta.phase);
 
   const handleLaunch = () => {
@@ -48,11 +48,11 @@ export function MiniAppCard({
         <GlowBadge
           variant="outline"
           size="sm"
-          className="border-transparent text-[10px] font-bold uppercase tracking-wider"
-          style={{
-            backgroundColor: phaseSoftColor,
-            color: phaseColor,
-          }}
+          className={cn(
+            'border-transparent text-[10px] font-bold uppercase tracking-wider',
+            phaseClasses.badgeBackground,
+            phaseClasses.badgeText
+          )}
         >
           {phaseLabel}
         </GlowBadge>
@@ -73,11 +73,11 @@ export function MiniAppCard({
       {/* Middle: App icon + name + sublabel */}
       <div className="flex items-center gap-3">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0"
-          style={{
-            backgroundColor: phaseSoftColor,
-            color: phaseColor,
-          }}
+          className={cn(
+            'flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0',
+            phaseClasses.iconBackground,
+            phaseClasses.iconText
+          )}
         >
           <span className="text-xl font-bold">
             {meta.name.charAt(0)}
@@ -98,24 +98,12 @@ export function MiniAppCard({
         variant="default"
         size="sm"
         onClick={handleLaunch}
-        className="w-full"
-        style={{
-          backgroundColor: phaseColor,
-          color: '#FFFFFF',
-        }}
-        onMouseEnter={(e) => {
-          // Darker shade on hover
-          const hoverColor = phaseColor === '#0F766E' ? '#0D5D56' :
-                           phaseColor === '#C2410C' ? '#9A3412' :
-                           phaseColor === '#16A34A' ? '#15803D' :
-                           phaseColor === '#2563EB' ? '#1E3A8A' :
-                           phaseColor === '#7C3AED' ? '#6D28D9' :
-                           phaseColor === '#DB2777' ? '#BE185D' : phaseColor;
-          e.currentTarget.style.backgroundColor = hoverColor;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = phaseColor;
-        }}
+        className={cn(
+          'w-full transition-colors',
+          phaseClasses.buttonBackground,
+          phaseClasses.buttonHover,
+          'text-vision-gray-0'
+        )}
       >
         Launch
       </GlowButton>
@@ -129,4 +117,3 @@ export function MiniAppCard({
     </GlowCard>
   );
 }
-

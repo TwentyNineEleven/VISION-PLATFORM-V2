@@ -16,11 +16,7 @@ export function HeroWelcome({ user, organization, onAskVisionAI }: HeroWelcomePr
     <GlowCard
       variant="glow"
       padding="lg"
-      className="border-vision-gray-100"
-      style={{
-        backgroundColor: '#F8FAFC',
-        borderRadius: '16px',
-      }}
+      className="border-vision-gray-100 bg-vision-gray-50 rounded-[16px]"
     >
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         {/* Left side */}
@@ -46,10 +42,7 @@ export function HeroWelcome({ user, organization, onAskVisionAI }: HeroWelcomePr
             size="sm"
             onClick={onAskVisionAI}
             rightIcon={<Sparkles className="h-4 w-4" />}
-            style={{
-              backgroundColor: '#0047AB',
-              color: '#FFFFFF',
-            }}
+            className="bg-vision-blue-950 hover:bg-vision-blue-700 text-vision-gray-0"
           >
             Ask VISION AI
           </GlowButton>

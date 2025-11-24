@@ -3,6 +3,7 @@
 import React from 'react';
 import { Crown, Users, Layers3, Zap, ChartPie, Plus, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlowButton, GlowSelect } from '@/components/glow-ui';
 
 interface Tab {
   id: string;
@@ -30,37 +31,42 @@ export function DashboardHeader() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-medium text-gray-900">Dashboard</h1>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <button className="p-2.5 rounded-md hover:bg-gray-100 text-gray-600 transition-colors">
+            <GlowButton variant="ghost" size="icon" className="shadow-none text-gray-600 hover:text-gray-900">
               <MoreHorizontal className="w-5 h-5" />
-            </button>
-            <div className="relative">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm font-medium text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-                <option>Last year</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+            </GlowButton>
+            <GlowSelect
+              value={dateFilter}
+              onChange={(event) => setDateFilter(event.target.value)}
+              className="w-48"
+              controlSize="md"
+              data-testid="dashboard-date-filter"
+            >
+              <option value="Last 7 days">Last 7 days</option>
+              <option value="Last 30 days">Last 30 days</option>
+              <option value="Last 90 days">Last 90 days</option>
+              <option value="Last year">Last year</option>
+            </GlowSelect>
+            <GlowButton
+              variant="default"
+              size="sm"
+              className="flex items-center gap-2 text-sm font-medium"
+            >
               <Plus className="w-4 h-4" />
               Widget
-            </button>
+            </GlowButton>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex items-center gap-2 sm:gap-3 border-b border-gray-200 overflow-x-auto">
           {tabs.map((tab) => (
-            <button
+            <GlowButton
               key={tab.id}
               onClick={() => setSelectedTab(tab.id)}
+              variant="ghost"
+              size="sm"
               className={cn(
-                'flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium transition-colors border-b-2',
+                'flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium border-b-2 rounded-none',
                 selectedTab === tab.id || tab.active
                   ? 'text-gray-900 border-blue-600'
                   : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -68,11 +74,15 @@ export function DashboardHeader() {
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
               <span>{tab.label}</span>
-            </button>
+            </GlowButton>
           ))}
-          <button className="flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          <GlowButton
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1.5 h-12 px-2 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+          >
             <Plus className="w-4 h-4" />
-          </button>
+          </GlowButton>
         </div>
       </div>
     </div>

@@ -2,14 +2,14 @@
 
 import * as React from 'react';
 import { GlowModal, GlowModalClose } from '@/components/glow-ui/GlowModal';
-import { GlowButton as Button } from '@/components/glow-ui/GlowButton';
+import { GlowButton } from '@/components/glow-ui/GlowButton';
 
 interface ConfirmDialogProps {
   title: string;
   description: string;
   triggerLabel: string;
-  triggerVariant?: React.ComponentProps<typeof Button>['variant'];
-  triggerSize?: React.ComponentProps<typeof Button>['size'];
+  triggerVariant?: React.ComponentProps<typeof GlowButton>['variant'];
+  triggerSize?: React.ComponentProps<typeof GlowButton>['size'];
   triggerLeftIcon?: React.ReactNode;
   triggerClassName?: string;
   onConfirm: () => void;
@@ -39,7 +39,7 @@ export function ConfirmDialog({
 
   return (
     <>
-      <Button
+      <GlowButton
         variant={triggerVariant}
         size={triggerSize}
         leftIcon={triggerLeftIcon}
@@ -47,7 +47,7 @@ export function ConfirmDialog({
         onClick={() => setOpen(true)}
       >
         {triggerLabel}
-      </Button>
+      </GlowButton>
       <GlowModal
         open={open}
         onOpenChange={setOpen}
@@ -58,16 +58,16 @@ export function ConfirmDialog({
         footer={
           <>
             <GlowModalClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <GlowButton variant="outline">Cancel</GlowButton>
             </GlowModalClose>
-            <Button
+            <GlowButton
               variant={destructive ? 'destructive' : 'default'}
               glow={destructive ? 'subtle' : 'none'}
               onClick={handleConfirm}
               loading={loading}
             >
               Confirm
-            </Button>
+            </GlowButton>
           </>
         }
       >

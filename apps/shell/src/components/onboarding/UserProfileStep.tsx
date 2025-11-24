@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { GlowInput, GlowButton, GlowCard } from '@/components/glow-ui';
-import { Upload, User } from 'lucide-react';
+import { GlowInput, GlowCard } from '@/components/glow-ui';
+import { User } from 'lucide-react';
 import type { OnboardingFormValues } from './types';
+import { FileUpload } from '@/design-system/components/FileUpload';
 
 export function UserProfileStep() {
   const {
@@ -17,8 +18,8 @@ export function UserProfileStep() {
   const avatar = watch('avatar');
   const [preview, setPreview] = React.useState<string | undefined>(avatar);
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleAvatarFiles = (files: File[]) => {
+    const file = files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -79,12 +80,16 @@ export function UserProfileStep() {
             Upload a square image (JPG or PNG) to personalize your profile.
           </p>
         </div>
-        <label className="w-full">
-          <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-          <GlowButton type="button" variant="outline" className="w-full" leftIcon={<Upload className="h-4 w-4" />}>
-            Upload avatar
-          </GlowButton>
-        </label>
+        <div className="w-full">
+          <FileUpload
+            value={[]}
+            onChange={(files) => handleAvatarFiles(files)}
+            accept="image/*"
+            helperText="Square JPG or PNG images only"
+            className="w-full"
+            label=""
+          />
+        </div>
       </GlowCard>
     </div>
   );

@@ -21,7 +21,7 @@ export function CatalogBanner({
       padding="lg"
       className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(0, 71, 171, 0.05) 0%, rgba(4, 120, 87, 0.05) 50%, rgba(194, 65, 12, 0.05) 100%)',
+        background: 'linear-gradient(to bottom right, rgba(0, 71, 171, 0.05), rgba(4, 120, 87, 0.05), rgba(194, 65, 12, 0.05))'
       }}
     >
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
