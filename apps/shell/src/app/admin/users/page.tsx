@@ -23,6 +23,7 @@ import {
 import type { UserRole } from '@/lib/auth';
 import { formatDistanceToNow } from 'date-fns';
 import { UserPlus, ShieldCheck } from 'lucide-react';
+import { userAdminService } from '@/services/userAdminService';
 
 const roles: UserRole[] = ['super_admin', 'org_admin', 'funder_admin', 'member', 'viewer'];
 
@@ -40,6 +41,35 @@ export default function AdminUsersPage() {
     role: 'member' as UserRole,
     orgId: mockAdminOrganizations[0]?.id ?? '',
   });
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
+
+  // Clear messages after 5 seconds
+  React.useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
+
+  const loadUsers = async () => {
+    try {
+      const savedUsers = await userAdminService.getUsers();
+      if (savedUsers.length > 0) {
+        setUsers(savedUsers);
+      }
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -90,14 +120,105 @@ export default function AdminUsersPage() {
     setEditModalOpen(true);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (!selectedUser) return;
-    setUsers((prev) => prev.map((user) => (user.id === selectedUser.id ? selectedUser : user)));
-    setEditModalOpen(false);
+    setIsLoading(true);
+    try {
+      const updatedUsers = users.map((user) => (user.id === selectedUser.id ? selectedUser : user));
+      setUsers(updatedUsers);
+      await userAdminService.saveUsers(updatedUsers);
+      setSuccess('User updated successfully');
+      setEditModalOpen(false);
+    } catch (err) {
+      setError('Failed to update user');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (user: AdminUserRecord) => {
+    const action = user.status === 'active' ? 'deactivate' : 'activate';
+
+    if (!confirm(`${action.toUpperCase()} user "${user.email}"?\n\nThis will ${action} their access to the platform.`)) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await userAdminService.toggleUserStatus(user.id, user.status !== 'active');
+      await loadUsers();
+      setSuccess(`User ${action}d successfully`);
+    } catch (err) {
+      setError(`Failed to ${action} user`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (user: AdminUserRecord) => {
+    if (
+      !confirm(
+        `Reset password for "${user.email}"?\n\nA temporary password will be generated. In production, this would be emailed to the user.`
+      )
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const tempPassword = await userAdminService.resetPassword(user.id);
+      alert(`Temporary password: ${tempPassword}\n\nIn production, this would be emailed to the user.`);
+      setSuccess('Password reset email sent');
+    } catch (err) {
+      setError('Failed to reset password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (user: AdminUserRecord) => {
+    if (
+      !confirm(
+        `⚠️ DELETE user "${user.email}"?\n\nThis will:\n- Remove their access to all organizations\n- Delete all their data\n- This action CANNOT be undone\n\nType the email to confirm:`
+      )
+    ) {
+      return;
+    }
+
+    const typedEmail = prompt(`Type "${user.email}" to confirm deletion:`);
+
+    if (typedEmail !== user.email) {
+      alert('Email does not match. Deletion cancelled.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await userAdminService.deleteUser(user.id);
+      await loadUsers();
+      setSuccess('User deleted successfully');
+    } catch (err) {
+      setError('Failed to delete user');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-lg border border-vision-error-600 bg-vision-error-50 px-4 py-3 text-vision-error-600" role="alert">
+          <strong className="font-semibold">Error:</strong> {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-lg border border-vision-success-600 bg-vision-success-50 px-4 py-3 text-vision-success-600" role="status">
+          <strong className="font-semibold">Success:</strong> {success}
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Users & access</h1>
@@ -139,14 +260,17 @@ export default function AdminUsersPage() {
         </GlowCardHeader>
         <GlowCardContent className="overflow-x-auto">
           <table className="w-full text-left text-sm">
+            <caption className="sr-only">
+              List of users with name, email, role, organization, last login, status, and actions
+            </caption>
             <thead>
               <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-3 py-2 font-semibold">User</th>
-                <th className="px-3 py-2 font-semibold">Role</th>
-                <th className="px-3 py-2 font-semibold">Organization</th>
-                <th className="px-3 py-2 font-semibold">Last login</th>
-                <th className="px-3 py-2 font-semibold">Status</th>
-                <th className="px-3 py-2 font-semibold">Actions</th>
+                <th scope="col" className="px-3 py-2 font-semibold">User</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Role</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Organization</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Last login</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Status</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -170,12 +294,47 @@ export default function AdminUsersPage() {
                       }
                     >
                       {user.status}
+                      <span className="sr-only">user status</span>
                     </GlowBadge>
                   </td>
                   <td className="px-3 py-3">
-                    <GlowButton variant="outline" size="sm" onClick={() => openEditModal(user)}>
-                      Edit
-                    </GlowButton>
+                    <div className="flex flex-wrap gap-2">
+                      <GlowButton
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditModal(user)}
+                        aria-label={`Edit user ${user.email}`}
+                      >
+                        Edit
+                      </GlowButton>
+                      <GlowButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleStatus(user)}
+                        disabled={isLoading}
+                        aria-label={`${user.status === 'active' ? 'Deactivate' : 'Activate'} user ${user.email}`}
+                      >
+                        {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                      </GlowButton>
+                      <GlowButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleResetPassword(user)}
+                        disabled={isLoading}
+                        aria-label={`Reset password for ${user.email}`}
+                      >
+                        Reset Password
+                      </GlowButton>
+                      <GlowButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteUser(user)}
+                        disabled={isLoading}
+                        aria-label={`Delete user ${user.email}`}
+                      >
+                        Delete
+                      </GlowButton>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -198,11 +357,14 @@ export default function AdminUsersPage() {
           </GlowCardHeader>
           <GlowCardContent className="overflow-x-auto">
             <table className="w-full text-left text-sm">
+              <caption className="sr-only">
+                Permissions matrix showing capabilities available to each user role
+              </caption>
               <thead>
                 <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-semibold">Capability</th>
+                  <th scope="col" className="px-3 py-2 font-semibold">Capability</th>
                   {roles.map((role) => (
-                    <th key={role} className="px-3 py-2 font-semibold text-center">
+                    <th key={role} scope="col" className="px-3 py-2 font-semibold text-center">
                       {role.replace('_', ' ')}
                     </th>
                   ))}
