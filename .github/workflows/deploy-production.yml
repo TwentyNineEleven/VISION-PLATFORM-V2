@@ -1,0 +1,166 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://app.visionplatform.io
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.1
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run type check
+        run: pnpm type-check
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Run unit tests
+        run: pnpm test:run
+
+      - name: Run E2E tests
+        run: pnpm playwright:install --with-deps && pnpm test:e2e
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3001
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Backup current production deployment URL
+        id: backup
+        run: |
+          current_url=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | grep "PRODUCTION" | awk '{print $2}' | head -n 1)
+          echo "backup_url=$current_url" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Run database migrations
+        run: npx supabase db push --db-url ${{ secrets.PRODUCTION_DATABASE_URL }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment_url=$url" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Wait for deployment to be ready
+        run: sleep 45
+
+      - name: Health check
+        id: health_check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://app.visionplatform.io/api/health)
+          if [ $response -ne 200 ]; then
+            echo "Health check failed with status code: $response"
+            echo "health_check_failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          echo "Health check passed with status code: $response"
+          echo "health_check_failed=false" >> $GITHUB_OUTPUT
+
+      - name: Rollback on failure
+        if: failure() && steps.backup.outputs.backup_url != ''
+        run: |
+          echo "⚠️ Health check failed. Rolling back to previous deployment..."
+          vercel alias set ${{ steps.backup.outputs.backup_url }} app.visionplatform.io --token=${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Rollback completed to: ${{ steps.backup.outputs.backup_url }}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Create GitHub Release
+        if: success() && startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Deployment Information
+
+            - **Environment**: Production
+            - **URL**: https://app.visionplatform.io
+            - **Deployment URL**: ${{ steps.deploy.outputs.deployment_url }}
+            - **Commit**: ${{ github.sha }}
+
+            ## Changes
+
+            See commit history for details.
+          draft: false
+          prerelease: false
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "🌐 URL: https://app.visionplatform.io"
+          echo "📦 Deployment: ${{ steps.deploy.outputs.deployment_url }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment failed!"
+          if [ "${{ steps.health_check.outputs.health_check_failed }}" = "true" ]; then
+            echo "🔄 Rollback to previous version completed"
+          fi
+          echo "Check the logs for details."
