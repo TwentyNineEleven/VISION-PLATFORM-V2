@@ -8,24 +8,47 @@ import {
   GlowCardTitle,
   GlowCardDescription,
 } from '@/components/glow-ui/GlowCard';
-import { GlowBadge, GlowButton, Grid, Group } from '@/components/glow-ui';
+import { GlowBadge, GlowButton, GlowSwitch, Grid, Group } from '@/components/glow-ui';
 import { mockApps, mockAppSubscriptions, mockCurrentPlan } from '@/lib/mock-data';
-import { Activity, Settings, Power } from 'lucide-react';
+import { appSettingsService } from '@/services/appSettingsService';
+import { Activity, Settings } from 'lucide-react';
 import { Stack } from '@/design-system';
 import { AppCard } from '@/components/AppCard';
 import { mapAppToCardProps } from '@/lib/app-card';
 
 export default function AppSubscriptionsPage() {
-  const [enabledApps, setEnabledApps] = React.useState<Record<string, boolean>>(
-    () =>
-      mockApps.reduce<Record<string, boolean>>((acc, app) => {
-        acc[app.id] = app.status === 'active';
-        return acc;
-      }, {})
-  );
+  const [enabledApps, setEnabledApps] = React.useState<Record<string, boolean>>({});
 
-  const toggleApp = (id: string) => {
-    setEnabledApps((prev) => ({ ...prev, [id]: !prev[id] }));
+  // Load app settings from localStorage on mount
+  React.useEffect(() => {
+    loadAppSettings();
+  }, []);
+
+  const loadAppSettings = async () => {
+    const initialSettings = mockApps.reduce<Record<string, boolean>>((acc, app) => {
+      acc[app.id] = app.status === 'active';
+      return acc;
+    }, {});
+
+    // Initialize with mock data if empty
+    await appSettingsService.initializeAppSettings(initialSettings);
+
+    // Load settings from localStorage
+    const settings = await appSettingsService.getAppSettings();
+    setEnabledApps(settings);
+  };
+
+  const toggleApp = async (id: string) => {
+    const newValue = !enabledApps[id];
+    setEnabledApps((prev) => ({ ...prev, [id]: newValue }));
+
+    try {
+      await appSettingsService.toggleApp(id, newValue);
+    } catch (error) {
+      console.error('Failed to save app setting:', error);
+      // Revert on error
+      setEnabledApps((prev) => ({ ...prev, [id]: !newValue }));
+    }
   };
 
   const enabledList = mockApps.filter((app) => enabledApps[app.id]);
@@ -85,7 +108,7 @@ export default function AppSubscriptionsPage() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Usage trend</p>
-            <p className="text-2xl font-semibold text-emerald-500">+8%</p>
+            <p className="text-2xl font-semibold text-success">+8%</p>
           </div>
         </GlowCardContent>
       </GlowCard>
@@ -114,14 +137,14 @@ export default function AppSubscriptionsPage() {
                     <span>Data: {sub?.dataObjects ?? 0}</span>
                   </div>
                   <Group spacing="sm" wrap="wrap">
-                    <GlowButton
-                      variant="ghost"
-                      size="sm"
-                      leftIcon={<Power className="h-4 w-4" />}
-                      onClick={() => toggleApp(app.id)}
-                    >
-                      Disable
-                    </GlowButton>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Enabled</span>
+                      <GlowSwitch
+                        checked={enabledApps[app.id] ?? false}
+                        onCheckedChange={() => toggleApp(app.id)}
+                        aria-label={`${enabledApps[app.id] ? 'Disable' : 'Enable'} ${app.name}`}
+                      />
+                    </div>
                     <GlowButton
                       variant="outline"
                       size="sm"
@@ -159,14 +182,17 @@ export default function AppSubscriptionsPage() {
                     className="w-full"
                   />
                   <Group spacing="sm">
-                    <GlowButton
-                      variant="ghost"
-                      size="sm"
-                      disabled={cardProps.status === 'coming_soon'}
-                      onClick={() => toggleApp(app.id)}
-                    >
-                      Enable app
-                    </GlowButton>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {cardProps.status === 'coming_soon' ? 'Coming soon' : 'Enable'}
+                      </span>
+                      <GlowSwitch
+                        checked={enabledApps[app.id] ?? false}
+                        onCheckedChange={() => toggleApp(app.id)}
+                        disabled={cardProps.status === 'coming_soon'}
+                        aria-label={`${enabledApps[app.id] ? 'Disable' : 'Enable'} ${app.name}`}
+                      />
+                    </div>
                   </Group>
                 </div>
               );
