@@ -15,7 +15,7 @@ export function OnePlatform() {
           </Stack>
 
           {/* Two-Column Layout */}
-          <Grid columns={2} gap="2xl" className="items-center">
+          <Grid columns={2} gap="xl" className="items-center">
             {/* Left Column - Content */}
             <Stack spacing="xl">
               <Text className="text-2xl sm:text-3xl text-[#001A33] font-bold leading-tight">

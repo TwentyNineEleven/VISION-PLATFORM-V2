@@ -131,7 +131,7 @@ export default function FunderDashboardPage() {
       />
 
       <div className="px-8 py-8">
-        <Stack spacing="8">
+        <Stack spacing="xl">
           {/* Metrics Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {metrics.map((metric) => (
@@ -285,12 +285,14 @@ export default function FunderDashboardPage() {
                     key={activity.id}
                     className="flex items-start gap-4 rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer"
                   >
-                    <div className={cn(
-                      "rounded-full p-2.5 shrink-0",
-                      activity.type === 'risk' && "bg-warning/10 border border-warning/20",
-                      activity.type === 'milestone' && "bg-success/10 border border-success/20",
-                      activity.type === 'grant' && "bg-primary/10 border border-primary/20"
-                    )}>
+                    <div
+                      className={cn(
+                        "rounded-full p-2.5 shrink-0",
+                        activity.type === 'risk' && "bg-warning/10 border border-warning/20",
+                        activity.type === 'milestone' && "bg-success/10 border border-success/20",
+                        activity.type === 'update' && "bg-primary/10 border border-primary/20"
+                      )}
+                    >
                       {activityIcon(activity.type)}
                     </div>
                     <div className="flex-1 min-w-0">

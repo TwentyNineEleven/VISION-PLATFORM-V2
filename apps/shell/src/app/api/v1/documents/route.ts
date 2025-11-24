@@ -94,10 +94,13 @@ export async function GET(request: NextRequest) {
       data: result,
     });
   } catch (error) {
+    const supabase = await createServerSupabaseClient();
+    const { data: userData } = await supabase.auth.getUser();
+
     return handleApiError(error, {
       method: 'GET',
       path: '/api/v1/documents',
-      userId: (await createServerSupabaseClient()).auth.getUser().then(r => r.data.user?.id),
+      userId: userData.user?.id,
       organizationId: request.nextUrl.searchParams.get('organizationId') || undefined,
     });
   }

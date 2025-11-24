@@ -82,7 +82,7 @@ export async function POST(
     // Verify the user being assigned exists and is in the organization
     const { data: targetUser, error: userError } = await supabase
       .from('organization_members')
-      .select('user_id, users(id, name, email, avatar_url)')
+      .select('user_id, role, users(id, name, email, avatar_url)')
       .eq('organization_id', organizationId)
       .eq('user_id', user_id)
       .single();
@@ -99,7 +99,7 @@ export async function POST(
       .from('task_assignments')
       .select('*')
       .eq('task_id', taskId)
-      .eq('user_id', user_id)
+      .eq('assigned_to', user_id)
       .maybeSingle();
 
     if (existingAssignment) {
@@ -152,7 +152,7 @@ export async function POST(
       .from('task_assignments')
       .insert({
         task_id: taskId,
-        user_id: user_id,
+        assigned_to: user_id,
         role,
         assigned_by: user.id,
       })
@@ -255,7 +255,7 @@ export async function DELETE(
       .from('task_assignments')
       .select('*, user:users(id, name, email)')
       .eq('task_id', taskId)
-      .eq('user_id', userId)
+      .eq('assigned_to', userId)
       .maybeSingle();
 
     if (assignError || !assignment) {
