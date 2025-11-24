@@ -13,60 +13,58 @@ Click this link:
 
 ## Step 2: Copy and Paste This SQL
 
+**This will drop ALL tables in the public schema and reset migration history:**
+
 ```sql
--- Reset Database - Clean out all existing tables
--- Safe to run: Uses IF EXISTS so won't error if tables don't exist
+-- Complete Database Reset
+-- This will drop ALL tables in the public schema and reset migration history
+-- Safe to run - only affects public schema, not auth or storage
 
--- Drop all custom tables
-DROP TABLE IF EXISTS user_preferences CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS organizations CASCADE;
-DROP TABLE IF EXISTS organization_members CASCADE;
-DROP TABLE IF EXISTS teams CASCADE;
-DROP TABLE IF EXISTS team_members CASCADE;
-DROP TABLE IF EXISTS notifications CASCADE;
-DROP TABLE IF EXISTS files CASCADE;
-DROP TABLE IF EXISTS folders CASCADE;
-DROP TABLE IF EXISTS apps CASCADE;
-DROP TABLE IF EXISTS app_installations CASCADE;
-DROP TABLE IF EXISTS activities CASCADE;
-DROP TABLE IF EXISTS tasks CASCADE;
-DROP TABLE IF EXISTS comments CASCADE;
-DROP TABLE IF EXISTS tags CASCADE;
-DROP TABLE IF EXISTS bookmarks CASCADE;
-DROP TABLE IF EXISTS search_history CASCADE;
-DROP TABLE IF EXISTS cohorts CASCADE;
-DROP TABLE IF EXISTS cohort_members CASCADE;
-DROP TABLE IF EXISTS programs CASCADE;
-DROP TABLE IF EXISTS applications CASCADE;
-DROP TABLE IF EXISTS application_reviews CASCADE;
+-- Step 1: Drop all tables in public schema
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    -- Drop all tables in public schema
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+        RAISE NOTICE 'Dropped table: %', r.tablename;
+    END LOOP;
 
--- Drop custom types
-DROP TYPE IF EXISTS user_role CASCADE;
-DROP TYPE IF EXISTS notification_type CASCADE;
-DROP TYPE IF EXISTS priority_level CASCADE;
-DROP TYPE IF EXISTS task_status CASCADE;
-DROP TYPE IF EXISTS member_role CASCADE;
-DROP TYPE IF EXISTS application_status CASCADE;
+    -- Drop all custom types
+    FOR r IN (SELECT typname FROM pg_type WHERE typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public') AND typtype = 'e') LOOP
+        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE';
+        RAISE NOTICE 'Dropped type: %', r.typname;
+    END LOOP;
 
--- Drop custom functions
-DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
-DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+    -- Drop all functions in public schema
+    FOR r IN (SELECT proname FROM pg_proc WHERE pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')) LOOP
+        EXECUTE 'DROP FUNCTION IF EXISTS public.' || quote_ident(r.proname) || ' CASCADE';
+        RAISE NOTICE 'Dropped function: %', r.proname;
+    END LOOP;
 
--- Verify clean state
-SELECT 'Database reset complete!' as status;
+    RAISE NOTICE '✅ Database reset complete!';
+    RAISE NOTICE 'All public schema tables, types, and functions have been dropped.';
+    RAISE NOTICE 'Ready for fresh Phase 1 implementation.';
+END $$;
+
+-- Step 2: Clean migration history
+TRUNCATE TABLE supabase_migrations.schema_migrations;
+
+-- Success message
+SELECT '✅ Database completely reset. Ready for Phase 1!' as status;
 ```
 
 ---
 
 ## Step 3: Click "Run" or Press Cmd/Ctrl + Enter
 
-You should see:
+You should see NOTICE messages for each dropped table, then:
 ```
-status: "Database reset complete!"
+status: "✅ Database completely reset. Ready for Phase 1!"
 ```
 
-✅ **Done! Database is now clean**
+✅ **Done! Database is now completely clean**
 
 ---
 
