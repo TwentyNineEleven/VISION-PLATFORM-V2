@@ -40,6 +40,20 @@ export const navConfig: NavItem[] = [
     icon: 'layers-3-light',
   },
   {
+    id: 'visionflow',
+    label: 'VisionFlow',
+    href: '/visionflow',
+    icon: 'check-circle-light',
+    submenu: [
+      { id: 'visionflow-dashboard', label: 'Dashboard', href: '/visionflow/dashboard' },
+      { id: 'visionflow-tasks', label: 'My Tasks', href: '/visionflow/tasks' },
+      { id: 'visionflow-plans', label: 'Plans', href: '/visionflow/plans' },
+      { id: 'visionflow-projects', label: 'Projects', href: '/visionflow/projects' },
+      { id: 'visionflow-workflows', label: 'Workflows', href: '/visionflow/workflows' },
+      { id: 'visionflow-calendar', label: 'Calendar', href: '/visionflow/calendar' },
+    ],
+  },
+  {
     id: 'funder',
     label: 'Funder',
     href: '/funder',
