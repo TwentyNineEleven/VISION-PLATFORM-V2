@@ -51,7 +51,7 @@ interface Task {
   assignments?: Array<{
     id: string;
     user_id: string;
-    role?: string;
+    role: 'OWNER' | 'COLLABORATOR' | 'REVIEWER';
     user: {
       id: string;
       name: string;
@@ -354,7 +354,7 @@ export default function TaskDetailPage({
                     {new Date(activity.created_at).toLocaleString()}
                   </p>
                   {activity.changes && (
-                    <GlowCard variant="subtle" padding="sm" className="mt-2 bg-muted">
+                    <GlowCard variant="flat" padding="sm" className="mt-2 bg-muted">
                       <pre className="text-xs text-muted-foreground overflow-auto">
                         {JSON.stringify(activity.changes, null, 2)}
                       </pre>
@@ -636,7 +636,7 @@ export default function TaskDetailPage({
           )}
 
           {/* Metadata */}
-          <GlowCard variant="subtle" padding="md" className="text-sm space-y-2">
+          <GlowCard variant="flat" padding="md" className="text-sm space-y-2">
             <div>
               <span className="text-muted-foreground">Created:</span>
               <span className="ml-2 text-foreground">

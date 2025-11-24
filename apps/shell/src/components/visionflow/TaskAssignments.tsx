@@ -201,7 +201,7 @@ export function TaskAssignments({
             return (
               <GlowCard
                 key={assignment.id}
-                variant="subtle"
+                variant="flat"
                 padding="sm"
                 className="shadow-ambient-card hover:shadow-ambient-card-hover transition-shadow"
               >

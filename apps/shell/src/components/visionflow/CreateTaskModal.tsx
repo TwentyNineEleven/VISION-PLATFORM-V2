@@ -172,12 +172,7 @@ export function CreateTaskModal({
       open={isOpen}
       onOpenChange={onClose}
       title="Create New Task"
-      description={
-        <div className="flex items-center gap-2">
-          <span>Add a new task to your workflow</span>
-          {getContextBadge()}
-        </div>
-      }
+      description="Add a new task to your workflow"
       size="xl"
       footer={
         <>
@@ -198,6 +193,13 @@ export function CreateTaskModal({
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Context Badge */}
+        {getContextBadge() && (
+          <div className="flex items-center gap-2">
+            {getContextBadge()}
+          </div>
+        )}
+
         {/* Error Message */}
         {error && (
           <div className="rounded-lg bg-vision-red-50 p-4 border border-vision-red-900/20">
