@@ -285,7 +285,7 @@ export function MyWorkTodayCard({ tasks, deadlines, approvals }: MyWorkTodayCard
           </Stack>
 
           <Link
-            href="/apps/ops360"
+            href="/applications"
             className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
           >
             View all tasks in Ops360

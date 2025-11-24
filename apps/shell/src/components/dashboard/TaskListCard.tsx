@@ -115,7 +115,7 @@ export function TaskListCard({ tasks }: TaskListCardProps) {
           </Stack>
           <div className="flex justify-end pt-2">
             <Link
-              href="/apps/ops360"
+              href="/applications"
               className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
               View all tasks in Ops360

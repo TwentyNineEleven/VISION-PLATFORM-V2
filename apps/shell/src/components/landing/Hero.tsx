@@ -19,7 +19,7 @@ export function Hero() {
               AI-powered. Human-centered. Built for real-world impact.
             </Text>
 
-            <Text size="md" color="secondary" className="max-w-3xl mt-4">
+            <Text size="base" color="secondary" className="max-w-3xl mt-4">
               The VISION Platform helps mission-driven organizations design, plan, and track high-quality programs with clarity and confidence — using structured workflows grounded in the TEIF Framework.
             </Text>
           </Stack>
