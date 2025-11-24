@@ -8,8 +8,9 @@ import {
   GlowCardTitle,
   GlowCardDescription,
 } from '@/components/glow-ui/GlowCard';
-import { GlowInput, GlowBadge, GlowButton } from '@/components/glow-ui';
+import { GlowInput, GlowBadge, GlowButton, GlowSelect, GlowModal } from '@/components/glow-ui';
 import { mockApps, mockGrantees, mockCohorts } from '@/lib/mock-data';
+import type { Grantee } from '@/lib/mock-data';
 import { Filter, Users, Download, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,32 @@ export default function FunderGranteesPage() {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'on-track' | 'at-risk' | 'off-track'>('all');
   const [riskFilter, setRiskFilter] = React.useState<'all' | 'low' | 'medium' | 'high'>('all');
   const [cohortFilter, setCohortFilter] = React.useState<'all' | string>('all');
+  const [showInviteModal, setShowInviteModal] = React.useState(false);
+  const [inviteForm, setInviteForm] = React.useState({
+    name: '',
+    email: '',
+    organizationName: '',
+  });
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleInviteGrantee = () => {
+    if (!inviteForm.name || !inviteForm.email || !inviteForm.organizationName) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.email)) {
+      setError('Invalid email address');
+      return;
+    }
+
+    // In a real app, this would call a service
+    setSuccess(`Invitation sent to ${inviteForm.email}`);
+    setShowInviteModal(false);
+    setInviteForm({ name: '', email: '', organizationName: '' });
+    setError(null);
+  };
 
   const filtered = mockGrantees.filter((g) => {
     const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase());
@@ -29,6 +56,18 @@ export default function FunderGranteesPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-success/10 border border-success/50 text-success px-4 py-3 rounded-lg">
+          {success}
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <p className="text-sm font-medium text-primary">Funder</p>
@@ -39,7 +78,7 @@ export default function FunderGranteesPage() {
           <GlowButton variant="outline" leftIcon={<Download className="h-4 w-4" />}>
             Export CSV
           </GlowButton>
-          <GlowButton glow="subtle" rightIcon={<Users className="h-4 w-4" />}>
+          <GlowButton glow="subtle" rightIcon={<Users className="h-4 w-4" />} onClick={() => setShowInviteModal(true)}>
             Invite grantee
           </GlowButton>
         </div>
@@ -62,47 +101,38 @@ export default function FunderGranteesPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Status</label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value as any)}
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
-                    >
-                      <option value="all">All</option>
-                      <option value="on-track">On Track</option>
-                      <option value="at-risk">At Risk</option>
-                      <option value="off-track">Off Track</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Risk level</label>
-                    <select
-                      value={riskFilter}
-                      onChange={(e) => setRiskFilter(e.target.value as any)}
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
-                    >
-                      <option value="all">All</option>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cohort</label>
-                    <select
-                      value={cohortFilter}
-                      onChange={(e) => setCohortFilter(e.target.value as any)}
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
-                    >
-                      <option value="all">All cohorts</option>
-                      {mockCohorts.map((cohort) => (
-                        <option key={cohort.id} value={cohort.id}>
-                          {cohort.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <GlowSelect
+                    label="Status"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                  >
+                    <option value="all">All</option>
+                    <option value="on-track">On Track</option>
+                    <option value="at-risk">At Risk</option>
+                    <option value="off-track">Off Track</option>
+                  </GlowSelect>
+                  <GlowSelect
+                    label="Risk level"
+                    value={riskFilter}
+                    onChange={(e) => setRiskFilter(e.target.value as any)}
+                  >
+                    <option value="all">All</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </GlowSelect>
+                  <GlowSelect
+                    label="Cohort"
+                    value={cohortFilter}
+                    onChange={(e) => setCohortFilter(e.target.value as any)}
+                  >
+                    <option value="all">All cohorts</option>
+                    {mockCohorts.map((cohort) => (
+                      <option key={cohort.id} value={cohort.id}>
+                        {cohort.name}
+                      </option>
+                    ))}
+                  </GlowSelect>
                 </GlowCardContent>
               </GlowCard>
 
@@ -147,16 +177,13 @@ export default function FunderGranteesPage() {
                             <div className="space-y-1">
                               <div className="h-2 rounded-full bg-muted">
                                 <div
-                                  className="h-full rounded-full"
-                                  style={{
-                                    width: `${grantee.capacityScore}%`,
-                                    backgroundColor:
-                                      grantee.capacityScore >= 80
-                                        ? 'rgb(34 197 94)'
-                                        : grantee.capacityScore >= 60
-                                          ? 'rgb(234 179 8)'
-                                          : 'rgb(239 68 68)',
-                                  }}
+                                  className={cn(
+                                    "h-full rounded-full transition-all",
+                                    grantee.capacityScore >= 80 && "bg-success",
+                                    grantee.capacityScore >= 60 && grantee.capacityScore < 80 && "bg-warning",
+                                    grantee.capacityScore < 60 && "bg-destructive"
+                                  )}
+                                  style={{ width: `${grantee.capacityScore}%` }}
                                 />
                               </div>
                               <span className="text-xs text-muted-foreground">{grantee.capacityScore}%</span>
@@ -195,6 +222,44 @@ export default function FunderGranteesPage() {
                   )}
                 </GlowCardContent>
       </GlowCard>
+
+      {/* Invite Grantee Modal */}
+      <GlowModal
+        open={showInviteModal}
+        onOpenChange={setShowInviteModal}
+        title="Invite Grantee"
+        description="Send an invitation to a new grantee organization."
+      >
+        <div className="space-y-4">
+          <GlowInput
+            label="Organization Name"
+            value={inviteForm.organizationName}
+            onChange={(e) => setInviteForm({ ...inviteForm, organizationName: e.target.value })}
+            placeholder="Hope Community Foundation"
+          />
+          <GlowInput
+            label="Contact Name"
+            value={inviteForm.name}
+            onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+            placeholder="John Doe"
+          />
+          <GlowInput
+            label="Email Address"
+            type="email"
+            value={inviteForm.email}
+            onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+            placeholder="contact@organization.org"
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <GlowButton variant="ghost" onClick={() => setShowInviteModal(false)}>
+              Cancel
+            </GlowButton>
+            <GlowButton onClick={handleInviteGrantee}>
+              Send Invitation
+            </GlowButton>
+          </div>
+        </div>
+      </GlowModal>
     </div>
   );
 }
