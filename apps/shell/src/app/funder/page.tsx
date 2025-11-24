@@ -76,7 +76,7 @@ export default function FunderDashboardPage() {
       id: 'risk',
       title: 'At risk',
       value: atRiskGrantees.length,
-      icon: <AlertTriangle className="w-5 h-5 text-orange-500" />,
+      icon: <AlertTriangle className="w-5 h-5 text-warning" />,
       trend: {
         value: atRiskGrantees.length === 0 ? 'No issues' : `${atRiskGrantees.length} flagged`,
         isPositive: atRiskGrantees.length === 0,
@@ -108,9 +108,9 @@ export default function FunderDashboardPage() {
   const activityIcon = (type: (typeof mockFunderActivities)[number]['type']) => {
     switch (type) {
       case 'risk':
-        return <AlertTriangle className="w-5 h-5 text-orange-500" />;
+        return <AlertTriangle className="w-5 h-5 text-warning" />;
       case 'milestone':
-        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
+        return <CheckCircle className="w-5 h-5 text-success" />;
       default:
         return <Bell className="w-5 h-5 text-primary" />;
     }

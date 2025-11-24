@@ -16,28 +16,129 @@ import { Plus, Send, Users, Clock3, RefreshCcw } from 'lucide-react';
 import { Grid, Stack, spacing, semanticColors } from '@/design-system';
 
 export default function TeamSettingsPage() {
-  const [invites, setInvites] = React.useState(mockPendingInvites);
-  const [members, setMembers] = React.useState(mockTeamMembers);
+  const [invites, setInvites] = React.useState<PendingInvite[]>([]);
+  const [members, setMembers] = React.useState<TeamMember[]>([]);
   const [inviteForm, setInviteForm] = React.useState({ email: '', role: 'Viewer' as TeamRole });
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
 
-  const handleInvite = (event: React.FormEvent<HTMLFormElement>) => {
+  // Load data on mount
+  React.useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      // Initialize with mock data if empty
+      await teamService.initializeMockData(mockTeamMembers, mockPendingInvites);
+
+      const [loadedMembers, loadedInvites] = await Promise.all([
+        teamService.getTeamMembers(),
+        teamService.getPendingInvites(),
+      ]);
+
+      setMembers(loadedMembers);
+      setInvites(loadedInvites);
+    } catch (err) {
+      console.error('Failed to load team data:', err);
+    }
+  };
+
+  const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!inviteForm.email) return;
-    setInvites((prev) => [
-      ...prev,
-      {
-        id: `inv-${Date.now()}`,
-        email: inviteForm.email,
-        role: inviteForm.role,
-        invitedAt: new Date(),
-        status: 'pending',
-      },
-    ]);
-    setInviteForm({ email: '', role: inviteForm.role });
+
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    try {
+      await teamService.inviteMember({ email: inviteForm.email, role: inviteForm.role });
+      setInviteForm({ email: '', role: inviteForm.role });
+      setSuccess(`Invitation sent to ${inviteForm.email}`);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send invitation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async (inviteId: string) => {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    try {
+      await teamService.resendInvite(inviteId);
+      setSuccess('Invitation resent successfully');
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend invitation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    try {
+      await teamService.cancelInvite(inviteId);
+      setSuccess('Invitation cancelled');
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to cancel invitation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    try {
+      await teamService.removeMember(memberId);
+      setSuccess('Member removed successfully');
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove member');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateRole = async (memberId: string, newRole: TeamRole) => {
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await teamService.updateMemberRole(memberId, newRole);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update member role');
+    }
   };
 
   return (
     <Stack gap="6xl">
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-success/10 border border-success/50 text-success px-4 py-3 rounded-lg">
+          {success}
+        </div>
+      )}
+
       <GlowCard variant="elevated">
         <GlowCardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -55,6 +156,7 @@ export default function TeamSettingsPage() {
                 value={inviteForm.email}
                 onChange={(e) => setInviteForm((prev) => ({ ...prev, email: e.target.value }))}
                 leftIcon={<Users className="h-4 w-4" />}
+                disabled={isLoading}
               />
               <div className="space-y-2">
                 <GlowSelect
@@ -116,7 +218,8 @@ export default function TeamSettingsPage() {
                     variant="ghost"
                     size="sm"
                     leftIcon={<RefreshCcw className="h-3.5 w-3.5" />}
-                    onClick={() => console.log('resend invite', invite.id)}
+                    onClick={() => handleResend(invite.id)}
+                    disabled={isLoading}
                   >
                     Resend
                   </GlowButton>
@@ -124,7 +227,8 @@ export default function TeamSettingsPage() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setInvites((prev) => prev.filter((i) => i.id !== invite.id))}
+                    onClick={() => handleCancelInvite(invite.id)}
+                    disabled={isLoading}
                   >
                     Cancel
                   </GlowButton>
@@ -201,7 +305,7 @@ export default function TeamSettingsPage() {
                     triggerLabel="Remove"
                     triggerVariant="ghost"
                     triggerSize="sm"
-                    onConfirm={() => setMembers((prev) => prev.filter((m) => m.id !== member.id))}
+                    onConfirm={() => handleRemoveMember(member.id)}
                   />
                 </Stack>
               </Stack>
