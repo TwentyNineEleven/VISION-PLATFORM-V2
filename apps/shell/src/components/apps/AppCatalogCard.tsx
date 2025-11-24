@@ -26,10 +26,10 @@ export function AppCatalogCard({
       onToggleFavorite={onToggleFavorite}
       onViewDetails={onViewDetails}
       showDescription
-      showStatusChip={app.status !== 'available'}
+      showStatusChip={false}
       iconSize="md"
       buttonSize="md"
-      className={cn('h-[380px]', className)}
+      className={cn('h-[340px]', className)}
     />
   );
 }

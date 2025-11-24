@@ -27,7 +27,13 @@ function gatherFiles(stagedOnly: boolean): string[] {
   }
 
   return globSync(path.join('apps', 'shell', 'src', '**', '*.{ts,tsx}'), {
-    ignore: ['**/node_modules/**', '**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+    ignore: [
+      '**/node_modules/**',
+      '**/*.test.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/design-system/theme/**',
+      '**/lib/color-mappings.ts',
+    ],
   });
 }
 

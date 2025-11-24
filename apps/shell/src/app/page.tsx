@@ -17,10 +17,10 @@ export default function LandingPage() {
               <span className="text-xl font-bold">VISION</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/applications" className="text-sm font-medium hover:text-blue-600">
+              <Link href="/applications" className="text-sm font-medium hover:text-primary">
                 Apps
               </Link>
-              <a href="/#pricing" className="text-sm font-medium hover:text-blue-600">
+              <a href="/#pricing" className="text-sm font-medium hover:text-primary">
                 Pricing
               </a>
               <Link href="/signin">

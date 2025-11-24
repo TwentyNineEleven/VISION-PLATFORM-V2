@@ -207,24 +207,6 @@ export function AppCardShell({
           </div>
         ) : null}
 
-        {/* Status Chip - Fixed height: 28px (or 0 if not shown) */}
-        {showStatusChip && statusChip ? (
-          <div className="mb-3 flex h-7 items-center justify-center">
-            <span
-              className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide"
-              style={{
-                border: `1px solid ${statusChip.borderColor}`,
-                backgroundColor: statusChip.bgColor,
-                color: statusChip.textColor,
-              }}
-            >
-              {statusChip.label}
-            </span>
-          </div>
-        ) : showStatusChip ? (
-          <div className="mb-3 h-7" />
-        ) : null}
-
         {/* Spacer to push button to bottom */}
         <div className="flex-1" />
 
@@ -262,21 +244,21 @@ export function AppCardShell({
           </GlowButton>
         </div>
 
-        {/* View Details Link - Fixed height: 36px (or 0 if not shown) */}
-        {onViewDetails ? (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onViewDetails(app);
-            }}
-            className="h-9 w-full rounded-lg border border-transparent px-0 py-2 text-center text-xs font-semibold uppercase tracking-wide text-primary transition hover:text-primary/80"
-          >
-            View details
-          </button>
-        ) : (
-          <div className="h-9" />
-        )}
+        {/* View Details Link - Fixed height: 36px (always rendered for consistent card heights) */}
+        <div className="h-9">
+          {onViewDetails && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onViewDetails(app);
+              }}
+              className="h-full w-full rounded-lg border border-transparent px-0 py-2 text-center text-xs font-semibold uppercase tracking-wide text-primary transition hover:text-primary/80"
+            >
+              View details
+            </button>
+          )}
+        </div>
       </div>
     </GlowCard>
   );

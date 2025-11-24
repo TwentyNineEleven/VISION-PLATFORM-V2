@@ -60,7 +60,7 @@ export default function OrganizationSettingsPage() {
                   <select
                     value={state.type}
                     onChange={(e) => handleChange('type', e.target.value)}
-                    className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                    className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                   >
                     {mockOrganizationTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -138,7 +138,7 @@ export default function OrganizationSettingsPage() {
                       onChange={(e) =>
                         setState((prev) => ({ ...prev, address: { ...prev.address, country: e.target.value } }))
                       }
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                     >
                       {mockCountries.map((country) => (
                         <option key={country.code} value={country.code}>
@@ -201,7 +201,7 @@ export default function OrganizationSettingsPage() {
                 <textarea
                   value={state.mission}
                   onChange={(e) => handleChange('mission', e.target.value)}
-                  className="mt-2 w-full rounded-md border border-input bg-transparent p-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50"
+                  className="mt-2 w-full rounded-md border border-input bg-transparent p-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                   rows={3}
                 />
               </div>
