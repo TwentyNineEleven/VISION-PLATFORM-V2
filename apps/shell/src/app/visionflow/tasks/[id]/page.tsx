@@ -7,7 +7,7 @@
 
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TaskAssignments } from '@/components/visionflow/TaskAssignments';
@@ -119,9 +119,9 @@ const PRIORITY_CONFIG = {
 export default function TaskDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);

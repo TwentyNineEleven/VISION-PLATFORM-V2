@@ -58,7 +58,7 @@ export function Hero() {
             {/* Narrative Text */}
             <div className="max-w-3xl mx-auto mt-8">
               <Text className="text-lg text-blue-100/90 leading-relaxed">
-                No more fragmentation. No more disconnected tools. No more guessing. The Vision Impact Hub helps your organization understand what's working, where to improve, and how to create long-term, evidence-driven impact.
+                No more fragmentation. No more disconnected tools. No more guessing. The Vision Impact Hub helps your organization understand what’s working, where to improve, and how to create long-term, evidence-driven impact.
               </Text>
             </div>
 

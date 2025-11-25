@@ -31,7 +31,7 @@ export function OnePlatform() {
               </Text>
 
               <Text className="text-lg text-gray-700 leading-relaxed">
-                Powered by VISION AI™, the Hub transforms complexity into clarity, helping organizations understand what's working, where to improve, and how to create measurable, long-term impact.
+                Powered by VISION AI™, the Hub transforms complexity into clarity, helping organizations understand what’s working, where to improve, and how to create measurable, long-term impact.
               </Text>
             </Stack>
 

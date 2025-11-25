@@ -93,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   Something went wrong
                 </h1>
                 <p className="text-vision-gray-600 mt-1">
-                  We've been notified and are working to fix the issue.
+                  We’ve been notified and are working to fix the issue.
                 </p>
               </div>
             </div>

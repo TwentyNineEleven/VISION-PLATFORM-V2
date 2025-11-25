@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { documentService } from '@/services/documentService';
+import type { AsyncRouteParams } from '@/types/next';
 
 // ============================================================================
 // GET - Get Download URL
@@ -14,7 +15,7 @@ import { documentService } from '@/services/documentService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -28,7 +29,7 @@ export async function GET(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;

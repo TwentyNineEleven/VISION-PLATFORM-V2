@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { AsyncRouteParams } from '@/types/next';
 
 /**
  * POST /api/v1/apps/visionflow/tasks/[id]/assignments
@@ -13,7 +14,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -194,7 +195,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
