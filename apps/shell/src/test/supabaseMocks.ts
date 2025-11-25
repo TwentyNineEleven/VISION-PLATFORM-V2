@@ -48,12 +48,13 @@ export function createMockQuery() {
   });
 
   // Terminal methods return promises
-  query.single = vi.fn();
-  query.maybeSingle = vi.fn();
+  query.single = vi.fn().mockResolvedValue({ data: null, error: null });
+  query.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
 
   // Make query itself awaitable/mockable
-  query.then = vi.fn();
-  query.catch = vi.fn();
+  const defaultPromise = Promise.resolve({ data: null, error: null });
+  query.then = defaultPromise.then.bind(defaultPromise);
+  query.catch = defaultPromise.catch.bind(defaultPromise);
 
   /**
    * Helper to make the query resolve to a specific value when awaited
@@ -83,8 +84,33 @@ export function createMockQuery() {
  * ```
  */
 export function createMockSupabaseClient() {
+  const queryMap = new Map<string, ReturnType<typeof createMockQuery>>();
+  let defaultQuery: ReturnType<typeof createMockQuery> | null = null;
+
   return {
-    from: vi.fn(() => createMockQuery()),
+    from: vi.fn((table?: string) => {
+      if (table) {
+        if (queryMap.has(table)) {
+          return queryMap.get(table)!;
+        }
+
+        if (defaultQuery) {
+          queryMap.set(table, defaultQuery);
+          return defaultQuery;
+        }
+
+        const tableQuery = createMockQuery();
+        queryMap.set(table, tableQuery);
+        defaultQuery = tableQuery;
+        return tableQuery;
+      }
+
+      if (!defaultQuery) {
+        defaultQuery = createMockQuery();
+      }
+
+      return defaultQuery;
+    }),
     rpc: vi.fn(() => Promise.resolve({ data: null, error: null })),
     auth: {
       getUser: vi.fn(() => Promise.resolve({

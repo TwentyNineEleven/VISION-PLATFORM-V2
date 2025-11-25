@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { organizationService } from '../organizationService';
 import { createClient } from '@/lib/supabase/client';
 import {
+  createMockQuery,
   createMockSupabaseClient,
   createMockSupabaseError,
   mockOrganization,
@@ -46,10 +47,22 @@ describe('organizationService', () => {
         website: 'https://neworg.org',
       };
 
-      mockSupabase.from().insert().select().single.mockResolvedValue({
+      const orgQuery = createMockQuery();
+      orgQuery.single.mockResolvedValue({
         data: { ...mockOrganization, ...newOrg },
         error: null,
       });
+
+      const prefsQuery = createMockQuery();
+      prefsQuery.mockResolvedValue({ data: null, error: null });
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(orgQuery)
+        .mockReturnValueOnce(prefsQuery)
+        .mockReturnValueOnce(membershipQuery);
 
       const result = await organizationService.createOrganization(newOrg);
 
@@ -234,23 +247,35 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
+
       const updates = {
         name: 'Updated Name',
         website: 'https://updated.org',
       };
 
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const updateQuery = createMockQuery();
+      updateQuery.single.mockResolvedValue({
         data: { ...mockOrganization, ...updates },
         error: null,
       });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(updateQuery);
 
       const result = await organizationService.updateOrganization('org-123', updates);
 
       expect(result.name).toBe('Updated Name');
       expect(result.website).toBe('https://updated.org');
-      expect(mockSupabase.from).toHaveBeenCalledWith('organizations');
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('id', 'org-123');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'organization_members');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(2, 'organizations');
+      expect(updateQuery.eq).toHaveBeenCalledWith('id', 'org-123');
     });
 
     it('should throw error when update fails', async () => {
@@ -258,15 +283,45 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const updateQuery = createMockQuery();
+      updateQuery.single.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Update failed'),
       });
 
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(updateQuery);
+
       await expect(
         organizationService.updateOrganization('org-123', { name: 'New Name' })
       ).rejects.toThrow('Update failed');
+    });
+
+    it('should prevent updates from unauthorized users', async () => {
+      if (USE_REAL_DB) {
+        expect(true).toBe(true);
+        return;
+      }
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      mockSupabase.from.mockReturnValueOnce(membershipQuery);
+
+      await expect(
+        organizationService.updateOrganization('org-123', { name: 'Unauthorized' })
+      ).rejects.toThrow('You do not have permission to update this organization');
     });
   });
 
@@ -276,19 +331,28 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().update().eq().mockResolvedValue({
-        data: null,
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
         error: null,
       });
 
+      const deleteQuery = createMockQuery();
+      deleteQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(deleteQuery);
+
       await organizationService.deleteOrganization('org-123');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('organizations');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'organization_members');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(2, 'organizations');
+      expect(deleteQuery.update).toHaveBeenCalledWith({
         deleted_at: expect.any(String),
       });
-      expect(mockSupabase.from().eq).toHaveBeenCalledWith('id', 'org-123');
+      expect(deleteQuery.eq).toHaveBeenCalledWith('id', 'org-123');
     });
 
     it('should throw error when deletion fails', async () => {
@@ -296,14 +360,39 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().update().eq().mockResolvedValue({
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const deleteQuery = createMockQuery();
+      deleteQuery.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Deletion failed'),
       });
 
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(deleteQuery);
+
       await expect(organizationService.deleteOrganization('org-123')).rejects.toThrow(
         'Deletion failed'
+      );
+    });
+
+    it('should block deletion for unauthorized users', async () => {
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      mockSupabase.from.mockReturnValueOnce(membershipQuery);
+
+      await expect(organizationService.deleteOrganization('org-123')).rejects.toThrow(
+        'You do not have permission to delete this organization'
       );
     });
   });
@@ -314,16 +403,25 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().insert().mockResolvedValue({
-        data: null,
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
         error: null,
       });
 
+      const insertQuery = createMockQuery();
+      insertQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(insertQuery);
+
       await organizationService.addMember('org-123', 'user-456', 'editor');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().insert).toHaveBeenCalledWith({
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'organization_members');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(2, 'organization_members');
+      expect(insertQuery.insert).toHaveBeenCalledWith({
         organization_id: 'org-123',
         user_id: 'user-456',
         role: 'editor',
@@ -335,15 +433,23 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().insert().mockResolvedValue({
-        data: null,
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
         error: null,
       });
 
+      const insertQuery = createMockQuery();
+      insertQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(insertQuery);
+
       await organizationService.addMember('org-123', 'user-456');
 
-      expect(mockSupabase.from().insert).toHaveBeenCalledWith({
+      expect(insertQuery.insert).toHaveBeenCalledWith({
         organization_id: 'org-123',
         user_id: 'user-456',
         role: 'viewer',
@@ -355,15 +461,37 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().insert().mockResolvedValue({
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const insertQuery = createMockQuery();
+      insertQuery.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Duplicate key violation', '23505'),
       });
 
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(insertQuery);
+
       await expect(
         organizationService.addMember('org-123', 'user-456', 'viewer')
       ).rejects.toThrow();
+    });
+
+    it('should block member changes for unauthorized users', async () => {
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from.mockReturnValueOnce(membershipQuery);
+
+      await expect(
+        organizationService.addMember('org-123', 'user-456', 'viewer')
+      ).rejects.toThrow('You do not have permission to manage members for this organization');
     });
   });
 
@@ -373,16 +501,25 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().delete().eq().eq.mockResolvedValue({
-        data: null,
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
         error: null,
       });
 
+      const deleteQuery = createMockQuery();
+      deleteQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(deleteQuery);
+
       await organizationService.removeMember('org-123', 'user-456');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().delete().eq).toHaveBeenCalledWith('organization_id', 'org-123');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'organization_members');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(2, 'organization_members');
+      expect(deleteQuery.delete().eq).toHaveBeenCalledWith('organization_id', 'org-123');
     });
 
     it('should throw error when removal fails', async () => {
@@ -390,15 +527,37 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().delete().eq().eq.mockResolvedValue({
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
+        error: null,
+      });
+
+      const deleteQuery = createMockQuery();
+      deleteQuery.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Cannot remove last owner'),
       });
 
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(deleteQuery);
+
       await expect(
         organizationService.removeMember('org-123', 'user-123')
       ).rejects.toThrow();
+    });
+
+    it('should block removal for unauthorized users', async () => {
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from.mockReturnValueOnce(membershipQuery);
+
+      await expect(
+        organizationService.removeMember('org-123', 'user-123')
+      ).rejects.toThrow('You do not have permission to manage members for this organization');
     });
   });
 
@@ -408,16 +567,25 @@ describe('organizationService', () => {
         expect(true).toBe(true);
         return;
       }
-      
-      mockSupabase.from().update().eq().eq.mockResolvedValue({
-        data: null,
+
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({
+        data: { role: 'Owner' },
         error: null,
       });
 
+      const updateQuery = createMockQuery();
+      updateQuery.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from
+        .mockReturnValueOnce(membershipQuery)
+        .mockReturnValueOnce(updateQuery);
+
       await organizationService.updateMemberRole('org-123', 'user-456', 'admin');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('organization_members');
-      expect(mockSupabase.from().update).toHaveBeenCalledWith({ role: 'admin' });
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'organization_members');
+      expect(mockSupabase.from).toHaveBeenNthCalledWith(2, 'organization_members');
+      expect(updateQuery.update).toHaveBeenCalledWith({ role: 'admin' });
     });
 
     it('should validate role value', async () => {
@@ -429,6 +597,17 @@ describe('organizationService', () => {
       await expect(
         organizationService.updateMemberRole('org-123', 'user-456', 'invalid-role' as any)
       ).rejects.toThrow();
+    });
+
+    it('should block role updates for unauthorized users', async () => {
+      const membershipQuery = createMockQuery();
+      membershipQuery.single.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.from.mockReturnValueOnce(membershipQuery);
+
+      await expect(
+        organizationService.updateMemberRole('org-123', 'user-456', 'admin')
+      ).rejects.toThrow('You do not have permission to manage members for this organization');
     });
   });
 
