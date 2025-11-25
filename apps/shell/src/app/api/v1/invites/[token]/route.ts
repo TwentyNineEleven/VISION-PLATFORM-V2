@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { AsyncRouteParams } from '@/types/next';
 
 /**
  * GET /api/v1/invites/[token]
@@ -8,7 +9,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
+  { params }: AsyncRouteParams<{ token: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -85,7 +86,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
+  { params }: AsyncRouteParams<{ token: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();

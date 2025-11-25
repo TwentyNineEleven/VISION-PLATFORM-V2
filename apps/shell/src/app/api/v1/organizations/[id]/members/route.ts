@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { AsyncRouteParams } from '@/types/next';
 
 /**
  * GET /api/v1/organizations/[id]/members
@@ -7,7 +8,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
