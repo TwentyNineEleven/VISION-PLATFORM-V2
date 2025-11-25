@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { AsyncRouteParams } from '@/types/next';
-import { emailService } from '@/services/emailService';
+import { sendInviteEmail } from '@/services/emailService';
 
 /**
  * GET /api/v1/organizations/[id]/invites
@@ -218,7 +218,7 @@ export async function POST(
 
     // Send invite email
     try {
-      await emailService.sendInviteEmail({
+      await sendInviteEmail({
         email: newInvite.email,
         token: newInvite.token,
         organizationName: organization?.name || 'the organization',

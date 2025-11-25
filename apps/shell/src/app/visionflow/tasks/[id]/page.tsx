@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { TaskAssignments } from '@/components/visionflow/TaskAssignments';
 import { GlowButton } from '@/components/glow-ui/GlowButton';
 import { GlowCard } from '@/components/glow-ui/GlowCard';
@@ -116,13 +116,10 @@ const PRIORITY_CONFIG = {
   URGENT: { label: 'Urgent', variant: 'destructive' as const },
 };
 
-export default function TaskDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+export default function TaskDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

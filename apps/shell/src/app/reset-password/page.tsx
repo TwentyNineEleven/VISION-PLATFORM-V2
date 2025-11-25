@@ -11,6 +11,9 @@ import { GlowButton, GlowCard, GlowInput } from '@/components/glow-ui';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { Eye, EyeOff, ChevronLeft } from 'lucide-react';
 
+// Force dynamic rendering for this page (uses useSearchParams)
+export const dynamic = 'force-dynamic';
+
 const resetPasswordSchema = z
   .object({
     password: z
