@@ -103,6 +103,7 @@ export async function createAuditLog(
  * Get audit logs for an engagement
  */
 export async function getEngagementAuditLogs(
+  organizationId: string,
   engagementId: string,
   limit = 50
 ): Promise<AuditLogEntry[]> {
@@ -111,6 +112,7 @@ export async function getEngagementAuditLogs(
   const { data, error } = await supabase
     .from('community_pulse_audit_logs')
     .select('*')
+    .eq('organization_id', organizationId)
     .eq('resource_id', engagementId)
     .order('created_at', { ascending: false })
     .limit(limit);
