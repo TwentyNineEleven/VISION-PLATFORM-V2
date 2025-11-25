@@ -54,6 +54,17 @@ export const navConfig: NavItem[] = [
     ],
   },
   {
+    id: 'community-pulse',
+    label: 'CommunityPulse',
+    href: '/community-pulse',
+    icon: 'users-light',
+    submenu: [
+      { id: 'community-pulse-dashboard', label: 'Dashboard', href: '/community-pulse' },
+      { id: 'community-pulse-templates', label: 'Templates', href: '/community-pulse/templates' },
+      { id: 'community-pulse-methods', label: 'Methods Library', href: '/community-pulse/methods' },
+    ],
+  },
+  {
     id: 'funder',
     label: 'Funder',
     href: '/funder',

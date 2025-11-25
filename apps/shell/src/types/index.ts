@@ -12,3 +12,6 @@ export interface Organization {
   name: string;
   logo?: string;
 }
+
+// Re-export module types
+export * from './community-pulse';
