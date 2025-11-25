@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { File, Folder, Upload, Search, Grid, List, Filter } from 'lucide-react';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -52,23 +52,9 @@ export default function FilesPage() {
 
   const organizationId = activeOrganization?.id;
 
-  // Load folders on mount
-  useEffect(() => {
-    if (organizationId) {
-      loadFolders();
-    }
-  }, [organizationId]);
-
-  // Load documents when folder changes
-  useEffect(() => {
-    if (organizationId) {
-      loadDocuments();
-    }
-  }, [organizationId, currentFolderId, searchQuery]);
-
-  const loadFolders = async () => {
+  const loadFolders = useCallback(async () => {
     if (!organizationId) return;
-    
+
     try {
       const response = await fetch(
         `/api/v1/folders?organizationId=${organizationId}&tree=true`
@@ -80,11 +66,11 @@ export default function FilesPage() {
     } catch (error) {
       console.error('Failed to load folders:', error);
     }
-  };
+  }, [organizationId]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     if (!organizationId) return;
-    
+
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
@@ -106,7 +92,21 @@ export default function FilesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentFolderId, organizationId, searchQuery]);
+
+  // Load folders on mount
+  useEffect(() => {
+    if (organizationId) {
+      loadFolders();
+    }
+  }, [loadFolders, organizationId]);
+
+  // Load documents when folder changes
+  useEffect(() => {
+    if (organizationId) {
+      loadDocuments();
+    }
+  }, [loadDocuments, organizationId]);
 
   const handleUpload = () => {
     setIsUploadModalOpen(true);
@@ -277,7 +277,7 @@ export default function FilesPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Files</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Manage your organization's documents
+              Manage your organization’s documents
             </p>
           </div>
           <button

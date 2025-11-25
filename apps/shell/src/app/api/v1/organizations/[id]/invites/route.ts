@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { AsyncRouteParams } from '@/types/next';
 import { emailService } from '@/services/emailService';
 
 /**
@@ -9,7 +10,7 @@ import { emailService } from '@/services/emailService';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -77,7 +78,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: AsyncRouteParams<{ id: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();

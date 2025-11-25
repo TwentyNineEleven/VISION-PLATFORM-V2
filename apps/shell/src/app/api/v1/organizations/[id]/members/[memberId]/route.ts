@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { AsyncRouteParams } from '@/types/next';
 
 /**
  * PATCH /api/v1/organizations/[id]/members/[memberId]
@@ -8,7 +9,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; memberId: string }> }
+  { params }: AsyncRouteParams<{ id: string; memberId: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -118,7 +119,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; memberId: string }> }
+  { params }: AsyncRouteParams<{ id: string; memberId: string }>
 ) {
   try {
     const supabase = await createServerSupabaseClient();

@@ -93,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   Something went wrong
                 </h1>
                 <p className="text-vision-gray-600 mt-1">
-                  We've been notified and are working to fix the issue.
+                  We’ve been notified and are working to fix the issue.
                 </p>
               </div>
             </div>
@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex gap-3">
               <GlowButton
-                variant="primary"
+                variant="default"
                 onClick={this.handleReset}
                 className="flex items-center gap-2"
               >

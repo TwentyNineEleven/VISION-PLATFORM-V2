@@ -58,14 +58,7 @@ export default function TeamSettingsPage() {
   const [resendingInviteId, setResendingInviteId] = React.useState<string | null>(null);
   const [cancellingInviteId, setCancellingInviteId] = React.useState<string | null>(null);
 
-  // Load data on mount
-  React.useEffect(() => {
-    if (activeOrganization) {
-      loadData();
-    }
-  }, [activeOrganization]);
-
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     if (!activeOrganization?.id) return;
 
     try {
@@ -91,7 +84,14 @@ export default function TeamSettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeOrganization]);
+
+  // Load data on mount
+  React.useEffect(() => {
+    if (activeOrganization) {
+      loadData();
+    }
+  }, [activeOrganization, loadData]);
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

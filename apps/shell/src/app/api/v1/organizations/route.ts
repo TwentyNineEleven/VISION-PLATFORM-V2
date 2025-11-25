@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { visionColors } from '@/shell-design-system/theme/visionTheme';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 /**
@@ -106,8 +107,8 @@ export async function POST(request: NextRequest) {
         address_state: rest.address?.state || null,
         address_postal_code: rest.address?.postalCode || null,
         address_country: rest.address?.country || null,
-        brand_primary_color: rest.brandColors?.primary || '#2563eb',
-        brand_secondary_color: rest.brandColors?.secondary || '#9333ea',
+        brand_primary_color: rest.brandColors?.primary || visionColors.blue,
+        brand_secondary_color: rest.brandColors?.secondary || visionColors.purple,
       })
       .select()
       .single();

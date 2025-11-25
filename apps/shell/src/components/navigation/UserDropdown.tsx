@@ -143,9 +143,11 @@ export function UserDropdown({ user, onSignOut, className }: UserDropdownProps) 
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
                   {activeOrganization.logo ? (
-                    <img
+                    <Image
                       src={activeOrganization.logo}
                       alt={activeOrganization.name}
+                      width={24}
+                      height={24}
                       className="w-full h-full object-cover rounded"
                     />
                   ) : (
@@ -187,9 +189,11 @@ export function UserDropdown({ user, onSignOut, className }: UserDropdownProps) 
                     >
                       <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
                         {org.logo ? (
-                          <img
+                          <Image
                             src={org.logo}
                             alt={org.name}
+                            width={24}
+                            height={24}
                             className="w-full h-full object-cover rounded"
                           />
                         ) : (
