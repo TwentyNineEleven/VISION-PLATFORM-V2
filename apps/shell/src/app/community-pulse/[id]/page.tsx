@@ -215,9 +215,11 @@ export default function EngagementDetailPage() {
                     </p>
                   </div>
                 </div>
-                <GlowButton variant="ghost" size="sm">
-                  Edit
-                </GlowButton>
+                <Link href={`/community-pulse/${id}/stage/1`}>
+                  <GlowButton variant="ghost" size="sm">
+                    Edit
+                  </GlowButton>
+                </Link>
               </div>
             </div>
             <div className="px-6 py-4">
@@ -255,9 +257,11 @@ export default function EngagementDetailPage() {
                     </p>
                   </div>
                 </div>
-                <GlowButton variant="ghost" size="sm">
-                  Edit
-                </GlowButton>
+                <Link href={`/community-pulse/${id}/stage/2`}>
+                  <GlowButton variant="ghost" size="sm">
+                    Edit
+                  </GlowButton>
+                </Link>
               </div>
             </div>
             <div className="px-6 py-4">
@@ -299,9 +303,11 @@ export default function EngagementDetailPage() {
                     </p>
                   </div>
                 </div>
-                <GlowButton variant="ghost" size="sm">
-                  Edit
-                </GlowButton>
+                <Link href={`/community-pulse/${id}/stage/3`}>
+                  <GlowButton variant="ghost" size="sm">
+                    Edit
+                  </GlowButton>
+                </Link>
               </div>
             </div>
             <div className="px-6 py-4">
@@ -333,10 +339,12 @@ export default function EngagementDetailPage() {
             <p className="text-sm text-muted-foreground mb-4">
               {STAGE_DESCRIPTIONS[engagement.currentStage - 1]}
             </p>
-            <GlowButton variant="default" glow="medium" className="w-full">
-              Continue to Stage {engagement.currentStage}
-              <ArrowRight className="h-4 w-4" />
-            </GlowButton>
+            <Link href={`/community-pulse/${id}/stage/${engagement.currentStage}`}>
+              <GlowButton variant="default" glow="medium" className="w-full">
+                Continue to Stage {engagement.currentStage}
+                <ArrowRight className="h-4 w-4" />
+              </GlowButton>
+            </Link>
           </GlowCard>
 
           {/* Quick Stats */}
