@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
+import { DashboardSkeleton } from './components/EngagementCardSkeleton';
 
 export default function CommunityPulseDashboard() {
   const { activeOrganization } = useOrganization();
@@ -65,14 +66,7 @@ export default function CommunityPulseDashboard() {
   ).length;
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {

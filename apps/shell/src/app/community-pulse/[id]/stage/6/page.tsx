@@ -15,6 +15,7 @@ import { GlowInput } from '@/components/glow-ui/GlowInput';
 import type { Engagement, EngagementMethod } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, Calendar, DollarSign, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 export default function Stage6Page() {
   const params = useParams();
@@ -85,11 +86,7 @@ export default function Stage6Page() {
     : null;
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (

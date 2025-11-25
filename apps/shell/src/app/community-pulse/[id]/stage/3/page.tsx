@@ -14,6 +14,7 @@ import { GlowCard } from '@/components/glow-ui/GlowCard';
 import type { Engagement, EngagementMethod } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, Settings, Sparkles, Users, Clock, DollarSign, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 export default function Stage3Page() {
   const params = useParams();
@@ -85,11 +86,7 @@ export default function Stage3Page() {
   const recommendedMethods = getRecommendedMethods();
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (

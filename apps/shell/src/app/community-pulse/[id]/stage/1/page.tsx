@@ -15,6 +15,7 @@ import { GlowInput } from '@/components/glow-ui/GlowInput';
 import type { Engagement, GoalType } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, Target, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 const GOAL_TYPES: { value: GoalType; label: string; description: string }[] = [
   { value: 'explore', label: 'Explore', description: 'Understand experiences, attitudes, and perceptions' },
@@ -81,11 +82,7 @@ export default function Stage1Page() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (

@@ -15,6 +15,7 @@ import { GlowInput } from '@/components/glow-ui/GlowInput';
 import type { Engagement } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, Users, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 export default function Stage2Page() {
   const params = useParams();
@@ -91,11 +92,7 @@ export default function Stage2Page() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (

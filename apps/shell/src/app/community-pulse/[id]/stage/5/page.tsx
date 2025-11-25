@@ -14,6 +14,7 @@ import { GlowCard } from '@/components/glow-ui/GlowCard';
 import type { Engagement, EngagementMethod } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, FileText, Sparkles, Download, Eye, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 const MATERIAL_TYPES = [
   { id: 'facilitator_guide', label: 'Facilitator Guide', description: 'Step-by-step session guide' },
@@ -89,11 +90,7 @@ export default function Stage5Page() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (

@@ -14,6 +14,7 @@ import { GlowCard } from '@/components/glow-ui/GlowCard';
 import type { Engagement, ParticipationModel } from '@/types/community-pulse';
 import { ArrowLeft, ArrowRight, FileText, AlertTriangle, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { StageSkeleton } from '../../../components/EngagementCardSkeleton';
 
 const PARTICIPATION_MODELS: { value: ParticipationModel; label: string; description: string }[] = [
   { value: 'informational', label: 'Informational', description: 'We gather input from community' },
@@ -120,11 +121,7 @@ export default function Stage4Page() {
   const totalChecks = Object.keys(equityChecklist).length;
 
   if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-vision-blue-950"></div>
-      </div>
-    );
+    return <StageSkeleton />;
   }
 
   return (
