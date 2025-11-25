@@ -14,12 +14,18 @@
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'storage') THEN
-    INSERT INTO storage.buckets (id, name)
+    INSERT INTO storage.buckets (id, name, file_size_limit, allowed_mime_types, public)
     VALUES (
       'organization-logos',
-      'organization-logos'
+      'organization-logos',
+      5242880, -- 5MB in bytes
+      ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'],
+      true -- Public bucket for reading
     )
-    ON CONFLICT (id) DO NOTHING;
+    ON CONFLICT (id) DO UPDATE SET
+      file_size_limit = 5242880,
+      allowed_mime_types = ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'],
+      public = true;
   END IF;
 END $$;
 

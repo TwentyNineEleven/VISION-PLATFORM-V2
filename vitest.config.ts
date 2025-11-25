@@ -27,7 +27,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: [shellVitestSetup],
+    // Use real Supabase if USE_REAL_DB env var is set, otherwise use mocks
+    setupFiles: [
+      process.env.USE_REAL_DB 
+        ? path.resolve(__dirname, 'vitest.setup.real-db.ts')
+        : shellVitestSetup
+    ],
     include: [path.resolve(shellRoot, 'src/**/*.test.{ts,tsx}')],
     isolate: true,
     coverage: {
