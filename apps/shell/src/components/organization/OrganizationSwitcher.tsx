@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { GlowButton } from '@/components/glow-ui/GlowButton';
 import { Check, ChevronDown, Building2, Plus } from 'lucide-react';
@@ -79,9 +80,11 @@ export function OrganizationSwitcher({ onCreateNew, className = '' }: Organizati
         {/* Organization Icon */}
         <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-glow-500 to-glow-600 flex items-center justify-center">
           {activeOrganization.logo ? (
-            <img
+            <Image
               src={activeOrganization.logo}
               alt={activeOrganization.name}
+              width={32}
+              height={32}
               className="w-full h-full object-cover rounded-lg"
             />
           ) : (
@@ -142,9 +145,11 @@ export function OrganizationSwitcher({ onCreateNew, className = '' }: Organizati
                       {/* Organization Icon */}
                       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-glow-500 to-glow-600 flex items-center justify-center">
                         {org.logo ? (
-                          <img
+                          <Image
                             src={org.logo}
                             alt={org.name}
+                            width={32}
+                            height={32}
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
@@ -207,20 +212,22 @@ export function OrganizationSwitcherCompact({ onCreateNew, className = '' }: Org
 
   return (
     <div className={`relative ${className}`}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-lg bg-gradient-to-br from-glow-500 to-glow-600 flex items-center justify-center hover:opacity-90 transition-opacity"
-      >
-        {activeOrganization.logo ? (
-          <img
-            src={activeOrganization.logo}
-            alt={activeOrganization.name}
-            className="w-full h-full object-cover rounded-lg"
-          />
-        ) : (
-          <Building2 className="w-5 h-5 text-white" />
-        )}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-10 h-10 rounded-lg bg-gradient-to-br from-glow-500 to-glow-600 flex items-center justify-center hover:opacity-90 transition-opacity"
+        >
+          {activeOrganization.logo ? (
+            <Image
+              src={activeOrganization.logo}
+              alt={activeOrganization.name}
+              width={40}
+              height={40}
+              className="w-full h-full object-cover rounded-lg"
+            />
+          ) : (
+            <Building2 className="w-5 h-5 text-white" />
+          )}
+        </button>
 
       {isOpen && (
         <>

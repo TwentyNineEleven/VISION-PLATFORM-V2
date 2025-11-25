@@ -16,11 +16,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id } = await params;
+    const { id } = params;
 
     // Check authentication
     const {
@@ -111,11 +111,11 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id } = await params;
+    const { id } = params;
 
     // Check authentication
     const {
@@ -228,11 +228,11 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id } = await params;
+    const { id } = params;
 
     // Check authentication
     const {

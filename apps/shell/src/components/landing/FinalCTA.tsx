@@ -31,7 +31,7 @@ export function FinalCTA() {
               </Text>
 
               <Text size="lg" className="text-white font-semibold leading-relaxed">
-                Now it's here.
+                Now it’s here.
               </Text>
             </Stack>
           </Stack>

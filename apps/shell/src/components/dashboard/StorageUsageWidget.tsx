@@ -178,7 +178,7 @@ export function StorageUsageWidget() {
                     Storage Running Low
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    You're using {storage.percentage.toFixed(0)}% of your storage.
+                    You’re using {storage.percentage.toFixed(0)}% of your storage.
                   </p>
                 </div>
               </div>

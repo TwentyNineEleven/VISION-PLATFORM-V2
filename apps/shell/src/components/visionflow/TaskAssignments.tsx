@@ -7,7 +7,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { GlowButton } from '@/components/glow-ui/GlowButton';
@@ -74,14 +75,7 @@ export function TaskAssignments({
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load organization members when add form is shown
-  useEffect(() => {
-    if (showAddForm && activeOrganization) {
-      loadOrgMembers();
-    }
-  }, [showAddForm, activeOrganization]);
-
-  const loadOrgMembers = async () => {
+  const loadOrgMembers = useCallback(async () => {
     if (!activeOrganization) return;
 
     try {
@@ -107,7 +101,14 @@ export function TaskAssignments({
     } finally {
       setLoadingMembers(false);
     }
-  };
+  }, [activeOrganization, assignments]);
+
+  // Load organization members when add form is shown
+  useEffect(() => {
+    if (showAddForm && activeOrganization) {
+      loadOrgMembers();
+    }
+  }, [activeOrganization, loadOrgMembers, showAddForm]);
 
   const handleAssignUser = async () => {
     if (!selectedUserId) return;
@@ -210,10 +211,12 @@ export function TaskAssignments({
                     {/* Avatar */}
                     <div className="flex-shrink-0">
                       {assignment.user.avatar_url ? (
-                        <img
+                        <Image
                           src={assignment.user.avatar_url}
                           alt={assignment.user.name}
-                          className="h-8 w-8 rounded-full ring-2 ring-white"
+                          width={32}
+                          height={32}
+                          className="h-8 w-8 rounded-full ring-2 ring-white object-cover"
                         />
                       ) : (
                         <div className={`h-8 w-8 rounded-full ${roleConfig.bgClass} flex items-center justify-center ring-2 ring-white`}>
@@ -288,10 +291,12 @@ export function TaskAssignments({
                 >
                   {/* Avatar */}
                   {member.avatar_url ? (
-                    <img
+                    <Image
                       src={member.avatar_url}
                       alt={member.name}
-                      className="h-6 w-6 rounded-full"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 rounded-full object-cover"
                     />
                   ) : (
                     <div className="h-6 w-6 rounded-full bg-vision-gray-100 flex items-center justify-center">

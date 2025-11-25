@@ -18,24 +18,33 @@ import { Footer } from '@/components/landing/Footer';
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+      <nav className="border-b bg-card backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#001A33] to-[#007F5F] shadow-lg" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-vision-gray-950 to-vision-green-700 shadow-lg" />
               <div className="flex flex-col">
-                <span className="text-lg font-bold leading-tight text-[#001A33]">Vision Impact Hub</span>
-                <span className="text-xs text-gray-500 leading-tight">Powered by VISION AI™</span>
+                <span className="text-lg font-bold leading-tight text-vision-gray-950">Vision Impact Hub</span>
+                <span className="text-xs text-muted-foreground leading-tight">Powered by VISION AI™</span>
               </div>
             </div>
             <div className="flex items-center gap-6">
-              <a href="/#platform" className="text-sm font-medium text-gray-700 hover:text-[#007F5F] transition-colors">
+              <a
+                href="/#platform"
+                className="text-sm font-medium text-vision-gray-700 hover:text-vision-green-700 transition-colors"
+              >
                 Platform
               </a>
-              <a href="/#transformation" className="text-sm font-medium text-gray-700 hover:text-[#007F5F] transition-colors">
+              <a
+                href="/#transformation"
+                className="text-sm font-medium text-vision-gray-700 hover:text-vision-green-700 transition-colors"
+              >
                 Transformation Areas
               </a>
-              <a href="/#pricing" className="text-sm font-medium text-gray-700 hover:text-[#007F5F] transition-colors">
+              <a
+                href="/#pricing"
+                className="text-sm font-medium text-vision-gray-700 hover:text-vision-green-700 transition-colors"
+              >
                 Pricing
               </a>
               <Link href="/signin">
@@ -44,7 +53,12 @@ export default function LandingPage() {
                 </GlowButton>
               </Link>
               <Link href="/signup">
-                <GlowButton variant="default" size="sm" glow="subtle" className="bg-[#007F5F] hover:bg-[#00B88D]">
+                <GlowButton
+                  variant="default"
+                  size="sm"
+                  glow="subtle"
+                  className="bg-vision-green-700 hover:bg-vision-green-600"
+                >
                   Book a Demo
                 </GlowButton>
               </Link>

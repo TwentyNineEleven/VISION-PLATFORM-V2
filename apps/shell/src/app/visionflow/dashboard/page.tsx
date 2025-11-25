@@ -84,7 +84,7 @@ export default function VisionFlowDashboard() {
           Good morning! 👋
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Here's what you need to focus on today
+          Here’s what you need to focus on today
         </p>
       </div>
 

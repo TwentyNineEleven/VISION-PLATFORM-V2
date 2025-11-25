@@ -78,14 +78,7 @@ export default function OrganizationSettingsPage() {
   const [isUploadingLogo, setIsUploadingLogo] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
-  // Fetch organization data on mount
-  React.useEffect(() => {
-    if (activeOrganization) {
-      loadOrganizationData();
-    }
-  }, [activeOrganization]);
-
-  const loadOrganizationData = async () => {
+  const loadOrganizationData = React.useCallback(async () => {
     if (!activeOrganization?.id) return;
 
     try {
@@ -128,7 +121,14 @@ export default function OrganizationSettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeOrganization]);
+
+  // Fetch organization data on mount
+  React.useEffect(() => {
+    if (activeOrganization) {
+      loadOrganizationData();
+    }
+  }, [activeOrganization, loadOrganizationData]);
 
   const handleChange = (key: keyof OrganizationFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));

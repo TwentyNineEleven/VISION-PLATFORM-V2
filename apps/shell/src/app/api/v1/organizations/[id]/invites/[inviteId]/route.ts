@@ -8,11 +8,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; inviteId: string }> }
+  { params }: { params: { id: string; inviteId: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id, inviteId } = await params;
+    const { id, inviteId } = params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -102,11 +102,11 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; inviteId: string }> }
+  { params }: { params: { id: string; inviteId: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id, inviteId } = await params;
+    const { id, inviteId } = params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

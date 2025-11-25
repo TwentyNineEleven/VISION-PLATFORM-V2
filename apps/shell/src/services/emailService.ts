@@ -136,7 +136,7 @@ export const emailTemplates = {
               </a>
             </div>
             
-            <p style="font-size: 14px; color: #666; margin-top: 30px;">
+            <p style="font-size: 14px; color: inherit; margin-top: 30px;">
               Or copy and paste this link into your browser:<br>
               <a href="${inviteUrl}" style="color: #667eea; word-break: break-all;">
                 ${inviteUrl}
@@ -195,7 +195,7 @@ export const emailTemplates = {
               </a>
             </div>
             
-            <p style="font-size: 14px; color: #666; margin-top: 30px;">
+            <p style="font-size: 14px; color: inherit; margin-top: 30px;">
               Or copy and paste this link into your browser:<br>
               <a href="${inviteUrl}" style="color: #667eea; word-break: break-all;">
                 ${inviteUrl}

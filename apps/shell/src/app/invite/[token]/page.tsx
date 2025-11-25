@@ -43,22 +43,16 @@ export default function InviteAcceptancePage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
-  // Load invite data and check authentication
-  React.useEffect(() => {
-    loadInviteData();
-    checkAuthentication();
-  }, [token]);
-
-  const checkAuthentication = async () => {
+  const checkAuthentication = React.useCallback(async () => {
     try {
       const response = await fetch('/api/auth/check');
       setIsAuthenticated(response.ok);
     } catch (err) {
       setIsAuthenticated(false);
     }
-  };
+  }, []);
 
-  const loadInviteData = async () => {
+  const loadInviteData = React.useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -93,7 +87,13 @@ export default function InviteAcceptancePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
+
+  // Load invite data and check authentication
+  React.useEffect(() => {
+    loadInviteData();
+    checkAuthentication();
+  }, [checkAuthentication, loadInviteData]);
 
   const handleAccept = async () => {
     if (!inviteData || !isAuthenticated) return;
@@ -202,7 +202,7 @@ export default function InviteAcceptancePage() {
             </div>
           )}
           <GlowCardTitle className="text-2xl mb-2">
-            You're invited to join {inviteData.organization.name}
+            You’re invited to join {inviteData.organization.name}
           </GlowCardTitle>
           <GlowCardDescription className="text-base">
             {inviteData.invitedBy} has invited you to collaborate
@@ -234,11 +234,11 @@ export default function InviteAcceptancePage() {
               </div>
 
               {inviteData.message && (
-                <div className="p-4 rounded-lg border border-border bg-muted/50">
-                  <p className="text-sm font-medium text-foreground mb-2">Personal Message</p>
-                  <p className="text-sm text-muted-foreground italic">"{inviteData.message}"</p>
-                </div>
-              )}
+              <div className="p-4 rounded-lg border border-border bg-muted/50">
+                <p className="text-sm font-medium text-foreground mb-2">Personal Message</p>
+                <p className="text-sm text-muted-foreground italic">&ldquo;{inviteData.message}&rdquo;</p>
+              </div>
+            )}
 
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Clock className="h-4 w-4" />
@@ -260,7 +260,7 @@ export default function InviteAcceptancePage() {
             {isAccepted && (
               <div className="p-4 rounded-lg border border-success/50 bg-success/10">
                 <p className="text-sm text-success text-center">
-                  This invitation has already been accepted. If you're having trouble accessing the organization, please contact support.
+                  This invitation has already been accepted. If you’re having trouble accessing the organization, please contact support.
                 </p>
               </div>
             )}
@@ -284,10 +284,10 @@ export default function InviteAcceptancePage() {
                         )
                       }
                     >
-                      {isAccepting ? 'Joining...' : 'Accept Invitation'}
+                      {isAccepting ? 'Joining…' : 'Accept Invitation'}
                     </GlowButton>
                     <p className="text-xs text-center text-muted-foreground">
-                      By accepting, you'll gain {inviteData.role} access to {inviteData.organization.name}
+                      By accepting, you’ll gain {inviteData.role} access to {inviteData.organization.name}
                     </p>
                   </>
                 ) : (

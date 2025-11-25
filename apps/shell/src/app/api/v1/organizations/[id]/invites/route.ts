@@ -9,11 +9,11 @@ import { emailService } from '@/services/emailService';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id } = await params;
+    const { id } = params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -77,11 +77,11 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id } = await params;
+    const { id } = params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
