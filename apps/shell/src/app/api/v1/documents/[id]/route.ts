@@ -16,7 +16,7 @@ import { documentService } from '@/services/documentService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -30,7 +30,7 @@ export async function GET(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Get document
     const document = await documentService.getDocument(documentId);
@@ -69,7 +69,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -83,7 +83,7 @@ export async function PATCH(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Parse request body
     const body = await request.json();
@@ -134,7 +134,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -148,7 +148,7 @@ export async function DELETE(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Delete document (soft delete)
     await documentService.deleteDocument(documentId);

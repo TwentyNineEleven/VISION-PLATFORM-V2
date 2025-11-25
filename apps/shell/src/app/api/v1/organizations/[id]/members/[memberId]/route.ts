@@ -8,11 +8,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; memberId: string } }
+  { params }: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id, memberId } = params;
+    const { id, memberId } = await params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -118,11 +118,11 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; memberId: string } }
+  { params }: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id, memberId } = params;
+    const { id, memberId } = await params;
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

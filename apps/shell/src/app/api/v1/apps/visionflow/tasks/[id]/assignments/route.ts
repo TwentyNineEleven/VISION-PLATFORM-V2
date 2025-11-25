@@ -13,11 +13,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id: taskId } = params;
+    const { id: taskId } = await params;
 
     // Check authentication
     const {
@@ -194,11 +194,11 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { id: taskId } = params;
+    const { id: taskId } = await params;
 
     // Check authentication
     const {

@@ -8,11 +8,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { token } = params;
+    const { token } = await params;
 
     // Get invite with organization details
     const { data: invite, error } = await supabase
@@ -85,11 +85,11 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    const { token } = params;
+    const { token } = await params;
 
     // Get current user (must be authenticated)
     const { data: { user }, error: authError } = await supabase.auth.getUser();
