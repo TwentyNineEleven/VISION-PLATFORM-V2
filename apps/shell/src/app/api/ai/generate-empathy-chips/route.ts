@@ -127,7 +127,25 @@ No markdown, no preamble - just the JSON.`;
             chips = content.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 6);
         }
 
-        const res = NextResponse.json({ chips: chips.map(text => ({ text })) });
+        // Fix: Return consistent structure matching generate-chips endpoint
+        // Map quadrant ID to question_category format used in database
+        const categoryMap: Record<string, string> = {
+            pain: 'pain_points',
+            feelings: 'feelings',
+            influences: 'influences',
+            intentions: 'intentions',
+        };
+        const questionCategory = categoryMap[body.quadrant] || body.quadrant;
+
+        const chipsResponse = chips.map(text => ({
+            assessment_id: body.assessmentId,
+            text,
+            question_category: questionCategory,
+            is_ai_generated: true,
+            is_selected: false,
+        }));
+
+        const res = NextResponse.json({ chips: chipsResponse });
         Object.entries(rate.headers).forEach(([key, value]) => res.headers.set(key, value));
         return res;
 

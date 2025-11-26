@@ -91,12 +91,16 @@ export default function EmpathyMapPage() {
             if (!response.ok) throw new Error('Failed to generate');
 
             const data = await response.json();
+            // Fix: Use mapped question_category from API response (never use quadrantId)
+            // The endpoint maps quadrant values to database format (e.g., 'pain' → 'pain_points')
+            // and provides the correct structure matching generate-chips endpoint
             const payload = data.chips.map((c: any) => ({
-                assessment_id: assessmentId,
+                assessment_id: c.assessment_id || assessmentId,
                 text: c.text,
-                question_category: quadrantId,
-                is_selected: false,
-                is_ai_generated: true,
+                question_category: c.question_category, // Always use mapped value from API, no fallback
+                is_ai_generated: c.is_ai_generated ?? true,
+                is_selected: c.is_selected ?? false,
+                // Optional fields with defaults
                 is_custom: false,
                 is_edited: false,
                 confidence: null,
