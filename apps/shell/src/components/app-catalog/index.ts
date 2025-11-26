@@ -8,3 +8,4 @@ export { AppCatalogPage } from './AppCatalogPage';
 export { AppCatalogCard } from '@/components/apps/AppCatalogCard';
 export { AppDetailDrawer } from './AppDetailDrawer';
 export { AppLauncherModal } from './AppLauncherModal';
+

@@ -12,18 +12,36 @@
 -- ============================================================================
 
 -- Create the storage bucket for organization documents
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'organization-documents',
-  'organization-documents',
-  false, -- Private bucket, RLS controls access
-  15728640, -- 15MB in bytes
-  NULL -- Allow all file types
-)
-ON CONFLICT (id) DO UPDATE SET
-  public = false,
-  file_size_limit = 15728640,
-  allowed_mime_types = NULL;
+-- Note: storage.buckets schema may vary by Supabase version
+-- Using DO block to handle gracefully
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'storage') THEN
+    -- Try with all columns first (newer schema)
+    BEGIN
+      INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+      VALUES (
+        'organization-documents',
+        'organization-documents',
+        false, -- Private bucket, RLS controls access
+        15728640, -- 15MB in bytes
+        NULL -- Allow all file types
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        public = false,
+        file_size_limit = 15728640,
+        allowed_mime_types = NULL;
+    EXCEPTION WHEN undefined_column THEN
+      -- Fallback: use minimal schema (older Supabase versions)
+      INSERT INTO storage.buckets (id, name)
+      VALUES (
+        'organization-documents',
+        'organization-documents'
+      )
+      ON CONFLICT (id) DO NOTHING;
+    END;
+  END IF;
+END $$;
 
 -- ============================================================================
 -- HELPER FUNCTIONS FOR RLS
@@ -35,11 +53,11 @@ RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1
-    FROM organization_members
-    WHERE organization_id = org_id
-      AND user_id = is_organization_member.user_id
-      AND status = 'active'
-      AND deleted_at IS NULL
+    FROM organization_members om
+    WHERE om.organization_id = is_organization_member.org_id
+      AND om.user_id = is_organization_member.user_id
+      AND om.status = 'active'
+      AND om.deleted_at IS NULL
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -50,12 +68,12 @@ RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1
-    FROM organization_members
-    WHERE organization_id = org_id
-      AND user_id = has_organization_role.user_id
-      AND role = ANY(required_role)
-      AND status = 'active'
-      AND deleted_at IS NULL
+    FROM organization_members om
+    WHERE om.organization_id = has_organization_role.org_id
+      AND om.user_id = has_organization_role.user_id
+      AND om.role = ANY(required_role)
+      AND om.status = 'active'
+      AND om.deleted_at IS NULL
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -77,12 +95,12 @@ BEGIN
   END IF;
   
   -- Get user's role in organization
-  SELECT role INTO user_role
-  FROM organization_members
-  WHERE organization_id = doc_org_id
-    AND user_id = can_view_document.user_id
-    AND status = 'active'
-    AND deleted_at IS NULL;
+  SELECT om.role INTO user_role
+  FROM organization_members om
+  WHERE om.organization_id = doc_org_id
+    AND om.user_id = can_view_document.user_id
+    AND om.status = 'active'
+    AND om.deleted_at IS NULL;
   
   -- Owner and Admin can view all
   IF user_role IN ('Owner', 'Admin') THEN
@@ -145,12 +163,12 @@ BEGIN
   END IF;
   
   -- Get user's role in organization
-  SELECT role INTO user_role
-  FROM organization_members
-  WHERE organization_id = doc_org_id
-    AND user_id = can_edit_document.user_id
-    AND status = 'active'
-    AND deleted_at IS NULL;
+  SELECT om.role INTO user_role
+  FROM organization_members om
+  WHERE om.organization_id = doc_org_id
+    AND om.user_id = can_edit_document.user_id
+    AND om.status = 'active'
+    AND om.deleted_at IS NULL;
   
   -- Owner and Admin can edit all
   IF user_role IN ('Owner', 'Admin') THEN
@@ -475,7 +493,7 @@ CREATE POLICY "Organization members can upload files"
       SELECT o.id::text
       FROM organizations o
       INNER JOIN organization_members om ON om.organization_id = o.id
-      WHERE om.user_id = auth.uid()
+      WHERE om.user_id = (select auth.uid())
         AND om.status = 'active'
         AND om.deleted_at IS NULL
     )

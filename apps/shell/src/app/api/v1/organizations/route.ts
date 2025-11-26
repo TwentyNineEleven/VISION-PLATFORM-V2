@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { visionColors } from '@/shell-design-system/theme/visionTheme';
+import { visionColors } from '@/design-system/theme/visionTheme';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 /**

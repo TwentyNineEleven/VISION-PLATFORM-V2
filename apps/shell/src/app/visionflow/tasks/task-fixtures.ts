@@ -9,13 +9,15 @@ export const demoTasks = [
     project: {
       id: 'demo-project-customer-success',
       title: 'Customer Success Pilot',
+      status: 'ACTIVE',
     },
     assignments: [
       {
         id: 'demo-assignment-1',
         user_id: 'demo-user-alex',
-        role: 'OWNER',
+        role: 'OWNER' as const,
         user: {
+          id: 'demo-user-alex',
           name: 'Alex Johnson',
           email: 'alex@example.com',
           avatar_url: undefined,
@@ -48,6 +50,7 @@ export const demoTasks = [
     project: {
       id: 'demo-project-workflow',
       title: 'Workflow Acceleration',
+      status: 'ACTIVE',
     },
     assignments: [],
     comments: [],

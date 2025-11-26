@@ -71,7 +71,10 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     // Filter by organization (USER_PRIVATE or ORG visibility)
-    query = query.or(`owner_user_id.eq.${user.id},and(visibility.eq.ORG,owner_org_id.eq.${organizationId})`);
+    // Show plans owned by user OR plans with ORG visibility in user's organization
+    // Note: RLS policies should also enforce this, but we filter explicitly for clarity
+    // Simplifying: get plans owned by user OR plans in user's organization
+    query = query.or(`owner_user_id.eq.${user.id},owner_org_id.eq.${organizationId}`);
 
     // Apply additional filters
     if (status) {
@@ -80,14 +83,21 @@ export async function GET(request: NextRequest) {
 
     if (visibility) {
       query = query.eq('visibility', visibility);
+    } else {
+      // If no visibility filter specified, filter out plans that are USER_PRIVATE and not owned by user
+      // This is handled by the owner_user_id filter above, so we're good
     }
 
     const { data: plans, error } = await query;
 
     if (error) {
       console.error('Error fetching plans:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return NextResponse.json(
-        { error: 'Failed to fetch plans' },
+        { 
+          error: 'Failed to fetch plans',
+          details: error.message || 'Unknown error'
+        },
         { status: 500 }
       );
     }

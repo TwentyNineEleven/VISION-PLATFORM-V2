@@ -12,7 +12,6 @@ import {
   GlowButton,
   GlowBadge,
 } from '@/components/glow-ui';
-import { mockNotifications } from '@/lib/mock-data';
 import type { Notification } from '@/types/notification';
 import { notificationService } from '@/services/notificationService';
 import {
@@ -60,21 +59,25 @@ export default function NotificationsPage() {
 
   const loadNotifications = useCallback(async () => {
     try {
-      // Initialize with mock data if no notifications exist
-      const convertedMockNotifications = mockNotifications.map((n) => ({
-        ...n,
-        createdAt: n.timestamp.toISOString(),
-        timestamp: undefined,
-        icon: undefined,
-      })) as unknown as Notification[];
-
-      await notificationService.initializeMockNotifications(convertedMockNotifications);
-
+      setIsLoading(true);
       const data = await notificationService.getNotifications();
-      setNotifications(data);
+      // Convert service notification type to UI notification type
+      const convertedData: Notification[] = data.map((n) => ({
+        id: n.id,
+        type: n.type as Notification['type'],
+        title: n.title,
+        message: n.message,
+        createdAt: n.created_at,
+        read: n.read,
+        actionUrl: n.action_url || undefined,
+        actionLabel: n.action_label || undefined,
+      }));
+      setNotifications(convertedData);
     } catch (err) {
       setError('Failed to load notifications');
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 

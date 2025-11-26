@@ -42,6 +42,7 @@
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^14.3.1",
     "@turbo/gen": "^2.4.0",
+    "@types/marked": "^6.0.0",
     "@types/node": "^22.19.1",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -71,6 +72,15 @@
     "packages/*"
   ],
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
+    "@tanstack/react-query": "^5.90.10",
+    "@tanstack/react-query-devtools": "^5.91.1",
+    "@upstash/ratelimit": "^2.0.7",
+    "@upstash/redis": "^1.35.6",
+    "date-fns": "^4.1.0",
+    "docx": "^9.5.1",
+    "marked": "^17.0.1",
+    "react-pdf": "^10.2.0",
     "resend": "^6.5.2"
   }
 }

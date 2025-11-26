@@ -535,7 +535,6 @@ export const documentService = {
         used: 0,
         limit: 1024 * 1024 * 1024, // 1GB default
         percentage: 0,
-        totalDocuments: 0,
         documentCount: 0,
       };
     }
@@ -549,7 +548,6 @@ export const documentService = {
       used,
       limit,
       percentage,
-      totalDocuments: data.length,
       documentCount: data.length,
     };
   },

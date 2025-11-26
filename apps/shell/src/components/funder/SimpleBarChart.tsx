@@ -35,3 +35,4 @@ export function SimpleBarChart({ data, className }: SimpleBarChartProps) {
 }
 
 
+

@@ -46,11 +46,11 @@ const PRIORITY_COLORS = {
   URGENT: 'bg-red-100 text-red-700',
 };
 
-export function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
+function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
   return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-export async function fetchTasksData(
+async function fetchTasksData(
   statusFilter: string,
   priorityFilter: string,
   service = visionflowService,
@@ -71,16 +71,18 @@ export async function fetchTasksData(
   };
 }
 
-export async function createTaskWithFallback(
+async function createTaskWithFallback(
   title: string,
   service = visionflowService,
   env: NodeJS.ProcessEnv = process.env,
 ) {
   if (isSupabaseConfigured(env)) {
+    // Note: created_by and organization_id should be set by the service based on current user/org context
+    // Cast is needed because the service receives partial data and fills in the rest
     const created = await service.createTask({
       title,
       status: 'NOT_STARTED',
-    });
+    } as any);
 
     return { task: created as Task, infoMessage: null as string | null };
   }

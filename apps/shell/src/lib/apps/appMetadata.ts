@@ -36,3 +36,4 @@ export function getPhaseSoftColor(phase: Phase): string {
 export function getPhaseLabel(phase: Phase): string {
   return phaseLabels[phase];
 }
+

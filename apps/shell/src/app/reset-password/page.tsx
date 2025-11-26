@@ -11,9 +11,6 @@ import { GlowButton, GlowCard, GlowInput } from '@/components/glow-ui';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { Eye, EyeOff, ChevronLeft } from 'lucide-react';
 
-// Force dynamic rendering for this page (uses useSearchParams)
-export const dynamic = 'force-dynamic';
-
 const resetPasswordSchema = z
   .object({
     password: z
@@ -203,10 +200,14 @@ function ResetPasswordForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <ResetPasswordForm />
     </Suspense>
   );
+}
+
+export default function ResetPasswordPage() {
+  return <ResetPasswordPageContent />;
 }

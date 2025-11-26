@@ -18,11 +18,12 @@ if (!USE_REAL_DB) {
 }
 
 describe('organizationService', () => {
-  let mockSupabase: ReturnType<typeof createMockSupabaseClient> | null = null;
+  // Using non-null assertion since mockSupabase is set in beforeEach when USE_REAL_DB is false
+  let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
 
   beforeEach(() => {
     setupTestEnvironment();
-    
+
     if (!USE_REAL_DB) {
       mockSupabase = createMockSupabaseClient({
         data: [mockOrganization],

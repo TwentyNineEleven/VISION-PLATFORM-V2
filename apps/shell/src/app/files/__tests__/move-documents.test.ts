@@ -1,14 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { moveDocuments } from '../page';
-
-declare global {
-  // eslint-disable-next-line no-var
-  var fetch: ReturnType<typeof vi.fn>;
-}
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { moveDocuments } from '../moveDocuments';
 
 describe('moveDocuments helper', () => {
+  let mockFetch: Mock;
+
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    mockFetch = vi.fn();
+    vi.stubGlobal('fetch', mockFetch);
   });
 
   afterEach(() => {
@@ -17,7 +15,7 @@ describe('moveDocuments helper', () => {
 
   it('sends PATCH requests for each document', async () => {
     const mockResponse = { ok: true } as Response;
-    global.fetch.mockResolvedValue(mockResponse);
+    mockFetch.mockResolvedValue(mockResponse);
 
     await moveDocuments(['doc-1', 'doc-2'], 'folder-123');
 
@@ -35,7 +33,7 @@ describe('moveDocuments helper', () => {
   });
 
   it('throws when any response is not ok', async () => {
-    global.fetch
+    mockFetch
       .mockResolvedValueOnce({ ok: true } as Response)
       .mockResolvedValueOnce({ ok: false } as Response);
 

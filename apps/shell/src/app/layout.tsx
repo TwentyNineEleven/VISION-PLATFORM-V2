@@ -5,6 +5,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PostHogProvider } from '@/components/analytics/PostHogProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,26 +24,28 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <PostHogProvider>
-          <ErrorBoundary>
-            <AppShell>{children}</AppShell>
-            <Toaster
-              position="top-right"
-              expand={false}
-              richColors
-              closeButton
-              duration={4000}
-              toastOptions={{
-                classNames: {
-                  toast: 'border border-border bg-background text-foreground',
-                  title: 'text-foreground font-semibold',
-                  description: 'text-muted-foreground',
-                  actionButton: 'bg-primary text-primary-foreground',
-                  cancelButton: 'bg-muted text-muted-foreground',
-                  closeButton: 'bg-background border-border text-foreground hover:bg-muted',
-                },
-              }}
-            />
-          </ErrorBoundary>
+          <QueryProvider>
+            <ErrorBoundary>
+              <AppShell>{children}</AppShell>
+              <Toaster
+                position="top-right"
+                expand={false}
+                richColors
+                closeButton
+                duration={4000}
+                toastOptions={{
+                  classNames: {
+                    toast: 'border border-border bg-background text-foreground',
+                    title: 'text-foreground font-semibold',
+                    description: 'text-muted-foreground',
+                    actionButton: 'bg-primary text-primary-foreground',
+                    cancelButton: 'bg-muted text-muted-foreground',
+                    closeButton: 'bg-background border-border text-foreground hover:bg-muted',
+                  },
+                }}
+              />
+            </ErrorBoundary>
+          </QueryProvider>
         </PostHogProvider>
       </body>
     </html>

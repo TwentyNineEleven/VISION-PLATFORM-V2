@@ -177,11 +177,11 @@ describe('folderService', () => {
 
       const result = await folderService.createFolder({
         organizationId: 'org-1',
-        parentFolderId: null,
+        parentFolderId: undefined,
         name: 'Reports',
-        description: null,
-        color: null,
-        icon: null,
+        description: undefined,
+        color: undefined,
+        icon: undefined,
       });
 
       expect(insertQuery.insert).toHaveBeenCalledWith(
@@ -235,11 +235,11 @@ describe('folderService', () => {
       await expect(
         folderService.createFolder({
           organizationId: 'org-1',
-          parentFolderId: null,
+          parentFolderId: undefined,
           name: 'Reports',
-          description: null,
-          color: null,
-          icon: null,
+          description: undefined,
+          color: undefined,
+          icon: undefined,
         })
       ).rejects.toThrow('already exists');
     });

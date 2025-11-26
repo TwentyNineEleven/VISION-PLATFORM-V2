@@ -39,6 +39,187 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_context_cache: {
+        Row: {
+          context_data: Json
+          context_type: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          context_data: Json
+          context_type: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          context_data?: Json
+          context_type?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_context_cache_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_sources: {
+        Row: {
+          api_key_hash: string | null
+          app_name: string
+          created_at: string | null
+          display_name: string
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          settings: Json | null
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key_hash?: string | null
+          app_name: string
+          created_at?: string | null
+          display_name: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          settings?: Json | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key_hash?: string | null
+          app_name?: string
+          created_at?: string | null
+          display_name?: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          settings?: Json | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      community_assessments: {
+        Row: {
+          created_at: string
+          current_screen: number
+          empathy_narrative: string | null
+          focus_statement: string | null
+          focus_statement_feedback: Json | null
+          focus_statement_version: number | null
+          geographic_area: string
+          id: string
+          organization_id: string
+          personas: Json | null
+          status: string
+          target_population: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_screen?: number
+          empathy_narrative?: string | null
+          focus_statement?: string | null
+          focus_statement_feedback?: Json | null
+          focus_statement_version?: number | null
+          geographic_area: string
+          id?: string
+          organization_id: string
+          personas?: Json | null
+          status?: string
+          target_population: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_screen?: number
+          empathy_narrative?: string | null
+          focus_statement?: string | null
+          focus_statement_feedback?: Json | null
+          focus_statement_version?: number | null
+          geographic_area?: string
+          id?: string
+          organization_id?: string
+          personas?: Json | null
+          status?: string
+          target_population?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      community_needs: {
+        Row: {
+          assessment_id: string
+          category: string
+          created_at: string
+          description: string | null
+          evidence_level: string
+          id: string
+          impact_level: string
+          is_ai_suggested: boolean
+          title: string
+          updated_at: string
+          urgency_level: string
+        }
+        Insert: {
+          assessment_id: string
+          category: string
+          created_at?: string
+          description?: string | null
+          evidence_level: string
+          id?: string
+          impact_level: string
+          is_ai_suggested?: boolean
+          title: string
+          updated_at?: string
+          urgency_level: string
+        }
+        Update: {
+          assessment_id?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          evidence_level?: string
+          id?: string
+          impact_level?: string
+          is_ai_suggested?: boolean
+          title?: string
+          updated_at?: string
+          urgency_level?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_needs_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "community_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_activity: {
         Row: {
           action: string
@@ -544,6 +725,323 @@ export type Database = {
           },
         ]
       }
+      memberships: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          invited_by: string | null
+          organization_id: string
+          permissions: Json | null
+          role: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          permissions?: Json | null
+          role: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          permissions?: Json | null
+          role?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          completion_date: string | null
+          created_at: string | null
+          deleted_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          project_id: string
+          sort_order: number | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          project_id: string
+          sort_order?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          project_id?: string
+          sort_order?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          comment_added_email: boolean
+          comment_added_in_app: boolean
+          created_at: string
+          email_digest_frequency: string
+          email_enabled: boolean
+          file_shared_email: boolean
+          file_shared_in_app: boolean
+          id: string
+          in_app_enabled: boolean
+          invitation_email: boolean
+          invitation_in_app: boolean
+          member_added_email: boolean
+          member_added_in_app: boolean
+          member_removed_email: boolean
+          member_removed_in_app: boolean
+          mention_email: boolean
+          mention_in_app: boolean
+          organization_updated_email: boolean
+          organization_updated_in_app: boolean
+          push_enabled: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          quiet_hours_timezone: string | null
+          role_changed_email: boolean
+          role_changed_in_app: boolean
+          system_email: boolean
+          system_in_app: boolean
+          task_assigned_email: boolean
+          task_assigned_in_app: boolean
+          task_completed_email: boolean
+          task_completed_in_app: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_added_email?: boolean
+          comment_added_in_app?: boolean
+          created_at?: string
+          email_digest_frequency?: string
+          email_enabled?: boolean
+          file_shared_email?: boolean
+          file_shared_in_app?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          invitation_email?: boolean
+          invitation_in_app?: boolean
+          member_added_email?: boolean
+          member_added_in_app?: boolean
+          member_removed_email?: boolean
+          member_removed_in_app?: boolean
+          mention_email?: boolean
+          mention_in_app?: boolean
+          organization_updated_email?: boolean
+          organization_updated_in_app?: boolean
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string | null
+          role_changed_email?: boolean
+          role_changed_in_app?: boolean
+          system_email?: boolean
+          system_in_app?: boolean
+          task_assigned_email?: boolean
+          task_assigned_in_app?: boolean
+          task_completed_email?: boolean
+          task_completed_in_app?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_added_email?: boolean
+          comment_added_in_app?: boolean
+          created_at?: string
+          email_digest_frequency?: string
+          email_enabled?: boolean
+          file_shared_email?: boolean
+          file_shared_in_app?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          invitation_email?: boolean
+          invitation_in_app?: boolean
+          member_added_email?: boolean
+          member_added_in_app?: boolean
+          member_removed_email?: boolean
+          member_removed_in_app?: boolean
+          mention_email?: boolean
+          mention_in_app?: boolean
+          organization_updated_email?: boolean
+          organization_updated_in_app?: boolean
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string | null
+          role_changed_email?: boolean
+          role_changed_in_app?: boolean
+          system_email?: boolean
+          system_in_app?: boolean
+          task_assigned_email?: boolean
+          task_assigned_in_app?: boolean
+          task_completed_email?: boolean
+          task_completed_in_app?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          actor_id: string | null
+          created_at: string
+          deleted_at: string | null
+          email_error: string | null
+          email_sent: boolean
+          email_sent_at: string | null
+          id: string
+          message: string
+          organization_id: string | null
+          priority: Database["public"]["Enums"]["notification_priority"]
+          read: boolean
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          actor_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email_error?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          id?: string
+          message: string
+          organization_id?: string | null
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          read?: boolean
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          actor_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email_error?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          id?: string
+          message?: string
+          organization_id?: string | null
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          read?: boolean
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_audit_log: {
         Row: {
           action: string
@@ -928,59 +1426,53 @@ export type Database = {
           },
         ]
       }
-      user_preferences: {
+      plan_shares: {
         Row: {
-          active_organization_id: string | null
-          created_at: string
-          email_digest: string | null
+          access_level: string
+          created_at: string | null
+          deleted_at: string | null
           id: string
-          language: string | null
-          notifications_enabled: boolean | null
-          theme: string | null
-          timezone: string | null
-          updated_at: string
-          user_id: string
+          plan_id: string
+          shared_by: string
+          shared_with_org_id: string | null
+          shared_with_user_id: string | null
         }
         Insert: {
-          active_organization_id?: string | null
-          created_at?: string
-          email_digest?: string | null
+          access_level?: string
+          created_at?: string | null
+          deleted_at?: string | null
           id?: string
-          language?: string | null
-          notifications_enabled?: boolean | null
-          theme?: string | null
-          timezone?: string | null
-          updated_at?: string
-          user_id: string
+          plan_id: string
+          shared_by: string
+          shared_with_org_id?: string | null
+          shared_with_user_id?: string | null
         }
         Update: {
-          active_organization_id?: string | null
-          created_at?: string
-          email_digest?: string | null
+          access_level?: string
+          created_at?: string | null
+          deleted_at?: string | null
           id?: string
-          language?: string | null
-          notifications_enabled?: boolean | null
-          theme?: string | null
-          timezone?: string | null
-          updated_at?: string
-          user_id?: string
+          plan_id?: string
+          shared_by?: string
+          shared_with_org_id?: string | null
+          shared_with_user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "user_preferences_active_organization_id_fkey"
-            columns: ["active_organization_id"]
+            foreignKeyName: "plan_shares_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_shares_shared_with_org_id_fkey"
+            columns: ["shared_with_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "user_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-          referencedRelation: "users"
-          referencedColumns: ["id"]
-        },
-      ]
+        ]
       }
       plans: {
         Row: {
@@ -1040,75 +1532,6 @@ export type Database = {
             columns: ["owner_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plans_owner_user_id_fkey"
-            columns: ["owner_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      plan_shares: {
-        Row: {
-          access_level: string
-          created_at: string | null
-          deleted_at: string | null
-          id: string
-          plan_id: string
-          shared_by: string
-          shared_with_org_id: string | null
-          shared_with_user_id: string | null
-        }
-        Insert: {
-          access_level?: string
-          created_at?: string | null
-          deleted_at?: string | null
-          id?: string
-          plan_id: string
-          shared_by: string
-          shared_with_org_id?: string | null
-          shared_with_user_id?: string | null
-        }
-        Update: {
-          access_level?: string
-          created_at?: string | null
-          deleted_at?: string | null
-          id?: string
-          plan_id?: string
-          shared_by?: string
-          shared_with_org_id?: string | null
-          shared_with_user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_shares_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_shares_shared_by_fkey"
-            columns: ["shared_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_shares_shared_with_org_id_fkey"
-            columns: ["shared_with_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_shares_shared_with_user_id_fkey"
-            columns: ["shared_with_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1182,62 +1605,264 @@ export type Database = {
           },
         ]
       }
-      milestones: {
+      statement_chips: {
+        Row: {
+          assessment_id: string
+          confidence: number | null
+          created_at: string
+          id: string
+          is_ai_generated: boolean
+          is_custom: boolean | null
+          is_edited: boolean | null
+          is_selected: boolean
+          original_text: string | null
+          question_category: string
+          source_citation: string | null
+          text: string
+        }
+        Insert: {
+          assessment_id: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_ai_generated?: boolean
+          is_custom?: boolean | null
+          is_edited?: boolean | null
+          is_selected?: boolean
+          original_text?: string | null
+          question_category: string
+          source_citation?: string | null
+          text: string
+        }
+        Update: {
+          assessment_id?: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_ai_generated?: boolean
+          is_custom?: boolean | null
+          is_edited?: boolean | null
+          is_selected?: boolean
+          original_text?: string | null
+          question_category?: string
+          source_citation?: string | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statement_chips_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "community_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_activity: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string | null
+          id: string
+          task_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string | null
+          id?: string
+          task_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string | null
+          id?: string
+          task_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_activity_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_assignments: {
+        Row: {
+          assigned_by: string
+          assigned_to: string
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          role: string | null
+          task_id: string
+        }
+        Insert: {
+          assigned_by: string
+          assigned_to: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          role?: string | null
+          task_id: string
+        }
+        Update: {
+          assigned_by?: string
+          assigned_to?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          role?: string | null
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_attachments: {
         Row: {
           created_at: string | null
           deleted_at: string | null
-          description: string | null
-          due_date: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
           id: string
-          metadata: Json | null
-          organization_id: string
-          project_id: string
-          sort_order: number | null
-          status: string | null
-          title: string
-          updated_at: string | null
+          storage_path: string
+          task_id: string
+          uploaded_by: string
         }
         Insert: {
           created_at?: string | null
           deleted_at?: string | null
-          description?: string | null
-          due_date?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
           id?: string
-          metadata?: Json | null
-          organization_id: string
-          project_id: string
-          sort_order?: number | null
-          status?: string | null
-          title: string
-          updated_at?: string | null
+          storage_path: string
+          task_id: string
+          uploaded_by: string
         }
         Update: {
           created_at?: string | null
           deleted_at?: string | null
-          description?: string | null
-          due_date?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
           id?: string
-          metadata?: Json | null
-          organization_id?: string
-          project_id?: string
-          sort_order?: number | null
-          status?: string | null
-          title?: string
-          updated_at?: string | null
+          storage_path?: string
+          task_id?: string
+          uploaded_by?: string
         }
         Relationships: [
           {
-            foreignKeyName: "milestones_organization_id_fkey"
+            foreignKeyName: "task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          metadata: Json | null
+          task_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          metadata?: Json | null
+          task_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          metadata?: Json | null
+          task_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_ingestion_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          organization_id: string
+          payload: Json | null
+          source_app: string
+          source_record_id: string | null
+          status: string | null
+          task_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          organization_id: string
+          payload?: Json | null
+          source_app: string
+          source_record_id?: string | null
+          status?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          organization_id?: string
+          payload?: Json | null
+          source_app?: string
+          source_record_id?: string | null
+          status?: string | null
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_ingestion_log_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "milestones_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "task_ingestion_log_task_id_fkey"
+            columns: ["task_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -1314,13 +1939,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "tasks_milestone_id_fkey"
             columns: ["milestone_id"]
             isOneToOne: false
@@ -1350,146 +1968,55 @@ export type Database = {
           },
         ]
       }
-      task_assignments: {
+      user_preferences: {
         Row: {
-          assigned_by: string
-          assigned_to: string
-          created_at: string | null
-          deleted_at: string | null
+          active_organization_id: string | null
+          created_at: string
+          email_digest: string | null
           id: string
-          role: string | null
-          task_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          assigned_by: string
-          assigned_to: string
-          created_at?: string | null
-          deleted_at?: string | null
-          id?: string
-          role?: string | null
-          task_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          assigned_by?: string
-          assigned_to?: string
-          created_at?: string | null
-          deleted_at?: string | null
-          id?: string
-          role?: string | null
-          task_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_assignments_assigned_by_fkey"
-            columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_assignments_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_assignments_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      task_comments: {
-        Row: {
-          content: string
-          created_at: string | null
-          deleted_at: string | null
-          id: string
-          metadata: Json | null
-          task_id: string
-          updated_at: string | null
+          language: string | null
+          notifications_enabled: boolean | null
+          theme: string | null
+          timezone: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          content: string
-          created_at?: string | null
-          deleted_at?: string | null
+          active_organization_id?: string | null
+          created_at?: string
+          email_digest?: string | null
           id?: string
-          metadata?: Json | null
-          task_id: string
-          updated_at?: string | null
+          language?: string | null
+          notifications_enabled?: boolean | null
+          theme?: string | null
+          timezone?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          content?: string
-          created_at?: string | null
-          deleted_at?: string | null
+          active_organization_id?: string | null
+          created_at?: string
+          email_digest?: string | null
           id?: string
-          metadata?: Json | null
-          task_id?: string
-          updated_at?: string | null
+          language?: string | null
+          notifications_enabled?: boolean | null
+          theme?: string | null
+          timezone?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "task_comments_task_id_fkey"
-            columns: ["task_id"]
+            foreignKeyName: "user_preferences_active_organization_id_fkey"
+            columns: ["active_organization_id"]
             isOneToOne: false
-            referencedRelation: "tasks"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "task_comments_user_id_fkey"
+            foreignKeyName: "user_preferences_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      task_activity: {
-        Row: {
-          action: string
-          changes: Json | null
-          created_at: string | null
-          id: string
-          task_id: string
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          changes?: Json | null
-          created_at?: string | null
-          id?: string
-          task_id: string
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          changes?: Json | null
-          created_at?: string | null
-          id?: string
-          task_id?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_activity_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_activity_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1522,6 +2049,186 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_instances: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          current_step_id: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          project_id: string | null
+          started_at: string | null
+          started_by: string
+          status: string | null
+          updated_at: string | null
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_step_id?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          project_id?: string | null
+          started_at?: string | null
+          started_by: string
+          status?: string | null
+          updated_at?: string | null
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_step_id?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          project_id?: string | null
+          started_at?: string | null
+          started_by?: string
+          status?: string | null
+          updated_at?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_instances_current_step_id_fkey"
+            columns: ["current_step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_steps: {
+        Row: {
+          assignee_role: string | null
+          automation_rules: Json | null
+          created_at: string | null
+          deleted_at: string | null
+          description: string | null
+          duration_days: number | null
+          id: string
+          metadata: Json | null
+          sort_order: number
+          title: string
+          updated_at: string | null
+          workflow_id: string
+        }
+        Insert: {
+          assignee_role?: string | null
+          automation_rules?: Json | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          duration_days?: number | null
+          id?: string
+          metadata?: Json | null
+          sort_order: number
+          title: string
+          updated_at?: string | null
+          workflow_id: string
+        }
+        Update: {
+          assignee_role?: string | null
+          automation_rules?: Json | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          duration_days?: number | null
+          id?: string
+          metadata?: Json | null
+          sort_order?: number
+          title?: string
+          updated_at?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          id: string
+          is_template: boolean | null
+          metadata: Json | null
+          name: string
+          organization_id: string
+          updated_at: string | null
+          visibility: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_template?: boolean | null
+          metadata?: Json | null
+          name: string
+          organization_id: string
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_template?: boolean | null
+          metadata?: Json | null
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_rls_policy_summary: {
@@ -1539,11 +2246,10 @@ export type Database = {
       }
       v_table_sizes: {
         Row: {
-          indexes_size: string | null
           schemaname: unknown
-          table_size: string | null
+          size: string | null
+          size_bytes: number | null
           tablename: unknown
-          total_size: string | null
         }
         Relationships: []
       }
@@ -1561,8 +2267,23 @@ export type Database = {
         Args: { doc_id: string; user_id: string }
         Returns: boolean
       }
+      delete_old_notifications: { Args: { days_old?: number }; Returns: number }
+      diagnose_security_definer_views: {
+        Args: never
+        Returns: {
+          is_security_definer: boolean
+          view_definition: string
+          view_name: string
+          view_owner: string
+        }[]
+      }
       expire_old_invites: { Args: never; Returns: undefined }
+      fix_security_definer_views: { Args: never; Returns: undefined }
       generate_invite_token: { Args: never; Returns: string }
+      get_unread_notification_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       get_user_org_role: {
         Args: { org_id: string; user_id: string }
         Returns: string
@@ -1587,10 +2308,21 @@ export type Database = {
         Returns: boolean
       }
       is_organization_owner: { Args: { org_id: string }; Returns: boolean }
+      mark_all_notifications_read: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      user_can_edit_plan: { Args: { plan_id: string }; Returns: boolean }
+      user_can_view_plan: { Args: { plan_id: string }; Returns: boolean }
       user_has_org_permission: {
         Args: { org_id: string; required_role: string }
         Returns: boolean
       }
+      user_has_role_in_org: {
+        Args: { org_id: string; required_role: string }
+        Returns: boolean
+      }
+      user_is_org_member: { Args: { org_id: string }; Returns: boolean }
       validate_invite_token: {
         Args: { invite_token: string }
         Returns: {
@@ -1606,7 +2338,19 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      notification_priority: "low" | "medium" | "high" | "urgent"
+      notification_type:
+        | "invitation"
+        | "member_added"
+        | "member_removed"
+        | "role_changed"
+        | "organization_updated"
+        | "task_assigned"
+        | "task_completed"
+        | "file_shared"
+        | "comment_added"
+        | "mention"
+        | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1736,6 +2480,21 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      notification_priority: ["low", "medium", "high", "urgent"],
+      notification_type: [
+        "invitation",
+        "member_added",
+        "member_removed",
+        "role_changed",
+        "organization_updated",
+        "task_assigned",
+        "task_completed",
+        "file_shared",
+        "comment_added",
+        "mention",
+        "system",
+      ],
+    },
   },
 } as const

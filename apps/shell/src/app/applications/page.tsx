@@ -31,7 +31,7 @@ import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
 import type { AppMetadata, AppCatalogFilters, SortOption } from '@/lib/app-catalog-types';
 import { favoritesService } from '@/services/favoritesService';
 
-export function buildApplicationsCtas(deps: {
+function buildApplicationsCtas(deps: {
   openAppLauncher: () => void;
   navigate: (path: string) => void;
 }) {
@@ -45,7 +45,7 @@ export default function ApplicationsPage() {
   const { openAppLauncher } = useAppShell();
   const router = useRouter();
   const { onAskVisionAI, onViewAppUsage } = React.useMemo(
-    () => buildApplicationsCtas({ openAppLauncher, navigate: router.push }),
+    () => buildApplicationsCtas({ openAppLauncher, navigate: (path) => router.push(path as any) }),
     [openAppLauncher, router]
   );
   const [filters, setFilters] = React.useState<AppCatalogFilters>({

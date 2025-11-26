@@ -29,11 +29,12 @@ vi.mock('../documentParserService', () => ({
 }));
 
 describe('documentService', () => {
-  let mockSupabase: ReturnType<typeof createMockSupabaseClient> | null = null;
+  // Using non-null assertion since mockSupabase is set in beforeEach when USE_REAL_DB is false
+  let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
 
   beforeEach(() => {
     setupTestEnvironment();
-    
+
     if (!USE_REAL_DB) {
       mockSupabase = createMockSupabaseClient({
         data: [mockDocument],
@@ -146,7 +147,7 @@ describe('documentService', () => {
         file,
         organizationId: 'org-123',
         name: 'Test Document',
-        folderId: null,
+        folderId: undefined,
         tags: ['important'],
       };
 
@@ -496,6 +497,7 @@ describe('documentService', () => {
         ...mockDocument,
         file_path: 'org-123/test-document.pdf',
         download_count: 0,
+        view_count: 0,
       };
 
       vi.spyOn(documentService, 'getDocument').mockResolvedValue({
@@ -507,7 +509,7 @@ describe('documentService', () => {
       } as any);
 
       // Mock storage signed URL
-      const mockStorage = mockSupabase.storage.from();
+      const mockStorage = mockSupabase.storage.from('organization-documents');
       (mockStorage.createSignedUrl as any).mockResolvedValue({
         data: { signedUrl: 'https://test.supabase.co/storage/v1/object/sign/test-path' },
         error: null,
@@ -595,7 +597,6 @@ describe('documentService', () => {
         expect(quota.organizationId).toBe(TEST_DATA.ORGANIZATION_ID);
         expect(quota.used).toBeGreaterThanOrEqual(0);
         expect(quota.documentCount).toBeGreaterThanOrEqual(0);
-        expect(quota.totalDocuments).toBeGreaterThanOrEqual(0);
         expect(quota.percentage).toBeGreaterThanOrEqual(0);
         return;
       }
@@ -641,7 +642,7 @@ describe('documentService', () => {
 
       const quota = await documentService.getStorageQuota('org-123');
 
-      expect(quota.totalDocuments).toBe(0);
+      expect(quota.documentCount).toBe(0);
       expect(quota.used).toBe(0);
       expect(quota.percentage).toBe(0);
     });

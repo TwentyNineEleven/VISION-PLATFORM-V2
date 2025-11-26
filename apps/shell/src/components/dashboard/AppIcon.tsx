@@ -154,3 +154,4 @@ export function PhaseIcon({ phase, size = 'md', className }: PhaseIconProps) {
     </div>
   );
 }
+

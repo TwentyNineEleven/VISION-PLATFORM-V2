@@ -1,6 +1,8 @@
+'use client';
+
 /**
  * Glow UI Icon Components
- * 
+ *
  * Maps Glow UI icon names to Lucide React icons
  * Matches the exact icon styles from Figma designs
  */
@@ -21,6 +23,7 @@ import {
   MoreVertical,
   Crown,
   Handshake,
+  GitBranch,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -43,6 +46,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   'dots-9-light': MoreVertical,
   'crown-light': Crown,
   'handshake-light': Handshake,
+  'workflow': GitBranch,
 };
 
 export function GlowIcon({ name, size = 20, className, color }: GlowIconProps) {

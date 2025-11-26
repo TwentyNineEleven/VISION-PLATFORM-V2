@@ -19,11 +19,17 @@ import { vi } from 'vitest';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
-// Try to load .env file if it exists
+// Try to load .env.test.local file if it exists (for local test database)
+// Use override: true to override any existing environment variables from .env.local
 try {
-  config({ path: resolve(process.cwd(), '.env') });
+  config({ path: resolve(process.cwd(), '.env.test.local'), override: true });
 } catch (e) {
-  // .env file not found, that's okay - use env vars or defaults
+  // .env.test.local file not found, try .env as fallback
+  try {
+    config({ path: resolve(process.cwd(), '.env'), override: true });
+  } catch (e2) {
+    // No env files found, that's okay - use env vars or defaults
+  }
 }
 
 // Get Supabase credentials from environment variables
@@ -44,6 +50,9 @@ const SUPABASE_SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY || 
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'; // Local service key (standard for local dev)
 
+// Set NODE_ENV first so client.ts can detect test mode
+process.env.NODE_ENV = 'test';
+
 // Set environment variables for tests to use Supabase (local or remote)
 process.env.NEXT_PUBLIC_SUPABASE_URL = SUPABASE_URL;
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
@@ -55,7 +64,6 @@ if (process.env.VITEST_VERBOSE !== 'false') {
   console.log(`[Test Setup] Using ${isLocal ? 'LOCAL' : 'REMOTE'} Supabase: ${SUPABASE_URL.replace(/\/\/.*@/, '//***@')}`);
 }
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
-process.env.NODE_ENV = 'test';
 
 // Mock Next.js router (still needed)
 vi.mock('next/navigation', () => ({

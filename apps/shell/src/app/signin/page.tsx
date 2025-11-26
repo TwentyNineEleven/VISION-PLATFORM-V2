@@ -10,6 +10,7 @@ import { GlowButton, GlowCard, GlowInput, GlowSwitch } from '@/components/glow-u
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import AuthSocialButtons from '@/components/auth/AuthSocialButtons';
 import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -45,7 +46,6 @@ export default function SignInPage() {
     console.log('🔐 Attempting sign in with:', data.email);
 
     try {
-      const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
 
       console.log('📡 Supabase client created');

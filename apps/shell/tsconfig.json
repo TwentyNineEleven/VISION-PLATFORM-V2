@@ -22,8 +22,7 @@
       "@/hooks/*": ["./src/hooks/*"],
       "@/types/*": ["./src/types/*"],
       "@/design-system": ["../../src/design-system"],
-      "@/design-system/*": ["../../src/design-system/*"],
-      "@/shell-design-system/*": ["./src/design-system/*"]
+      "@/design-system/*": ["../../src/design-system/*", "./src/design-system/*"]
     },
     "plugins": [
       {

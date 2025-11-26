@@ -19,7 +19,7 @@ export const APP_CATALOG_DATA: AppMetadata[] = [
       'Gather community voice through surveys, listening tools, and needs/assets analysis.',
     iconName: 'community-compass',
     status: 'available',
-    route: '/apps/community-compass',
+    route: '/community-compass',
     audiences: ['Organization', 'Consultant'],
     focusTags: ['Community listening', 'Stakeholder strategy'],
     isFavorited: true,

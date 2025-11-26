@@ -2,6 +2,10 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { config as dotenvConfig } from 'dotenv';
+
+// Load .env.test.local for test environment
+dotenvConfig({ path: '.env.test.local' });
 
 const require = createRequire(import.meta.url);
 const shellRoot = path.resolve(__dirname, 'apps/shell');
@@ -29,7 +33,7 @@ export default defineConfig({
     environment: 'jsdom',
     // Use real Supabase if USE_REAL_DB env var is set, otherwise use mocks
     setupFiles: [
-      process.env.USE_REAL_DB 
+      process.env.USE_REAL_DB
         ? path.resolve(__dirname, 'vitest.setup.real-db.ts')
         : shellVitestSetup
     ],

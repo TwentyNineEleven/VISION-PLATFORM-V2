@@ -1,12 +1,12 @@
 /**
  * Files Page - Document Management
- * 
+ *
  * Main page for document library with folder navigation
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { File, Folder, Upload, Search, Grid, List, Filter } from 'lucide-react';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -16,6 +16,7 @@ import FolderTree from '@/components/documents/FolderTree';
 import CreateFolderModal from '@/components/documents/CreateFolderModal';
 import MoveDocumentsModal from '@/components/documents/MoveDocumentsModal';
 import type { FolderWithChildren } from '@/types/document';
+import { moveDocuments } from './moveDocuments';
 
 // Types
 interface Document {
@@ -29,30 +30,7 @@ interface Document {
   folderId: string | null;
 }
 
-export async function moveDocuments(
-  documentIds: string[],
-  targetFolderId: string | null
-) {
-  if (documentIds.length === 0) return;
-
-  const responses = await Promise.all(
-    documentIds.map((docId) =>
-      fetch(`/api/v1/documents/${docId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderId: targetFolderId }),
-      })
-    )
-  );
-
-  const failedResponse = responses.find((response) => !response.ok);
-
-  if (failedResponse) {
-    throw new Error('Failed to move one or more documents');
-  }
-}
-
-export default function FilesPage() {
+function FilesPageContent() {
   const searchParams = useSearchParams();
   const { activeOrganization } = useOrganization();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -602,5 +580,13 @@ export default function FilesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function FilesPage() {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-gray-50">Loading...</div>}>
+      <FilesPageContent />
+    </Suspense>
   );
 }

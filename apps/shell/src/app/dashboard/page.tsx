@@ -43,7 +43,7 @@ import { appMetadata } from '@/lib/apps/appMetadata';
 import { favoritesService } from '@/services/favoritesService';
 import { useAppShell } from '@/components/layout/AppShell';
 
-export function buildDashboardCtas(deps: {
+function buildDashboardCtas(deps: {
   openAppLauncher: () => void;
   navigate: (path: string) => void;
 }) {
@@ -53,7 +53,7 @@ export function buildDashboardCtas(deps: {
   };
 }
 
-export function toggleFavoriteWithPersistence(
+function toggleFavoriteWithPersistence(
   appId: string,
   setFavoriteAppIds: React.Dispatch<React.SetStateAction<string[]>>,
   service = favoritesService
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   const { openAppLauncher } = useAppShell();
   const [favoriteAppIds, setFavoriteAppIds] = React.useState<string[]>([]);
   const { onAskVisionAI, onLearnMore } = React.useMemo(
-    () => buildDashboardCtas({ openAppLauncher, navigate: router.push }),
+    () => buildDashboardCtas({ openAppLauncher, navigate: (path) => router.push(path as any) }),
     [openAppLauncher, router]
   );
 

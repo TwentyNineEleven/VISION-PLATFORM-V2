@@ -9,21 +9,17 @@
 -- ORGANIZATIONS & MEMBERSHIP
 -- ─────────────────────────────────────────────────────
 
-CREATE TABLE IF NOT EXISTS organizations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  type TEXT CHECK (type IN ('NONPROFIT', 'SOCIAL_ENTERPRISE', 'GOVERNMENT', 'COALITION')),
-  ein TEXT,
-  logo_url TEXT,
-  brand_color TEXT DEFAULT '#0047AB', -- Vision Blue
-  settings JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
-);
-
-CREATE INDEX idx_organizations_slug ON organizations(slug) WHERE deleted_at IS NULL;
+-- Organizations table already exists - skip creation
+-- Only create index if slug column exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'organizations' AND column_name = 'slug'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS idx_organizations_slug ON organizations(slug) WHERE deleted_at IS NULL;
+  END IF;
+END $$;
 
 -- ─────────────────────────────────────────────────────
 
@@ -381,9 +377,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Only create triggers if they don't exist
+DROP TRIGGER IF EXISTS update_organizations_updated_at ON organizations;
 CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_memberships_updated_at ON memberships;
 CREATE TRIGGER update_memberships_updated_at BEFORE UPDATE ON memberships
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

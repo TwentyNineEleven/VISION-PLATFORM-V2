@@ -90,6 +90,7 @@ const APP_REGISTRY: AppDefinition[] = [
     isPopular: true,
     audience: 'organization',
     transformationArea: 'Community listening',
+    launchPath: '/community-compass',
     lastUsed: hoursAgo(6),
     popularity: 90,
   },

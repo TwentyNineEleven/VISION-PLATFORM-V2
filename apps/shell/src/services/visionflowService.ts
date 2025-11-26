@@ -415,9 +415,15 @@ export const visionflowService = {
   // ============================================================================
 
   /**
-   * Get projects for a plan
+   * Get projects with filters
    */
-  async getProjects(planId?: string) {
+  async getProjects(options?: {
+    planId?: string;
+    status?: string;
+    priority?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const supabase = createClient();
 
     let query = supabase
@@ -437,8 +443,21 @@ export const visionflowService = {
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
-    if (planId) {
-      query = query.eq('plan_id', planId);
+    if (options?.planId) {
+      query = query.eq('plan_id', options.planId);
+    }
+
+    if (options?.status) {
+      query = query.eq('status', options.status);
+    }
+
+    if (options?.priority) {
+      query = query.eq('priority', options.priority);
+    }
+
+    if (options?.limit) {
+      const offset = options.offset || 0;
+      query = query.range(offset, offset + options.limit - 1);
     }
 
     const { data, error } = await query;
@@ -449,6 +468,264 @@ export const visionflowService = {
     }
 
     return data as Project[];
+  },
+
+  /**
+   * Get a single project by ID
+   */
+  async getProject(id: string) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('projects')
+      .select(
+        `
+        *,
+        plan:plans(id, title, status),
+        milestones:milestones(
+          id,
+          title,
+          description,
+          due_date,
+          status,
+          sort_order
+        )
+      `
+      )
+      .eq('id', id)
+      .is('deleted_at', null)
+      .single();
+
+    if (error) {
+      console.error('Error fetching project:', error);
+      throw new Error('Failed to fetch project');
+    }
+
+    return data as Project;
+  },
+
+  /**
+   * Create a new project
+   */
+  async createProject(project: any) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('projects')
+      .insert(project)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating project:', error);
+      throw new Error('Failed to create project');
+    }
+
+    return data as Project;
+  },
+
+  /**
+   * Update a project
+   */
+  async updateProject(id: string, updates: any) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating project:', error);
+      throw new Error('Failed to update project');
+    }
+
+    return data as Project;
+  },
+
+  /**
+   * Update project status (for Kanban)
+   */
+  async updateProjectStatus(id: string, status: string) {
+    return this.updateProject(id, { status, updated_at: new Date().toISOString() });
+  },
+
+  /**
+   * Delete a project (soft delete)
+   */
+  async deleteProject(id: string) {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('projects')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting project:', error);
+      throw new Error('Failed to delete project');
+    }
+
+    return true;
+  },
+
+  // ============================================================================
+  // WORKFLOWS
+  // ============================================================================
+
+  /**
+   * Get workflows with filters
+   */
+  async getWorkflows(options?: {
+    is_public?: boolean;
+    limit?: number;
+    offset?: number;
+  }) {
+    const supabase = createClient();
+
+    let query = supabase
+      .from('workflows')
+      .select(
+        `
+        *,
+        created_by_user:users!workflows_created_by_fkey(id, name, email, avatar_url),
+        steps:workflow_steps(
+          id,
+          title,
+          description,
+          sort_order,
+          duration_days,
+          assignee_role
+        )
+      `
+      )
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+
+    if (options?.is_public !== undefined) {
+      query = query.eq('is_public', options.is_public);
+    }
+
+    if (options?.limit) {
+      const offset = options.offset || 0;
+      query = query.range(offset, offset + options.limit - 1);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching workflows:', error);
+      throw new Error('Failed to fetch workflows');
+    }
+
+    return data;
+  },
+
+  /**
+   * Get a single workflow by ID
+   */
+  async getWorkflow(id: string) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('workflows')
+      .select(
+        `
+        *,
+        created_by_user:users!workflows_created_by_fkey(id, name, email, avatar_url),
+        steps:workflow_steps(
+          id,
+          title,
+          description,
+          sort_order,
+          duration_days,
+          assignee_role
+        )
+      `
+      )
+      .eq('id', id)
+      .is('deleted_at', null)
+      .single();
+
+    if (error) {
+      console.error('Error fetching workflow:', error);
+      throw new Error('Failed to fetch workflow');
+    }
+
+    return data;
+  },
+
+  /**
+   * Create a new workflow
+   */
+  async createWorkflow(workflow: any) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('workflows')
+      .insert(workflow)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating workflow:', error);
+      throw new Error('Failed to create workflow');
+    }
+
+    return data;
+  },
+
+  /**
+   * Apply workflow to a project
+   */
+  async applyWorkflow(workflowId: string, projectId: string) {
+    // This is handled by the API endpoint
+    const response = await fetch(`/api/v1/apps/visionflow/workflows/${workflowId}/apply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project_id: projectId }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to apply workflow');
+    }
+
+    return await response.json();
+  },
+
+  // ============================================================================
+  // CALENDAR
+  // ============================================================================
+
+  /**
+   * Get calendar events for date range
+   */
+  async getCalendarEvents(startDate: Date, endDate: Date, filters?: {
+    include_tasks?: boolean;
+    include_projects?: boolean;
+    include_milestones?: boolean;
+  }) {
+    const params = new URLSearchParams({
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+      include_tasks: (filters?.include_tasks !== false).toString(),
+      include_projects: (filters?.include_projects !== false).toString(),
+      include_milestones: (filters?.include_milestones !== false).toString(),
+    });
+
+    const response = await fetch(`/api/v1/apps/visionflow/calendar/events?${params.toString()}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch calendar events');
+    }
+
+    const data = await response.json();
+    return data.events;
   },
 
   /**

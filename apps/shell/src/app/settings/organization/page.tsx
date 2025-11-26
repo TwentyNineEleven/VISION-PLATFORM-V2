@@ -676,7 +676,8 @@ export default function OrganizationSettingsPage() {
   );
 }
 
-export function OrganizationSettingsTestComponent() {
+// Test component for unit tests - not exported from page
+function OrganizationSettingsTestComponent() {
   const [name, setName] = React.useState('');
   const [type, setType] = React.useState('nonprofit');
   const [country, setCountry] = React.useState('US');

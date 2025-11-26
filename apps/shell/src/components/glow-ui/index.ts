@@ -6,6 +6,7 @@
 export * from './GlowButton';
 export * from './GlowCard';
 export * from './GlowInput';
+export * from './GlowTextarea';
 export * from './GlowSelect';
 export * from './GlowBadge';
 export * from './GlowModal';

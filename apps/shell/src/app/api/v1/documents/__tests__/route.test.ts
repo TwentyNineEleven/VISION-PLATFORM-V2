@@ -198,7 +198,7 @@ describe('Documents API Routes', () => {
 
       const response = await POST(request);
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(201); // 201 Created is correct for POST
 
       const data = await response.json();
       expect(data.success).toBe(true);

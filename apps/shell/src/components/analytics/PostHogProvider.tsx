@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { initPostHog, trackPageView } from '@/lib/analytics/posthog';
 
@@ -16,7 +16,7 @@ import { initPostHog, trackPageView } from '@/lib/analytics/posthog';
  * - Client-side only rendering
  */
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogPageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -33,5 +33,16 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, searchParams]);
 
-  return <>{children}</>;
+  return null;
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageViewTracker />
+      </Suspense>
+      {children}
+    </>
+  );
 }

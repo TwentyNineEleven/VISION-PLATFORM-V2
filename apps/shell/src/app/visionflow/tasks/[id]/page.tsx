@@ -118,11 +118,11 @@ const PRIORITY_CONFIG = {
   URGENT: { label: 'Urgent', variant: 'destructive' as const },
 };
 
-export function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
+function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
   return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-export async function fetchTaskData(
+async function fetchTaskData(
   id: string,
   service = visionflowService,
   env: NodeJS.ProcessEnv = process.env,
@@ -151,7 +151,7 @@ function getDefaultCommentAuthor(env: NodeJS.ProcessEnv = process.env) {
   };
 }
 
-export async function addCommentWithFallback(
+async function addCommentWithFallback(
   taskId: string,
   content: string,
   service = visionflowService,
