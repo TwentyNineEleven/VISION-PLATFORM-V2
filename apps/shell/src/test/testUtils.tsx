@@ -117,8 +117,16 @@ export function createMockFile(
   type: string,
   content = 'test content'
 ): File {
-  const blob = new Blob([content], { type });
-  return new File([blob], name, { type });
+  const data = new Uint8Array(Math.max(size, content.length)).fill(0);
+  const blob = new Blob([data], { type });
+  const file = new File([blob], name, { type });
+  // Ensure arrayBuffer is available in test environment
+  if (!(file as any).arrayBuffer) {
+    const buffer = data.buffer;
+    (file as any).arrayBuffer = () => Promise.resolve(buffer);
+  }
+
+  return file;
 }
 
 /**

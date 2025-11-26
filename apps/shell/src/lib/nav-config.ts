@@ -26,7 +26,7 @@ export interface NavSubItem {
  * Main Navigation Items
  * Matches VISION Platform actual routes and structure
  */
-export const navConfig: NavItem[] = [
+const baseNavConfig: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
@@ -69,7 +69,6 @@ export const navConfig: NavItem[] = [
     label: 'Notifications',
     href: '/notifications',
     icon: 'message-bubble-light',
-    badge: 0, // Will be updated dynamically based on unread count
   },
   {
     id: 'files',
@@ -94,26 +93,37 @@ export const navConfig: NavItem[] = [
   },
 ];
 
+function freezeNavItems(items: NavItem[]): ReadonlyArray<NavItem> {
+  return items.map((item) =>
+    Object.freeze({
+      ...item,
+      submenu: item.submenu?.map((subItem) => Object.freeze({ ...subItem })),
+    })
+  );
+}
+
+export const navConfig: ReadonlyArray<NavItem> = freezeNavItems(baseNavConfig);
+
 /**
  * Help & Support Item (shown at bottom of sidebar)
  */
-export const helpNavItem: NavItem = {
+export const helpNavItem: Readonly<NavItem> = Object.freeze({
   id: 'help',
   label: 'Help & Support',
   href: '/help',
   icon: 'question-circle-light',
-};
+});
 
 /**
  * Get active navigation item based on current path
  */
-export function getActiveNavItem(pathname: string): string | null {
+export function getActiveNavItem(pathname: string, items: NavItem[] = [...navConfig]): string | null {
   // Normalize pathname (remove trailing slash, ensure it starts with /)
   const normalizedPath = pathname.endsWith('/') && pathname.length > 1 
     ? pathname.slice(0, -1) 
     : pathname;
 
-  for (const item of navConfig) {
+  for (const item of items) {
     // Check if pathname matches the main item href exactly
     if (normalizedPath === item.href) {
       return item.id;
@@ -138,13 +148,13 @@ export function getActiveNavItem(pathname: string): string | null {
 /**
  * Get active submenu item based on current path
  */
-export function getActiveSubmenuItem(pathname: string): string | null {
+export function getActiveSubmenuItem(pathname: string, items: NavItem[] = [...navConfig]): string | null {
   // Normalize pathname (remove trailing slash, ensure it starts with /)
   const normalizedPath = pathname.endsWith('/') && pathname.length > 1 
     ? pathname.slice(0, -1) 
     : pathname;
 
-  for (const item of navConfig) {
+  for (const item of items) {
     if (item.submenu) {
       for (const subItem of item.submenu) {
         if (normalizedPath === subItem.href || normalizedPath.startsWith(`${subItem.href}/`)) {
@@ -157,12 +167,32 @@ export function getActiveSubmenuItem(pathname: string): string | null {
 }
 
 /**
- * Update notification badge count
- * Call this function to update the notification count dynamically
+ * Build a fresh nav config with derived badge counts (immutable)
+ * Call this from AppShell to ensure navigation updates re-render reactively
  */
-export function updateNotificationBadge(count: number): void {
-  const notificationsItem = navConfig.find((item) => item.id === 'notifications');
-  if (notificationsItem) {
-    notificationsItem.badge = count > 0 ? count : undefined;
-  }
+export function buildNavConfig(options?: { notificationsCount?: number | string }): NavItem[] {
+  const { notificationsCount } = options || {};
+
+  return navConfig.map((item) => {
+    const nextItem: NavItem = {
+      ...item,
+      submenu: item.submenu?.map((subItem) => ({ ...subItem })),
+    };
+
+    if (item.id === 'notifications') {
+      const badge = typeof notificationsCount === 'number'
+        ? (Number.isFinite(notificationsCount) && notificationsCount > 0 ? notificationsCount : undefined)
+        : typeof notificationsCount === 'string' && notificationsCount.trim().length > 0
+          ? notificationsCount
+          : undefined;
+
+      if (badge !== undefined) {
+        nextItem.badge = badge;
+      } else {
+        delete nextItem.badge;
+      }
+    }
+
+    return nextItem;
+  });
 }

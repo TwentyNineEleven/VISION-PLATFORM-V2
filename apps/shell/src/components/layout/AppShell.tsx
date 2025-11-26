@@ -24,7 +24,7 @@ import { GlowTopHeader } from '@/components/navigation/GlowTopHeader';
 import { GlowMobileNavDrawer } from '@/components/navigation/GlowMobileNavDrawer';
 import { AppLauncherModal } from '@/components/app-catalog/AppLauncherModal';
 import { mockUser, mockNotifications, getUnreadNotificationCount } from '@/lib/mock-data';
-import { updateNotificationBadge } from '@/lib/nav-config';
+import { buildNavConfig, NavItem } from '@/lib/nav-config';
 import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
 import { useRouter } from 'next/navigation';
 import { OrganizationProvider } from '@/contexts/OrganizationContext';
@@ -71,6 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [appLauncherOpen, setAppLauncherOpen] = React.useState(false);
   const [user, setUser] = React.useState<{ name: string; email: string; initials: string } | null>(null);
+  const [navItems, setNavItems] = React.useState<NavItem[]>(() => buildNavConfig());
 
   const isShellRoute = React.useMemo(() => {
     return !PUBLIC_ROUTES.has(pathname);
@@ -117,7 +118,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Update notification badge count
   React.useEffect(() => {
     const unreadCount = getUnreadNotificationCount(mockNotifications);
-    updateNotificationBadge(unreadCount);
+    setNavItems(buildNavConfig({ notificationsCount: unreadCount }));
   }, []);
 
   const toggleSidebar = React.useCallback(() => {
@@ -180,6 +181,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block lg:fixed lg:inset-y-0">
             <GlowSideNav
+              navItems={navItems}
               collapsed={sidebarCollapsed}
               onToggleCollapse={toggleSidebar}
             />
@@ -187,6 +189,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Mobile Navigation Drawer */}
           <GlowMobileNavDrawer
+            navItems={navItems}
             open={mobileNavOpen}
             onClose={closeMobileNav}
           />
@@ -194,7 +197,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Main Content Area */}
           <div
             className={cn(
-              'flex min-h-screen flex-1 flex-col bg-[#F8FAFC]',
+              'flex min-h-screen flex-1 flex-col bg-background text-foreground',
               sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'
             )}
           >
@@ -217,7 +220,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             />
 
             {/* Page Content */}
-            <main className="flex-1 overflow-y-auto bg-[#F8FAFC] px-4 py-6 sm:px-6 lg:px-8 overscroll-contain">
+            <main className="flex-1 overflow-y-auto bg-background px-4 py-6 sm:px-6 lg:px-8 overscroll-contain">
               {children}
             </main>
           </div>

@@ -169,10 +169,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload document
-    const document = await documentService.uploadDocument({
-      file,
-      organizationId,
-      folderId: folderId ?? undefined,
+  const document = await documentService.uploadDocument({
+    file,
+    organizationId,
+    folderId: folderId ?? undefined,
       name: name ?? file.name,
       description: description ?? undefined,
       tags,
@@ -180,10 +180,10 @@ export async function POST(request: NextRequest) {
       aiEnabled,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: document,
-    }, { status: 201 });
+  return NextResponse.json({
+    success: true,
+    data: document,
+  }, { status: 200 });
   } catch (error) {
     console.error('Error uploading document:', error);
     return NextResponse.json(

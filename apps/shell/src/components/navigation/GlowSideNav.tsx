@@ -23,21 +23,23 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GlowIcon } from './GlowIcons';
-import { navConfig, helpNavItem, getActiveNavItem, getActiveSubmenuItem } from '@/lib/nav-config';
+import { helpNavItem, getActiveNavItem, getActiveSubmenuItem, NavItem, navConfig } from '@/lib/nav-config';
 import { Menu, X } from 'lucide-react';
 import { GlowButton } from '@/components/glow-ui';
 
 export interface GlowSideNavProps {
+  navItems?: NavItem[];
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   className?: string;
 }
 
-export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: GlowSideNavProps) {
+export function GlowSideNav({ navItems, collapsed = false, onToggleCollapse, className }: GlowSideNavProps) {
   const pathname = usePathname() || '/';
+  const items = navItems ?? [...navConfig];
   const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
-  const activeNavId = getActiveNavItem(pathname);
-  const activeSubmenuId = getActiveSubmenuItem(pathname);
+  const activeNavId = getActiveNavItem(pathname, items);
+  const activeSubmenuId = getActiveSubmenuItem(pathname, items);
 
   const toggleExpand = (itemId: string) => {
     setExpandedItems((prev) => {
@@ -54,14 +56,14 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
   // Auto-expand parent if submenu item is active
   React.useEffect(() => {
     if (activeSubmenuId) {
-      const parentItem = navConfig.find((item) =>
+      const parentItem = items.find((item) =>
         item.submenu?.some((sub) => sub.id === activeSubmenuId)
       );
       if (parentItem) {
         setExpandedItems((prev) => new Set(prev).add(parentItem.id));
       }
     }
-  }, [activeSubmenuId]);
+  }, [activeSubmenuId, items]);
 
   return (
     <aside
@@ -107,7 +109,7 @@ export function GlowSideNav({ collapsed = false, onToggleCollapse, className }: 
 
       {/* Navigation Items */}
       <nav className="flex-1 overflow-y-auto px-4 py-0 flex flex-col gap-3 min-h-0">
-          {navConfig.map((item) => {
+          {items.map((item) => {
             const isActive = activeNavId === item.id;
             const isExpanded = expandedItems.has(item.id);
             const hasSubmenu = item.submenu && item.submenu.length > 0;
