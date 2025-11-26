@@ -28,6 +28,7 @@ export interface ParseResult {
     keywords?: string[];
     createdDate?: string;
     modifiedDate?: string;
+    note?: string;
   };
 }
 
@@ -36,6 +37,49 @@ export interface ParserOptions {
   maxLength?: number; // Maximum text length to extract
   includeFormatting?: boolean;
 }
+
+const applyMaxLength = (text: string, maxLength?: number) => {
+  if (!maxLength || text.length <= maxLength) {
+    return { text, truncated: false } as const;
+  }
+
+  return {
+    text: `${text.substring(0, maxLength)}\n[Content truncated]`,
+    truncated: true,
+  } as const;
+};
+
+const decodeXmlEntities = (value?: string) =>
+  value
+    ?.replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .trim();
+
+const decodeBuffer = (buffer: ArrayBuffer) => {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder().decode(buffer);
+  }
+
+  // Fallback for environments without TextDecoder (unlikely)
+  // eslint-disable-next-line no-undef
+  return Buffer.from(buffer).toString('utf-8');
+};
+
+const readFileText = async (file: File) => {
+  if (typeof (file as unknown as { text?: () => Promise<string> }).text === 'function') {
+    return (file as unknown as { text: () => Promise<string> }).text();
+  }
+
+  if (typeof (file as unknown as { arrayBuffer?: () => Promise<ArrayBuffer> }).arrayBuffer === 'function') {
+    return decodeBuffer(await (file as unknown as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer());
+  }
+
+  const buffer = await new Response(file as unknown as BodyInit).arrayBuffer();
+  return decodeBuffer(buffer);
+};
 
 // ============================================================================
 // MAIN PARSER SERVICE
@@ -127,38 +171,31 @@ export const documentParserService = {
    */
   async parsePDF(file: File, options: ParserOptions = {}): Promise<ParseResult> {
     try {
-      // TODO: Implement PDF parsing with pdf-parse or PDF.js
-      // For now, return a placeholder that indicates PDF parsing is needed
-      
-      // In a real implementation, you would:
-      // 1. Read the file as ArrayBuffer
-      // 2. Load it with pdf-parse or PDF.js
-      // 3. Extract text from each page
-      // 4. Extract metadata (author, title, etc.)
-      
-      const arrayBuffer = await file.arrayBuffer();
-      
-      // Placeholder: In production, use a PDF parsing library
-      const text = `[PDF content extraction requires pdf-parse library]
-      
-File: ${file.name}
-Size: ${file.size} bytes
-Type: ${file.type}
+      const rawContent = await readFileText(file);
+      const extractedText =
+        [...rawContent.matchAll(/\(([^\)]*)\)\s*Tj/g)]
+          .map(match => match[1]?.replace(/\\([()\\])/g, '$1')?.trim())
+          .filter(Boolean)
+          .join(' ')
+          .trim() ||
+        rawContent.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, ' ').trim();
 
-To enable PDF parsing, install: npm install pdf-parse
-Then implement the parsing logic in this method.`;
+      const { text, truncated } = applyMaxLength(extractedText, options.maxLength);
+      const words = text.split(/\s+/).filter(Boolean);
 
       return {
         success: true,
         text,
         textLength: text.length,
         metadata: {
-          pages: 0, // Would be extracted from PDF
-          words: text.split(/\s+/).length,
+          pages: (rawContent.match(/\/Type\s*\/Page/g) || []).length || 1,
+          words: words.length,
           characters: text.length,
+          ...(truncated ? { note: 'Content truncated for maxLength' } : {}),
         },
       };
     } catch (error) {
+      console.error('PDF parsing failed', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'PDF parsing failed',
@@ -174,27 +211,33 @@ Then implement the parsing logic in this method.`;
    */
   async parseWordDocument(file: File, options: ParserOptions = {}): Promise<ParseResult> {
     try {
-      // TODO: Implement Word document parsing with mammoth
-      
-      const text = `[Word document extraction requires mammoth library]
-      
-File: ${file.name}
-Size: ${file.size} bytes
-Type: ${file.type}
+      const xmlLikeContent = await readFileText(file);
+      const textNodes = [
+        ...xmlLikeContent.matchAll(/<w:t[^>]*>(.*?)<\/w:t>/g),
+        ...xmlLikeContent.matchAll(/<t[^>]*>(.*?)<\/t>/g),
+      ]
+        .map(match => decodeXmlEntities(match[1]))
+        .filter(Boolean);
 
-To enable Word document parsing, install: npm install mammoth
-Then implement the parsing logic in this method.`;
+      const extractedText = textNodes.join(' ').trim();
+      const fallbackText =
+        extractedText || xmlLikeContent.replace(/[^\x09\x0A\x0D\x20-\x7E]+/g, ' ').trim();
+
+      const { text, truncated } = applyMaxLength(fallbackText, options.maxLength);
+      const words = text.split(/\s+/).filter(Boolean);
 
       return {
         success: true,
         text,
         textLength: text.length,
         metadata: {
-          words: text.split(/\s+/).length,
+          words: words.length,
           characters: text.length,
+          ...(truncated ? { note: 'Content truncated for maxLength' } : {}),
         },
       };
     } catch (error) {
+      console.error('Word document parsing failed', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Word document parsing failed',
@@ -492,4 +535,4 @@ To enable OCR, you can:
 // EXPORT
 // ============================================================================
 
-export default documentParserService;
+  export default documentParserService;

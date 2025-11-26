@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import { Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { PageHero } from '@/components/layout/PageHero';
 import { AppsFilterBar } from '@/components/apps/AppsFilterBar';
 import { AppsAdvancedFilters } from '@/components/apps/AppsAdvancedFilters';
@@ -30,8 +31,23 @@ import { APP_CATALOG_DATA } from '@/lib/app-catalog-data';
 import type { AppMetadata, AppCatalogFilters, SortOption } from '@/lib/app-catalog-types';
 import { favoritesService } from '@/services/favoritesService';
 
+export function buildApplicationsCtas(deps: {
+  openAppLauncher: () => void;
+  navigate: (path: string) => void;
+}) {
+  return {
+    onAskVisionAI: () => deps.openAppLauncher(),
+    onViewAppUsage: () => deps.navigate('/applications/usage'),
+  };
+}
+
 export default function ApplicationsPage() {
   const { openAppLauncher } = useAppShell();
+  const router = useRouter();
+  const { onAskVisionAI, onViewAppUsage } = React.useMemo(
+    () => buildApplicationsCtas({ openAppLauncher, navigate: router.push }),
+    [openAppLauncher, router]
+  );
   const [filters, setFilters] = React.useState<AppCatalogFilters>({
     searchQuery: '',
     phase: 'All',
@@ -166,11 +182,6 @@ export default function ApplicationsPage() {
     setIsDrawerOpen(true);
   };
 
-  const handleAskVisionAI = () => {
-    // TODO: Implement VISION AI modal/feature
-    openAppLauncher();
-  };
-
   return (
     <div className="mx-auto max-w-7xl">
       {/* 1. Hero Section */}
@@ -179,26 +190,23 @@ export default function ApplicationsPage() {
           title="VISION Apps"
           subtitle="Browse every tool in the platform, filter by domain or audience, and launch with one click."
           primaryAction={
-            <GlowButton
-              variant="default"
-              size="default"
-              onClick={handleAskVisionAI}
-              rightIcon={<Sparkles className="h-4 w-4" />}
-            >
-              Ask VISION AI
+              <GlowButton
+                variant="default"
+                size="default"
+                onClick={onAskVisionAI}
+                rightIcon={<Sparkles className="h-4 w-4" />}
+              >
+                Ask VISION AI
             </GlowButton>
           }
           secondaryAction={
-            <GlowButton
-              variant="ghost"
-              size="default"
-              onClick={() => {
-                // TODO: Navigate to app usage analytics
-                console.log('View app usage');
-              }}
-            >
-              View app usage
-            </GlowButton>
+              <GlowButton
+                variant="ghost"
+                size="default"
+                onClick={onViewAppUsage}
+              >
+                View app usage
+              </GlowButton>
           }
         />
       </div>

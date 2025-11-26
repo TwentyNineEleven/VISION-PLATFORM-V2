@@ -14,6 +14,8 @@ import UploadModal from '@/components/documents/UploadModal';
 import DocumentDetailModal from '@/components/documents/DocumentDetailModal';
 import FolderTree from '@/components/documents/FolderTree';
 import CreateFolderModal from '@/components/documents/CreateFolderModal';
+import MoveDocumentsModal from '@/components/documents/MoveDocumentsModal';
+import type { FolderWithChildren } from '@/types/document';
 
 // Types
 interface Document {
@@ -27,20 +29,34 @@ interface Document {
   folderId: string | null;
 }
 
-interface FolderItem {
-  id: string;
-  name: string;
-  parentId: string | null;
-  color?: string;
-  icon?: string;
-  children?: FolderItem[];
+export async function moveDocuments(
+  documentIds: string[],
+  targetFolderId: string | null
+) {
+  if (documentIds.length === 0) return;
+
+  const responses = await Promise.all(
+    documentIds.map((docId) =>
+      fetch(`/api/v1/documents/${docId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderId: targetFolderId }),
+      })
+    )
+  );
+
+  const failedResponse = responses.find((response) => !response.ok);
+
+  if (failedResponse) {
+    throw new Error('Failed to move one or more documents');
+  }
 }
 
 export default function FilesPage() {
   const searchParams = useSearchParams();
   const { activeOrganization } = useOrganization();
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [folders, setFolders] = useState<FolderWithChildren[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +65,9 @@ export default function FilesPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [moveError, setMoveError] = useState<string | null>(null);
+  const [isMoveSubmitting, setIsMoveSubmitting] = useState(false);
 
   const organizationId = activeOrganization?.id;
 
@@ -141,29 +160,33 @@ export default function FilesPage() {
     loadFolders();
   };
 
-  const handleBulkMove = async () => {
+  const handleBulkMove = () => {
     if (selectedDocs.size === 0) return;
+    setMoveError(null);
+    setIsMoveModalOpen(true);
+  };
 
-    // TODO: Show folder selection modal
-    const targetFolderId = prompt('Enter target folder ID (or leave empty for root):');
-    
+  const handleConfirmMove = async (targetFolderId: string | null) => {
+    if (targetFolderId === currentFolderId) {
+      setMoveError('Please choose a different folder or move items to the workspace root.');
+      return;
+    }
+
+    setMoveError(null);
+    setIsMoveSubmitting(true);
+
     try {
-      const promises = Array.from(selectedDocs).map(docId =>
-        fetch(`/api/v1/documents/${docId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ folderId: targetFolderId || null }),
-        })
-      );
+      await moveDocuments(Array.from(selectedDocs), targetFolderId);
 
-      await Promise.all(promises);
-      
       // Clear selection and refresh
       setSelectedDocs(new Set());
+      setIsMoveModalOpen(false);
       loadDocuments();
     } catch (error) {
       console.error('Failed to move documents:', error);
-      alert('Failed to move some documents');
+      setMoveError('Failed to move some documents. Please try again.');
+    } finally {
+      setIsMoveSubmitting(false);
     }
   };
 
@@ -558,6 +581,24 @@ export default function FilesPage() {
           organizationId={organizationId}
           parentFolderId={currentFolderId}
           onSuccess={handleFolderCreated}
+        />
+      )}
+
+      {/* Move Documents Modal */}
+      {organizationId && (
+        <MoveDocumentsModal
+          isOpen={isMoveModalOpen}
+          onClose={() => {
+            if (!isMoveSubmitting) {
+              setIsMoveModalOpen(false);
+              setMoveError(null);
+            }
+          }}
+          folders={folders}
+          currentFolderId={currentFolderId}
+          isSubmitting={isMoveSubmitting}
+          errorMessage={moveError}
+          onConfirm={handleConfirmMove}
         />
       )}
     </div>

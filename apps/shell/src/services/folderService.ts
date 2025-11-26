@@ -273,6 +273,45 @@ export const folderService = {
       throw new Error('User not authenticated');
     }
 
+    const currentFolder = await this.getFolder(folderId);
+    if (!currentFolder) {
+      throw new Error('Folder not found');
+    }
+
+    const targetParentId =
+      request.parentFolderId !== undefined ? request.parentFolderId : currentFolder.parentFolderId;
+
+    if (request.parentFolderId) {
+      const newParent = await this.getFolder(request.parentFolderId);
+      if (!newParent) {
+        throw new Error('Destination folder not found');
+      }
+
+      if (newParent.path.includes(`/${folderId}/`)) {
+        throw new Error('Cannot move folder into its own subfolder');
+      }
+
+      if (newParent.organizationId !== currentFolder.organizationId) {
+        throw new Error('Cannot move folder to different organization');
+      }
+    }
+
+    if (request.name !== undefined) {
+      const validation = this.validateFolderName(request.name);
+      if (!validation.valid) {
+        throw new Error(validation.error || 'Invalid folder name');
+      }
+    }
+
+    if (request.name !== undefined || request.parentFolderId !== undefined) {
+      const siblings = await this.getFoldersByParent(currentFolder.organizationId, targetParentId ?? null);
+      const desiredName = request.name ?? currentFolder.name;
+
+      if (siblings.some(folder => folder.id !== folderId && folder.name === desiredName)) {
+        throw new Error('A folder with this name already exists in the target location');
+      }
+    }
+
     const dbFolder = {
       ...folderToDb(request),
       updated_by: user.id,
