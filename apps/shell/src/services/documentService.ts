@@ -102,7 +102,7 @@ export const documentService = {
       .from('documents' as any)
       .select('*')
       .eq('id', documentId)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .single();
 
     if (error || !data) {
@@ -128,7 +128,7 @@ export const documentService = {
       .from('documents' as any)
       .select('*')
       .eq('organization_id', organizationId)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -316,7 +316,7 @@ export const documentService = {
       .from('documents' as any)
       .update(updateData)
       .eq('id', documentId)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .select()
       .single();
 
@@ -418,7 +418,7 @@ export const documentService = {
       .from('documents' as any)
       .select('*', { count: 'exact' })
       .eq('organization_id', organizationId)
-      .eq('deleted_at', null);
+      .is('deleted_at', null);
 
     // Apply filters
     if (folderId) {
@@ -503,7 +503,7 @@ export const documentService = {
       .select('*')
       .eq('organization_id', organizationId)
       .eq('uploaded_by', user.id)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -526,7 +526,7 @@ export const documentService = {
       .from('documents' as any)
       .select('file_size')
       .eq('organization_id', organizationId)
-      .eq('deleted_at', null);
+      .is('deleted_at', null);
 
     if (error) {
       console.error('Error fetching storage quota:', error);
