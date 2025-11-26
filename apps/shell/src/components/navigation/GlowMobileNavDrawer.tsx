@@ -16,15 +16,18 @@ import * as React from 'react';
 import FocusTrap from 'focus-trap-react';
 import { cn } from '@/lib/utils';
 import { GlowSideNav } from './GlowSideNav';
+import { NavItem } from '@/lib/nav-config';
 import { X } from 'lucide-react';
 
 export interface GlowMobileNavDrawerProps {
+  navItems?: NavItem[];
   open: boolean;
   onClose: () => void;
   className?: string;
 }
 
 export function GlowMobileNavDrawer({
+  navItems,
   open,
   onClose,
   className,
@@ -81,7 +84,7 @@ export function GlowMobileNavDrawer({
           </button>
 
           {/* Side Navigation (always expanded in mobile) */}
-          <GlowSideNav collapsed={false} />
+          <GlowSideNav collapsed={false} navItems={navItems} />
         </div>
         </div>
       </FocusTrap>

@@ -314,7 +314,7 @@ export function AppSwitcher({
                                 className="h-8 w-8 shrink-0"
                               />
                             ) : (
-                              <Grid3x3 className="h-6 w-6 text-[#64748B]" />
+                              <Grid3x3 className="h-6 w-6 text-muted-foreground" />
                             )}
 
                             <div className="flex-1 min-w-0 space-y-1">

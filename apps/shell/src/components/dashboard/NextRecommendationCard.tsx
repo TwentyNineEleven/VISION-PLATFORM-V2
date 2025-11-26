@@ -17,7 +17,18 @@ import {
 import { Lightbulb, Rocket, ExternalLink } from 'lucide-react';
 import type { RecommendedApp } from '@/lib/dashboard/mockDashboardData';
 import { AppIcon } from '@/components/apps/AppIcon';
-import { getAppMeta, getPhaseColor, getPhaseSoftColor, getPhaseLabel } from '@/lib/apps/appMetadata';
+import { getAppMeta, getPhaseLabel } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses, type PhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
+
+const fallbackPhaseTokens: PhaseTokenClasses = {
+  badgeBackground: 'bg-vision-blue-50',
+  badgeText: 'text-vision-blue-700',
+  iconBackground: 'bg-vision-blue-50',
+  iconText: 'text-vision-blue-700',
+  buttonBackground: 'bg-vision-blue-700',
+  buttonHover: 'hover:bg-vision-blue-900',
+};
 
 export interface NextRecommendationCardProps {
   recommendation?: RecommendedApp;
@@ -30,8 +41,7 @@ export function NextRecommendationCard({ recommendation, onLaunchApp }: NextReco
   }
 
   const meta = getAppMeta(recommendation.appId);
-  const phaseColor = meta ? getPhaseColor(meta.phase) : '#2563EB';
-  const phaseSoftColor = meta ? getPhaseSoftColor(meta.phase) : 'rgba(37, 99, 235, 0.15)';
+  const phaseTokens = meta ? getPhaseTokenClasses(meta.phase) : fallbackPhaseTokens;
   const phaseLabel = meta ? getPhaseLabel(meta.phase) : 'Recommended';
   const contextAppName = recommendation.contextAppId ? getAppMeta(recommendation.contextAppId)?.name : null;
 
@@ -39,18 +49,15 @@ export function NextRecommendationCard({ recommendation, onLaunchApp }: NextReco
     <GlowCard
       variant="interactive"
       className="h-full border shadow-interactive"
-      style={{
-        borderColor: `${phaseColor}30`,
-      }}
     >
       <GlowCardHeader>
         <Group spacing="sm" align="center">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-lg"
-            style={{
-              backgroundColor: phaseSoftColor,
-              color: phaseColor,
-            }}
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg',
+              phaseTokens.iconBackground,
+              phaseTokens.iconText
+            )}
           >
             <Lightbulb size={18} />
           </div>
@@ -71,11 +78,11 @@ export function NextRecommendationCard({ recommendation, onLaunchApp }: NextReco
               <GlowBadge
                 variant="outline"
                 size="sm"
-                className="border-transparent text-[11px]"
-                style={{
-                  backgroundColor: phaseSoftColor,
-                  color: phaseColor,
-                }}
+                className={cn(
+                  'border-transparent text-[11px]',
+                  phaseTokens.badgeBackground,
+                  phaseTokens.badgeText
+                )}
               >
                 {phaseLabel}
               </GlowBadge>
@@ -88,18 +95,15 @@ export function NextRecommendationCard({ recommendation, onLaunchApp }: NextReco
           </Group>
         </Stack>
       </GlowCardContent>
-      <GlowCardFooter className="flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <GlowButton
-          glow="subtle"
-          style={{
-            backgroundColor: phaseColor,
-            color: '#fff',
-          }}
-          rightIcon={<Rocket className="h-4 w-4" />}
-          onClick={() => onLaunchApp?.(recommendation.appId, recommendation.href)}
-        >
-          Open {meta?.name || 'app'}
-        </GlowButton>
+        <GlowCardFooter className="flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <GlowButton
+            glow="subtle"
+            className={cn('text-white', phaseTokens.buttonBackground, phaseTokens.buttonHover)}
+            rightIcon={<Rocket className="h-4 w-4" />}
+            onClick={() => onLaunchApp?.(recommendation.appId, recommendation.href)}
+          >
+            Open {meta?.name || 'app'}
+          </GlowButton>
         <Link
           href={"/workflows" as any}
           className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"

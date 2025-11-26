@@ -8,7 +8,9 @@ import { Clock, Star, Lightbulb, Rocket, ExternalLink } from 'lucide-react';
 import type { AppItem } from '@/lib/dashboard/mockDashboardData';
 import { formatRelativeTime } from '@/lib/dashboard/mockDashboardData';
 import { AppIcon } from './AppIcon';
-import { getAppMeta, getPhaseColor } from '@/lib/apps/appMetadata';
+import { getAppMeta } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses, type PhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
 
 const WORKFLOWS_ROUTE: Route = '/workflows' as Route;
 
@@ -128,24 +130,30 @@ export function AppsListCard({ recentApps, favoriteApps, recommendedApp, onLaunc
       {/* Next Recommended Tool - Glow UI Insight/Callout Card Pattern */}
       {recommendedApp && (() => {
         const appMeta = getAppMeta(recommendedApp.id);
-        const phaseColor = appMeta ? getPhaseColor(appMeta.phase) : '#C2410C';
+        const phaseTokens: PhaseTokenClasses = appMeta
+          ? getPhaseTokenClasses(appMeta.phase)
+          : {
+              badgeBackground: 'bg-vision-orange-50',
+              badgeText: 'text-vision-orange-900',
+              iconBackground: 'bg-vision-orange-50',
+              iconText: 'text-vision-orange-900',
+              buttonBackground: 'bg-vision-orange-900',
+              buttonHover: 'hover:bg-vision-orange-800',
+            };
 
         return (
-          <GlowCard 
-            variant="interactive" 
+          <GlowCard
+            variant="interactive"
             className="h-full border-primary/20"
-            style={{
-              borderColor: `${phaseColor}30`,
-            }}
           >
             <GlowCardHeader>
               <Group spacing="sm" align="center">
                 <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg"
-                  style={{
-                    backgroundColor: `${phaseColor}15`,
-                    color: phaseColor,
-                  }}
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg',
+                    phaseTokens.iconBackground,
+                    phaseTokens.iconText
+                  )}
                 >
                   <Lightbulb size={16} />
                 </div>
@@ -162,10 +170,7 @@ export function AppsListCard({ recentApps, favoriteApps, recommendedApp, onLaunc
                     glow="subtle"
                     rightIcon={<Rocket className="h-4 w-4" />}
                     onClick={() => onLaunchApp?.(recommendedApp.id, recommendedApp.href)}
-                    style={{
-                      backgroundColor: phaseColor,
-                      color: '#FFFFFF',
-                    }}
+                    className={cn('text-white', phaseTokens.buttonBackground, phaseTokens.buttonHover)}
                   >
                     Open {recommendedApp.name}
                   </GlowButton>

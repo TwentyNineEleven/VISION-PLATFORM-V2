@@ -270,17 +270,25 @@ describe('teamService', () => {
         };
 
         // Mock getTeamMembers (no existing members)
-        const mockMembersQuery = mockSupabase!.from();
-        (mockMembersQuery.select().eq().is().order as any).mockResolvedValue({
-          data: [],
-          error: null,
+        mockSupabase!.from.mockImplementationOnce(() => {
+          const query = createMockSupabaseClient().from();
+          (query.select().eq().is().order as any).mockResolvedValue({
+            data: [],
+            error: null,
+          });
+
+          return query;
         });
 
         // Mock checking for existing invite - returns existing invite
-        const mockInviteCheckQuery = mockSupabase!.from();
-        (mockInviteCheckQuery.select().eq().eq().eq().is().single as any).mockResolvedValue({
-          data: { id: 'existing-invite' },
-          error: null,
+        mockSupabase!.from.mockImplementationOnce(() => {
+          const query = createMockSupabaseClient().from();
+          (query.select().eq().eq().eq().is().single as any).mockResolvedValue({
+            data: { id: 'existing-invite' },
+            error: null,
+          });
+
+          return query;
         });
 
         mockSupabase!.auth.getUser.mockResolvedValue({

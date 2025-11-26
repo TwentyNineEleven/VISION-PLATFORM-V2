@@ -5,12 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { GlowButton, GlowCard } from '@/components/glow-ui';
 import type { AppMetadata, AppStatus } from '@/lib/app-catalog-types';
-import {
-  getPhaseColor,
-  getPhaseLabel,
-  getPhaseSoftColor,
-} from '@/lib/apps/appMetadata';
-import { getPhaseHoverColor } from '@/lib/phase-colors';
+import { getPhaseLabel } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses, type PhaseTokenClasses } from '@/lib/phase-colors';
 import { cn } from '@/lib/utils';
 import { AppIcon } from './AppIcon';
 
@@ -22,59 +18,76 @@ const BUTTON_LABELS: Record<AppStatus, string> = {
   'funder-only': 'Request access',
 };
 
-// Status chip styles - use domain colors when applicable
+type StatusChipStyle = {
+  label: string;
+  textClass: string;
+  bgClass: string;
+  borderClass?: string;
+};
+
+const toBorderClass = (textClass?: string) =>
+  textClass?.startsWith('text-') ? textClass.replace('text-', 'border-') : undefined;
+
+// Status chip styles - use phase token classes when available
 const getStatusChipStyle = (
   status: AppStatus,
-  domainColor?: string
-): { label: string; textColor: string; borderColor: string; bgColor: string } | null => {
-  // Helper to convert hex to rgba with opacity
-  const hexToRgba = (hex: string, opacity: number): string => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
+  phaseTokens?: PhaseTokenClasses
+): StatusChipStyle | null => {
+  const defaultPreview = {
+    textClass: 'text-vision-blue-700',
+    bgClass: 'bg-vision-blue-50',
+    borderClass: 'border-vision-blue-700',
+  } satisfies Omit<StatusChipStyle, 'label'>;
 
-  // FALLBACK COLORS: These hex values are intentional fallback constants
-  // used when domain colors aren't available. They match design system tokens.
-  // @color-validation-exception: programmatic fallback values
-  const COLORS = {
-    blue: { text: '#3B82F6', bg: '#EFF6FF' }, // vision-blue-700 / vision-blue-50
-    orange: { text: '#C2410C', bg: '#FFEDD5' }, // vision-orange-900 / vision-orange-50
-    gray: { text: '#64748B', border: '#E2E8F0', bg: '#F8FAFC' }, // vision-gray-700 / vision-gray-100 / vision-gray-50
-    purple: { text: '#6D28D9', bg: '#EDE9FE' }, // vision-purple-900 / vision-purple-50
-  };
+  const defaultBeta = {
+    textClass: 'text-vision-orange-900',
+    bgClass: 'bg-vision-orange-50',
+    borderClass: 'border-vision-orange-800',
+  } satisfies Omit<StatusChipStyle, 'label'>;
+
+  const defaultComingSoon = {
+    textClass: 'text-vision-gray-700',
+    bgClass: 'bg-vision-gray-50',
+    borderClass: 'border-vision-gray-300',
+  } satisfies Omit<StatusChipStyle, 'label'>;
+
+  const defaultFunderOnly = {
+    textClass: 'text-vision-purple-900',
+    bgClass: 'bg-vision-purple-50',
+    borderClass: 'border-vision-purple-700',
+  } satisfies Omit<StatusChipStyle, 'label'>;
+
+  const badgeText = phaseTokens?.badgeText;
+  const badgeBackground = phaseTokens?.badgeBackground;
 
   switch (status) {
     case 'preview':
-      // Use domain color if available, otherwise use blue
       return {
         label: 'Preview',
-        textColor: domainColor || COLORS.blue.text,
-        borderColor: domainColor || COLORS.blue.text,
-        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : COLORS.blue.bg,
+        textClass: badgeText ?? defaultPreview.textClass,
+        bgClass: badgeBackground ?? defaultPreview.bgClass,
+        borderClass: toBorderClass(badgeText) ?? defaultPreview.borderClass,
       };
     case 'beta':
-      // Use domain color if available, otherwise use orange
       return {
         label: 'Beta',
-        textColor: domainColor || COLORS.orange.text,
-        borderColor: domainColor || COLORS.orange.text,
-        bgColor: domainColor ? hexToRgba(domainColor, 0.1) : COLORS.orange.bg,
+        textClass: badgeText ?? defaultBeta.textClass,
+        bgClass: badgeBackground ?? defaultBeta.bgClass,
+        borderClass: toBorderClass(badgeText) ?? defaultBeta.borderClass,
       };
     case 'coming-soon':
       return {
         label: 'Coming soon',
-        textColor: COLORS.gray.text,
-        borderColor: COLORS.gray.border,
-        bgColor: COLORS.gray.bg,
+        textClass: defaultComingSoon.textClass,
+        bgClass: defaultComingSoon.bgClass,
+        borderClass: defaultComingSoon.borderClass,
       };
     case 'funder-only':
       return {
         label: 'Funder-only',
-        textColor: COLORS.purple.text,
-        borderColor: COLORS.purple.text,
-        bgColor: COLORS.purple.bg,
+        textClass: defaultFunderOnly.textClass,
+        bgClass: defaultFunderOnly.bgClass,
+        borderClass: defaultFunderOnly.borderClass,
       };
     default:
       return null;
@@ -107,14 +120,11 @@ export function AppCardShell({
   buttonSize = 'md',
 }: AppCardShellProps) {
   const router = useRouter();
-  const domainColor = getPhaseColor(app.phase);
-  const domainSoftColor = getPhaseSoftColor(app.phase);
+  const phaseTokens = getPhaseTokenClasses(app.phase);
   const domainLabel = getPhaseLabel(app.phase).toUpperCase();
-  const domainHoverColor = getPhaseHoverColor(app.phase);
   const isDisabled = app.status === 'coming-soon' || app.status === 'funder-only';
-  const favoriteColor = domainColor;
   const isFavorite = app.isFavorited ?? app.isFavorite ?? false;
-  const statusChip = getStatusChipStyle(app.status, domainColor);
+  const statusChip = getStatusChipStyle(app.status, phaseTokens);
   const finalButtonLabel = buttonLabel || BUTTON_LABELS[app.status] || 'Launch';
 
   const handleLaunch = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -150,11 +160,11 @@ export function AppCardShell({
         {/* Header: Phase badge + Favorite star - Fixed height: 32px */}
         <div className="flex h-8 items-start justify-between">
           <span
-            className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{
-              backgroundColor: domainSoftColor,
-              color: domainColor,
-            }}
+            className={cn(
+              'rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]',
+              phaseTokens.badgeBackground,
+              phaseTokens.badgeText
+            )}
           >
             {domainLabel}
           </span>
@@ -169,23 +179,42 @@ export function AppCardShell({
             }
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
-              'hover:bg-muted',
-              isFavorite ? 'text-white' : 'text-muted-foreground'
-            )}
-            style={
               isFavorite
-                ? { backgroundColor: domainColor, color: 'white' }
-                : {}
-            }
+                ? cn(
+                    phaseTokens.iconBackground,
+                    phaseTokens.iconText,
+                    'hover:opacity-90'
+                  )
+                : 'text-muted-foreground hover:bg-muted'
+            )}
           >
             <Star
               size={16}
-              fill={isFavorite ? favoriteColor : 'none'}
-              stroke={isFavorite ? 'white' : 'currentColor'}
-              className={isFavorite ? '' : 'text-muted-foreground'}
+              fill={isFavorite ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              className={
+                isFavorite
+                  ? cn(phaseTokens.iconText)
+                  : 'text-muted-foreground'
+              }
             />
           </button>
         </div>
+
+        {showStatusChip && statusChip ? (
+          <div className="mt-2">
+            <span
+              className={cn(
+                'inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]',
+                statusChip.bgClass,
+                statusChip.textClass,
+                statusChip.borderClass ?? 'border-transparent'
+              )}
+            >
+              {statusChip.label}
+            </span>
+          </div>
+        ) : null}
 
         {/* Icon - Fixed spacing: 20px top margin, 16px bottom */}
         <div className="mb-4 mt-5 flex justify-center">
@@ -219,31 +248,13 @@ export function AppCardShell({
             variant="default"
             glow="none"
             className={cn(
-              "h-10 w-full rounded-lg text-sm font-semibold text-white",
-              isDisabled && "bg-vision-gray-500"
-            )}
-            style={
+              'h-10 w-full rounded-lg text-sm font-semibold text-white',
               isDisabled
-                ? undefined
-                : {
-                    backgroundColor: domainColor,
-                    color: 'white',
-                  }
-            }
+                ? 'bg-vision-gray-500 hover:bg-vision-gray-500'
+                : cn(phaseTokens.buttonBackground, phaseTokens.buttonHover)
+            )}
             disabled={isDisabled}
             onClick={handleLaunch}
-            onMouseEnter={(event) => {
-              if (!isDisabled) {
-                (event.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  domainHoverColor;
-              }
-            }}
-            onMouseLeave={(event) => {
-              if (!isDisabled) {
-                (event.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  domainColor;
-              }
-            }}
           >
             {finalButtonLabel}
           </GlowButton>

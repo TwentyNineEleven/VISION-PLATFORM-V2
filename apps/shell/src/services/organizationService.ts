@@ -6,6 +6,9 @@ import type { Organization, OrganizationBrandColors } from '@/types/organization
 
 type DbOrganization = Tables<'organizations'>;
 type DbOrganizationMember = Tables<'organization_members'>;
+type MemberRole = DbOrganizationMember['role'];
+
+const MEMBER_ROLES: MemberRole[] = ['owner', 'admin', 'editor', 'viewer'];
 
 export const ORGANIZATION_STORAGE_KEY = 'vision.platform.organization';
 
@@ -300,7 +303,6 @@ export const organizationService = {
       .from('organizations')
       .update({
         deleted_at: new Date().toISOString(),
-        deleted_by: user.id,
       })
       .eq('id', organizationId)
       .eq('owner_id', user.id); // Only owner can delete
@@ -322,22 +324,30 @@ export const organizationService = {
   /**
    * Get user's role in organization
    */
-  async getUserRole(organizationId: string): Promise<string | null> {
+  async getUserRole(organizationId: string, userId?: string): Promise<string | null> {
     const supabase = createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const targetUserId = userId ?? user?.id;
+    if (!targetUserId) {
       return null;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('organization_members')
       .select('role')
       .eq('organization_id', organizationId)
-      .eq('user_id', user.id)
+      .eq('user_id', targetUserId)
       .eq('status', 'active')
       .is('deleted_at', null)
       .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.warn('Failed to resolve user role', error);
+    }
 
     return data?.role || null;
   },
@@ -347,7 +357,89 @@ export const organizationService = {
    */
   async canManageOrganization(organizationId: string): Promise<boolean> {
     const role = await this.getUserRole(organizationId);
-    return role === 'Owner' || role === 'Admin';
+    const normalized = role?.toLowerCase();
+    return normalized === 'owner' || normalized === 'admin';
+  },
+
+  /**
+   * Add a member to an organization
+   */
+  async addMember(
+    organizationId: string,
+    userId: string,
+    role: MemberRole = 'viewer'
+  ): Promise<void> {
+    const supabase = createClient();
+
+    if (!MEMBER_ROLES.includes(role)) {
+      throw new Error('Invalid role value');
+    }
+
+    const { error } = await supabase.from('organization_members').insert({
+      organization_id: organizationId,
+      user_id: userId,
+      role,
+    });
+
+    if (error) {
+      const message = error.code === '23505' ? 'Member already exists' : error.message;
+      throw new Error(message || 'Failed to add member');
+    }
+  },
+
+  /**
+   * Remove a member from an organization
+   */
+  async removeMember(organizationId: string, userId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('organization_members')
+      .delete()
+      .eq('organization_id', organizationId)
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(error.message || 'Failed to remove member');
+    }
+  },
+
+  /**
+   * Update an existing member role
+   */
+  async updateMemberRole(organizationId: string, userId: string, role: MemberRole): Promise<void> {
+    const supabase = createClient();
+
+    if (!MEMBER_ROLES.includes(role)) {
+      throw new Error('Invalid role value');
+    }
+
+    const { error } = await supabase
+      .from('organization_members')
+      .update({ role })
+      .eq('organization_id', organizationId)
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update member role');
+    }
+  },
+
+  /**
+   * Determine if a user is the owner of an organization
+   */
+  async isOwner(organizationId: string, userId?: string): Promise<boolean> {
+    const role = await this.getUserRole(organizationId, userId);
+    return role?.toLowerCase() === 'owner';
+  },
+
+  /**
+   * Determine if a user has admin (or owner) privileges
+   */
+  async isAdmin(organizationId: string, userId?: string): Promise<boolean> {
+    const role = await this.getUserRole(organizationId, userId);
+    const normalized = role?.toLowerCase();
+    return normalized === 'owner' || normalized === 'admin';
   },
 
   /**

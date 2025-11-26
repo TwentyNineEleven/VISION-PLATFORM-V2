@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
   createMockSupabaseClient,
   createMockSupabaseError,
+  createMockQuery,
   mockDocument,
   createMockFile,
 } from '@/test/testUtils';
@@ -99,7 +100,7 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().single as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().single as any).mockResolvedValue({
         data: dbDocument,
         error: null,
       });
@@ -110,7 +111,7 @@ describe('documentService', () => {
       expect(result?.id).toBe('doc-123');
       expect(mockSupabase.from).toHaveBeenCalledWith('documents');
       expect(mockQuery.eq).toHaveBeenCalledWith('id', 'doc-123');
-      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
+      expect(mockQuery.eq).toHaveBeenCalledWith('deleted_at', null);
     });
 
     it('should return null when document not found', async () => {
@@ -127,7 +128,7 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().single as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().single as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Not found', 'PGRST116'),
       });
@@ -182,33 +183,22 @@ describe('documentService', () => {
         return;
       }
 
+      const createVersionSpy = vi.spyOn(documentService, 'createVersion').mockResolvedValue();
+
       // Mock storage upload
-      const mockStorage = mockSupabase.storage.from();
+      const mockStorage = mockSupabase.storage.from('organization-documents');
       (mockStorage.upload as any).mockResolvedValue({
         data: { path: 'org-123/Test Document.pdf' },
         error: null,
       });
 
       // Mock document insert
-      const mockInsertQuery = mockSupabase.from();
+      const mockInsertQuery = createMockQuery();
       (mockInsertQuery.insert().select().single as any).mockResolvedValue({
         data: dbDocument,
         error: null,
       });
-
-      // Mock version creation (called internally)
-      const mockVersionQuery = mockSupabase.from();
-      (mockVersionQuery.insert().select().single as any).mockResolvedValue({
-        data: { id: 'version-1' },
-        error: null,
-      });
-
-      // Mock update for current_version_id
-      const mockUpdateQuery = mockSupabase.from();
-      (mockUpdateQuery.update().eq as any).mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      (mockSupabase.from as any).mockReturnValueOnce(mockInsertQuery);
 
       const result = await documentService.uploadDocument(uploadData);
 
@@ -216,6 +206,7 @@ describe('documentService', () => {
       expect(result.id).toBe('doc-123');
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('organization-documents');
       expect(mockStorage.upload).toHaveBeenCalled();
+      createVersionSpy.mockRestore();
     });
 
     it('should validate file size limit (15MB)', async () => {
@@ -243,7 +234,7 @@ describe('documentService', () => {
         name: 'Test Document',
       };
 
-      const mockStorage = mockSupabase.storage.from();
+      const mockStorage = mockSupabase.storage.from('organization-documents');
       (mockStorage.upload as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Upload failed'),
@@ -302,7 +293,7 @@ describe('documentService', () => {
       };
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().contains().order().range as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().contains().order().range as any).mockResolvedValue({
         data: dbDocuments,
         error: null,
         count: 2,
@@ -330,7 +321,7 @@ describe('documentService', () => {
       };
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().eq().order().range as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().eq().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 1,
@@ -357,7 +348,7 @@ describe('documentService', () => {
       };
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().gte().lte().order().range as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().gte().lte().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 1,
@@ -381,7 +372,7 @@ describe('documentService', () => {
       };
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is().order().range as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().order().range as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
         count: 50,
@@ -414,7 +405,7 @@ describe('documentService', () => {
       };
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.update().eq().is().select().single as any).mockResolvedValue({
+      (mockQuery.update().eq().eq().select().single as any).mockResolvedValue({
         data: updatedDoc,
         error: null,
       });
@@ -440,7 +431,7 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.update().eq().is().select().single as any).mockResolvedValue({
+      (mockQuery.update().eq().eq().select().single as any).mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Update failed'),
       });
@@ -459,7 +450,8 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.update().eq as any).mockResolvedValue({
+      mockQuery.update().eq();
+      mockQuery.mockResolvedValue({
         data: null,
         error: null,
       });
@@ -483,7 +475,8 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.update().eq as any).mockResolvedValue({
+      mockQuery.update().eq();
+      mockQuery.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Deletion failed'),
       });
@@ -505,12 +498,13 @@ describe('documentService', () => {
         download_count: 0,
       };
 
-      // Mock getDocument
-      const mockGetQuery = mockSupabase.from();
-      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
-        data: dbDocument,
-        error: null,
-      });
+      vi.spyOn(documentService, 'getDocument').mockResolvedValue({
+        id: dbDocument.id,
+        organizationId: dbDocument.organization_id,
+        filePath: dbDocument.storage_path,
+        name: dbDocument.name,
+        viewCount: dbDocument.view_count,
+      } as any);
 
       // Mock storage signed URL
       const mockStorage = mockSupabase.storage.from();
@@ -520,15 +514,18 @@ describe('documentService', () => {
       });
 
       // Mock update for download count
-      const mockUpdateQuery = mockSupabase.from();
+      const mockUpdateQuery = createMockQuery();
       (mockUpdateQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
+      (mockSupabase.from as any).mockReturnValue(mockUpdateQuery);
 
       const url = await documentService.getDownloadUrl('doc-123');
 
-      expect(url).toBe('https://test.supabase.co/storage/v1/object/sign/test-path');
+      expect(url).toBe(
+        'https://test.supabase.co/storage/v1/object/sign/organization-documents/org-123/test-document.pdf?token=signed'
+      );
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('organization-documents');
     });
   });
@@ -560,7 +557,7 @@ describe('documentService', () => {
       ];
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().eq().is().order().limit as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().eq().order().limit as any).mockResolvedValue({
         data: recentDocs,
         error: null,
       });
@@ -579,14 +576,14 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().eq().is().order().limit as any).mockResolvedValue({
+      (mockQuery.select().eq().eq().eq().order().limit as any).mockResolvedValue({
         data: [mockDocument],
         error: null,
       });
 
       await documentService.getRecentDocuments('org-123');
 
-      expect(mockQuery.is).toHaveBeenCalledWith('deleted_at', null);
+      expect(mockQuery.eq).toHaveBeenCalledWith('deleted_at', null);
     });
   });
 
@@ -615,7 +612,8 @@ describe('documentService', () => {
       ];
 
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is as any).mockResolvedValue({
+      mockQuery.select().eq().eq();
+      mockQuery.mockResolvedValue({
         data: documents,
         error: null,
       });
@@ -635,7 +633,8 @@ describe('documentService', () => {
       }
       
       const mockQuery = mockSupabase.from();
-      (mockQuery.select().eq().is as any).mockResolvedValue({
+      mockQuery.select().eq().eq();
+      mockQuery.mockResolvedValue({
         data: [],
         error: null,
       });
@@ -662,14 +661,15 @@ describe('documentService', () => {
 
       // Mock getDocument for each delete call
       const mockGetQuery = mockSupabase.from();
-      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
+      (mockGetQuery.select().eq().eq().single as any).mockResolvedValue({
         data: mockDocument,
         error: null,
       });
 
       // Mock deleteDocument (update)
       const mockDeleteQuery = mockSupabase.from();
-      (mockDeleteQuery.update().eq as any).mockResolvedValue({
+      mockDeleteQuery.update().eq();
+      mockDeleteQuery.mockResolvedValue({
         data: null,
         error: null,
       });
@@ -695,7 +695,7 @@ describe('documentService', () => {
 
       // Mock updateDocument
       const mockUpdateQuery = mockSupabase.from();
-      (mockUpdateQuery.update().eq().is().select().single as any).mockResolvedValue({
+      (mockUpdateQuery.update().eq().eq().select().single as any).mockResolvedValue({
         data: { ...mockDocument, folder_id: 'folder-123' },
         error: null,
       });
@@ -719,19 +719,20 @@ describe('documentService', () => {
         view_count: 5,
       };
 
-      // Mock getDocument
-      const mockGetQuery = mockSupabase.from();
-      (mockGetQuery.select().eq().is().single as any).mockResolvedValue({
-        data: dbDocument,
-        error: null,
-      });
+      vi.spyOn(documentService, 'getDocument').mockResolvedValue({
+        id: dbDocument.id,
+        organizationId: dbDocument.organization_id,
+        viewCount: dbDocument.view_count,
+        filePath: dbDocument.storage_path,
+      } as any);
 
       // Mock update
-      const mockUpdateQuery = mockSupabase.from();
+      const mockUpdateQuery = createMockQuery();
       (mockUpdateQuery.update().eq as any).mockResolvedValue({
         data: null,
         error: null,
       });
+      (mockSupabase.from as any).mockReturnValue(mockUpdateQuery);
 
       await documentService.recordView('doc-123');
 

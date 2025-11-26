@@ -115,6 +115,13 @@ documentation/
 2. Review [general/CODE_STANDARDS.md](general/CODE_STANDARDS.md)
 3. Check [general/TECH_STACK.md](general/TECH_STACK.md)
 
+### VISION Platform V2 Standards & Plans
+1. Read [vision-platform-architecture-report.md](../documentation/vision-platform-architecture-report.md) for the current stack snapshot and drift analysis.
+2. Follow [vision-platform-code-standards.md](../documentation/vision-platform-code-standards.md) for layout, data, and styling rules tied to AppShell and Glow/2911 tokens.
+3. Use [vision-platform-app-template.md](../documentation/vision-platform-app-template.md) when creating or migrating app routes.
+4. Apply [vision-platform-ai-agent-workflows.md](../documentation/vision-platform-ai-agent-workflows.md) when asking AI agents to modify this repo.
+5. Execute against the milestones in [vision-platform-implementation-plan.md](../documentation/vision-platform-implementation-plan.md) to enforce standards and retire mocks.
+
 ### For Architecture Guidance
 1. Read [general/ARCHITECTURE.md](general/ARCHITECTURE.md)
 2. Review [general/MULTI_APP_BEST_PRACTICES.md](general/MULTI_APP_BEST_PRACTICES.md)

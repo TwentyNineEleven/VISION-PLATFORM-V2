@@ -110,7 +110,14 @@ describe('organizationService', () => {
 
       const result = await organizationService.getOrganization('org-123');
 
-      expect(result).toEqual(mockOrganization);
+      expect(result).toMatchObject({
+        id: mockOrganization.id,
+        name: mockOrganization.name,
+        type: mockOrganization.type,
+        website: mockOrganization.website,
+        ein: mockOrganization.ein,
+        updatedAt: mockOrganization.updated_at,
+      });
       expect(mockSupabase.from).toHaveBeenCalledWith('organizations');
       expect(mockSupabase.from().eq).toHaveBeenCalledWith('id', 'org-123');
     });

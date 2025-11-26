@@ -4,6 +4,7 @@ import React from 'react';
 import { ShoppingCart, Users, TrendingUp, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GlowButton } from '@/components/glow-ui';
+import { visionSemantic } from '@/design-system/theme/visionTheme';
 
 interface MetricWidgetProps {
   title: string;
@@ -86,7 +87,7 @@ function MiniLineChart() {
           .map((y, i) => `${(i / (normalized.length - 1)) * 80},${48 - y}`)
           .join(' ')}
         fill="none"
-        stroke="#2563EB"
+        stroke={visionSemantic.states.info.text}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -109,7 +110,7 @@ function MiniPieChart() {
         cy="24"
         r={radius}
         fill="none"
-        stroke="#F1F5F9"
+        stroke={visionSemantic.bg.tertiary}
         strokeWidth="4"
       />
       <circle
@@ -117,7 +118,7 @@ function MiniPieChart() {
         cy="24"
         r={radius}
         fill="none"
-        stroke="#2563EB"
+        stroke={visionSemantic.states.info.text}
         strokeWidth="4"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
@@ -144,7 +145,7 @@ function BarChart({ data }: { data: number[] }) {
               className="w-full rounded-sm"
               style={{
                 height: `${height}%`,
-                background: `linear-gradient(to top, #2563EB 50%, #DBEAFE 50%)`,
+                background: `linear-gradient(to top, ${visionSemantic.states.info.text} 50%, ${visionSemantic.states.info.bg} 50%)`,
                 minHeight: '2px',
               }}
             />

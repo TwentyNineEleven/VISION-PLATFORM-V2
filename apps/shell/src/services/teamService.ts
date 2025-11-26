@@ -58,6 +58,10 @@ export const teamService = {
       return [];
     }
 
+    if (!Array.isArray(members)) {
+      return [];
+    }
+
     return members
       .filter(m => m.users && !Array.isArray(m.users))
       .map(m => {
@@ -94,19 +98,27 @@ export const teamService = {
   /**
    * Update a member's role
    */
-  async updateMemberRole(organizationId: string, memberId: string, newRole: TeamRole): Promise<void> {
+  async updateMemberRole(
+    organizationId: string,
+    memberId: string,
+    newRole: TeamRole
+  ): Promise<DbOrganizationMember | null> {
     const supabase = createClient();
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('organization_members')
       .update({ role: newRole })
       .eq('id', memberId)
       .eq('organization_id', organizationId)
-      .is('deleted_at', null);
+      .is('deleted_at', null)
+      .select()
+      .single();
 
     if (error) {
       throw new Error(`Failed to update member role: ${error.message}`);
     }
+
+    return data ?? null;
   },
 
   /**
@@ -149,27 +161,13 @@ export const teamService = {
       throw new Error('Invalid email address');
     }
 
-    // Check if email is already a member
-    const { data: existingMember } = await supabase
-      .from('organization_members')
-      .select(`
-        id,
-        users!inner(email)
-      `)
-      .eq('organization_id', organizationId)
-      .eq('status', 'active')
-      .is('deleted_at', null)
-      .single();
-
-    // Note: The above query might not work correctly with the join, 
-    // so let's check differently
     const members = await this.getTeamMembers(organizationId);
     if (members.some(m => m.email.toLowerCase() === invite.email.toLowerCase())) {
       throw new Error('This email is already a team member');
     }
 
     // Check for existing pending invite
-    const { data: existingInvite } = await supabase
+    const { data: existingInvite, error: existingInviteError } = await supabase
       .from('organization_invites')
       .select('id')
       .eq('organization_id', organizationId)
@@ -177,6 +175,10 @@ export const teamService = {
       .eq('status', 'pending')
       .is('deleted_at', null)
       .single();
+
+    if (existingInviteError && existingInviteError.code !== 'PGRST116') {
+      throw new Error(existingInviteError.message);
+    }
 
     if (existingInvite) {
       throw new Error('An invitation has already been sent to this email');
@@ -396,7 +398,7 @@ export const teamService = {
   async getMemberCount(organizationId: string): Promise<number> {
     const supabase = createClient();
 
-    const { count, error } = await supabase
+    const { data, count, error } = await supabase
       .from('organization_members')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
@@ -408,7 +410,15 @@ export const teamService = {
       return 0;
     }
 
-    return count || 0;
+    if (typeof count === 'number') {
+      return count;
+    }
+
+    if (Array.isArray(data)) {
+      return data.length;
+    }
+
+    return 0;
   },
 
   /**
