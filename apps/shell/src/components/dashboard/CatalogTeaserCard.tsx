@@ -11,6 +11,7 @@ import {
   Title,
 } from '@/components/glow-ui';
 import { Grid3x3, ExternalLink } from 'lucide-react';
+import { visionGradients } from '@/design-system/theme/visionTheme';
 
 export interface CatalogTeaserCardProps {
   totalApps?: number;
@@ -27,7 +28,7 @@ export function CatalogTeaserCard({
       padding="lg"
       className="w-full border"
       style={{
-        background: 'linear-gradient(135deg, #EFF6FF 0%, #FDF2F8 100%)',
+        background: visionGradients.blueLight,
       }}
     >
       <Group justify="between" align="center" className="flex-col gap-6 lg:flex-row">

@@ -82,7 +82,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       // Default fallback UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
+        <div className="min-h-screen flex items-center justify-center bg-vision-gray-50 p-4">
           <GlowCard className="max-w-2xl w-full p-8 space-y-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-vision-red-50">

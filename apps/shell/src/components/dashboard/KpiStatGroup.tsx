@@ -4,6 +4,7 @@ import * as React from 'react';
 import { GlowCard, Stack, Group, Text } from '@/components/glow-ui';
 import { BarChart3, Clock, AlertCircle, Activity } from 'lucide-react';
 import type { Kpi } from '@/lib/dashboard/mockDashboardData';
+import { visionSemantic } from '@/design-system/theme/visionTheme';
 
 export interface KpiStatGroupProps {
   kpis: Kpi[];
@@ -11,22 +12,26 @@ export interface KpiStatGroupProps {
 
 const semanticConfig: Record<
   Kpi['semantic'],
-  { color: string; icon: React.ComponentType<any> }
+  { color: string; tint: string; icon: React.ComponentType<any> }
 > = {
   info: {
-    color: '#16A34A', // STRATEGIZE/VOICE emerald
+    color: visionSemantic.states.info.text,
+    tint: visionSemantic.states.info.bg,
     icon: Activity,
   },
   warning: {
-    color: '#C2410C', // INSPIRE orange
+    color: visionSemantic.states.warning.text,
+    tint: visionSemantic.states.warning.bg,
     icon: Clock,
   },
   error: {
-    color: '#DB2777', // NARRATE magenta
+    color: visionSemantic.states.error.text,
+    tint: visionSemantic.states.error.bg,
     icon: AlertCircle,
   },
   success: {
-    color: '#2563EB', // INITIATE blue
+    color: visionSemantic.states.success.text,
+    tint: visionSemantic.states.success.bg,
     icon: BarChart3,
   },
 };
@@ -35,7 +40,7 @@ export function KpiStatGroup({ kpis }: KpiStatGroupProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {kpis.map((kpi) => {
-        const { color, icon: Icon } = semanticConfig[kpi.semantic];
+        const { color, tint, icon: Icon } = semanticConfig[kpi.semantic];
         return (
           <GlowCard
             key={kpi.id}
@@ -48,7 +53,7 @@ export function KpiStatGroup({ kpis }: KpiStatGroupProps) {
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl"
                   style={{
-                    backgroundColor: `${color}1A`,
+                    backgroundColor: tint,
                     color,
                   }}
                 >

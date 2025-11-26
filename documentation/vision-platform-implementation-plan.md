@@ -13,6 +13,7 @@ Use this plan to turn the architecture findings and standards into delivered, te
 - AppShell background/text styling now uses semantic tokens (`bg-background`, `text-foreground`) instead of hex values, aligning with Glow/2911 rules.
 - Navigation configuration is frozen at the base layer and covered by unit tests to prevent accidental mutation when badges/routes change.
 - Organization service now includes explicit membership management helpers (add/update/remove/isOwner/isAdmin) with lower-case role normalization, bringing tests for member/role paths back to green.
+- Dashboard KPI tiles, stat groups, widgets, and catalog teasers now source accent/tint colors from `visionSemantic` or phase token helpers instead of inline hex strings, continuing the Bold Color System migration.
 
 ## 2) Workstreams, Deliverables, and Owners
 
