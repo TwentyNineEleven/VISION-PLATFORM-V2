@@ -101,20 +101,16 @@ export async function GET(request: NextRequest) {
         .eq('organization_id', organizationId)
         .is('deleted_at', null);
 
-      // Combine date range filters properly
-      // For a date range, we want projects that overlap with [startDate, endDate]
-      // Overlap condition: start_date <= endDate AND due_date >= startDate
-      // Since Supabase .or() calls replace each other, we need to combine conditions in a single filter
+      // Fix: Combine date range filters properly
+      // Since calling .or() twice replaces the first filter, we need to combine conditions
+      // For projects to be in range, at least one of their dates must be >= startDate
+      // AND at least one must be <= endDate
       if (startDate && endDate) {
-        // Both dates: projects that overlap the range
-        // Use a single combined OR filter with all overlap conditions:
-        // - start_date is in range, OR
-        // - due_date is in range, OR  
-        // - project spans the range (starts before and ends after)
+        // Both dates: fetch projects that could overlap, then filter precisely
+        // Use OR to get projects where either date might be in range
+        // We'll do precise overlap filtering in JavaScript
         projectsQuery = projectsQuery.or(
-          `start_date.gte.${startDate}.and.start_date.lte.${endDate},` +
-          `due_date.gte.${startDate}.and.due_date.lte.${endDate},` +
-          `start_date.lte.${startDate}.and.due_date.gte.${endDate}`
+          `start_date.gte.${startDate},due_date.gte.${startDate},start_date.lte.${endDate},due_date.lte.${endDate}`
         );
       } else if (startDate) {
         // Only start date: projects that start or end after this date
@@ -124,7 +120,24 @@ export async function GET(request: NextRequest) {
         projectsQuery = projectsQuery.or(`due_date.lte.${endDate},start_date.lte.${endDate}`);
       }
 
-      const { data: projects } = await projectsQuery;
+      let { data: projects } = await projectsQuery;
+
+      // If both dates provided, filter for precise overlap
+      if (startDate && endDate && projects) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        projects = projects.filter((project) => {
+          if (!project.start_date && !project.due_date) return false;
+          const projectStart = project.start_date ? new Date(project.start_date) : null;
+          const projectEnd = project.due_date ? new Date(project.due_date) : null;
+          // Project overlaps range if: projectStart <= end AND projectEnd >= start
+          // Or if either date is within the range
+          const startInRange = projectStart && projectStart >= start && projectStart <= end;
+          const endInRange = projectEnd && projectEnd >= start && projectEnd <= end;
+          const spansRange = projectStart && projectEnd && projectStart <= start && projectEnd >= end;
+          return startInRange || endInRange || spansRange;
+        });
+      }
 
       if (projects) {
         projects.forEach((project) => {
