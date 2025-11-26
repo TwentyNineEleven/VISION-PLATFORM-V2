@@ -6,8 +6,10 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { visionflowService } from '@/services/visionflowService';
+import { demoTasks } from './task-fixtures';
 
 interface Task {
   id: string;
@@ -44,27 +46,88 @@ const PRIORITY_COLORS = {
   URGENT: 'bg-red-100 text-red-700',
 };
 
+export function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
+  return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
+export async function fetchTasksData(
+  statusFilter: string,
+  priorityFilter: string,
+  service = visionflowService,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  if (isSupabaseConfigured(env)) {
+    const data = await service.getTasks({
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      priority: priorityFilter !== 'all' ? priorityFilter : undefined,
+    });
+
+    return { tasks: data as Task[], infoMessage: null as string | null };
+  }
+
+  return {
+    tasks: demoTasks as Task[],
+    infoMessage: 'Database not connected. Showing demo tasks from fixtures.',
+  };
+}
+
+export async function createTaskWithFallback(
+  title: string,
+  service = visionflowService,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  if (isSupabaseConfigured(env)) {
+    const created = await service.createTask({
+      title,
+      status: 'NOT_STARTED',
+    });
+
+    return { task: created as Task, infoMessage: null as string | null };
+  }
+
+  return {
+    task: {
+      id: `demo-${Date.now()}`,
+      title,
+      status: 'NOT_STARTED',
+      description: 'Demo task created locally. Connect Supabase to persist tasks.',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as Task,
+    infoMessage: 'Database not connected. New task was created locally only.',
+  };
+}
+
 export default function VisionFlowTasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [creatingTask, setCreatingTask] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadTasks() {
       try {
         setLoading(true);
-        // TODO: Fetch tasks from API
-        // const response = await fetch('/api/v1/apps/visionflow/tasks');
-        // const data = await response.json();
-        // setTasks(data.tasks);
-        setTasks([]);
-        setLoading(false);
+        setError(null);
+        setInfoMessage(null);
+
+        const { tasks: loadedTasks, infoMessage: info } = await fetchTasksData(
+          statusFilter,
+          priorityFilter,
+        );
+
+        setTasks(loadedTasks);
+        setInfoMessage(info);
       } catch (err) {
         console.error('Error loading tasks:', err);
         setError('Failed to load tasks');
+      } finally {
         setLoading(false);
       }
     }
@@ -72,18 +135,22 @@ export default function VisionFlowTasksPage() {
     loadTasks();
   }, [statusFilter, priorityFilter]);
 
-  const filteredTasks = tasks.filter((task) => {
-    if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (statusFilter !== 'all' && task.status !== statusFilter) {
-      return false;
-    }
-    if (priorityFilter !== 'all' && task.priority !== priorityFilter) {
-      return false;
-    }
-    return true;
-  });
+  const filteredTasks = useMemo(
+    () =>
+      tasks.filter((task) => {
+        if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return false;
+        }
+        if (statusFilter !== 'all' && task.status !== statusFilter) {
+          return false;
+        }
+        if (priorityFilter !== 'all' && task.priority !== priorityFilter) {
+          return false;
+        }
+        return true;
+      }),
+    [priorityFilter, searchQuery, statusFilter, tasks],
+  );
 
   const groupTasksByDueDate = (tasks: Task[]) => {
     const overdue: Task[] = [];
@@ -119,6 +186,30 @@ export default function VisionFlowTasksPage() {
   };
 
   const groupedTasks = groupTasksByDueDate(filteredTasks);
+
+  const handleCreateTask = async () => {
+    if (!newTaskTitle.trim()) return;
+
+    try {
+      setCreatingTask(true);
+      setError(null);
+      setFeedback(null);
+
+      const { task: createdTask, infoMessage: creationInfo } = await createTaskWithFallback(
+        newTaskTitle.trim(),
+      );
+
+      setTasks((prev) => [createdTask, ...prev]);
+      setInfoMessage(creationInfo);
+      setFeedback('Task created successfully');
+      setNewTaskTitle('');
+    } catch (err) {
+      console.error('Error creating task:', err);
+      setError('Failed to create task');
+    } finally {
+      setCreatingTask(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -166,7 +257,34 @@ export default function VisionFlowTasksPage() {
             {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <input
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            placeholder="New task title"
+            className="h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleCreateTask}
+            disabled={creatingTask || !newTaskTitle.trim()}
+            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            {creatingTask ? 'Creating...' : 'Add Task'}
+          </button>
+        </div>
       </div>
+
+      {infoMessage && (
+        <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+          {infoMessage}
+        </div>
+      )}
+
+      {feedback && (
+        <div className="rounded-lg border border-green-100 bg-green-50 p-4 text-sm text-green-900">
+          {feedback}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">

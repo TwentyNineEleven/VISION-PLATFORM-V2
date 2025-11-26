@@ -40,17 +40,60 @@ import {
   transformationSnapshot,
 } from '@/lib/dashboard/mockDashboardData';
 import { appMetadata } from '@/lib/apps/appMetadata';
+import { favoritesService } from '@/services/favoritesService';
+import { useAppShell } from '@/components/layout/AppShell';
+
+export function buildDashboardCtas(deps: {
+  openAppLauncher: () => void;
+  navigate: (path: string) => void;
+}) {
+  return {
+    onAskVisionAI: () => deps.openAppLauncher(),
+    onLearnMore: () => deps.navigate('/#transformation'),
+  };
+}
+
+export function toggleFavoriteWithPersistence(
+  appId: string,
+  setFavoriteAppIds: React.Dispatch<React.SetStateAction<string[]>>,
+  service = favoritesService
+) {
+  const isFavorite = service.toggleFavorite(appId);
+
+  setFavoriteAppIds((prev) => {
+    if (isFavorite) {
+      return prev.includes(appId) ? prev : [...prev, appId];
+    }
+
+    return prev.filter((id) => id !== appId);
+  });
+}
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { openAppLauncher } = useAppShell();
+  const [favoriteAppIds, setFavoriteAppIds] = React.useState<string[]>([]);
+  const { onAskVisionAI, onLearnMore } = React.useMemo(
+    () => buildDashboardCtas({ openAppLauncher, navigate: router.push }),
+    [openAppLauncher, router]
+  );
+
+  React.useEffect(() => {
+    const storedFavorites = favoritesService.getFavorites();
+    setFavoriteAppIds(storedFavorites);
+  }, []);
+
+  const decoratedRecentApps = React.useMemo(
+    () =>
+      recentApps.map((activity) => ({
+        ...activity,
+        pinnedBy: favoriteAppIds.includes(activity.appId) ? 'user' : activity.pinnedBy,
+      })),
+    [favoriteAppIds]
+  );
 
   const handleOpenCatalog = () => {
     router.push('/applications');
-  };
-
-  const handleAskVisionAI = () => {
-    // TODO: Implement VISION AI modal/feature
-    console.log('Ask VISION AI clicked');
   };
 
   const handleLaunchApp = (appId: string, href: string) => {
@@ -58,13 +101,7 @@ export default function DashboardPage() {
   };
 
   const handleToggleFavorite = (appId: string) => {
-    // TODO: Implement favorite toggle with backend
-    console.log('Toggle favorite:', appId);
-  };
-
-  const handleLearnMore = () => {
-    // TODO: Navigate to transformation areas documentation
-    console.log('Learn more clicked');
+    toggleFavoriteWithPersistence(appId, setFavoriteAppIds);
   };
 
   return (
@@ -76,7 +113,7 @@ export default function DashboardPage() {
             <HeroWelcome
               user={currentUser}
               organization={currentOrg}
-              onAskVisionAI={handleAskVisionAI}
+              onAskVisionAI={onAskVisionAI}
             />
           </section>
 
@@ -123,7 +160,7 @@ export default function DashboardPage() {
                     Recent apps
                   </h3>
                   <div className="flex flex-col gap-4">
-                    {recentApps.map((activity) => (
+                    {decoratedRecentApps.map((activity) => (
                       <MiniAppCard
                         key={activity.appId}
                         activity={activity}
@@ -150,7 +187,7 @@ export default function DashboardPage() {
             <CatalogBanner
               totalApps={Object.keys(appMetadata).length}
               onOpenCatalog={handleOpenCatalog}
-              onLearnMore={handleLearnMore}
+              onLearnMore={onLearnMore}
             />
           </section>
         </div>

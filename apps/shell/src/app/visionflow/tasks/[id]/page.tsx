@@ -19,6 +19,8 @@ import { GlowSelect } from '@/components/glow-ui/GlowSelect';
 import { GlowBadge } from '@/components/glow-ui/GlowBadge';
 import { GlowTabs, TabItem } from '@/components/glow-ui/GlowTabs';
 import { ArrowLeft, Edit, Save, Trash2, X, MessageSquare, Activity, Paperclip, CheckSquare } from 'lucide-react';
+import { visionflowService } from '@/services/visionflowService';
+import { getDemoTaskById } from '../task-fixtures';
 
 interface Task {
   id: string;
@@ -116,6 +118,65 @@ const PRIORITY_CONFIG = {
   URGENT: { label: 'Urgent', variant: 'destructive' as const },
 };
 
+export function isSupabaseConfigured(env: NodeJS.ProcessEnv = process.env) {
+  return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
+export async function fetchTaskData(
+  id: string,
+  service = visionflowService,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  if (isSupabaseConfigured(env)) {
+    const data = await service.getTask(id);
+    return { task: data as Task, infoMessage: null as string | null };
+  }
+
+  const demoTask = getDemoTaskById(id);
+  if (demoTask) {
+    return {
+      task: demoTask as Task,
+      infoMessage: 'Database not connected. Showing demo task from fixtures.',
+    };
+  }
+
+  return { task: null, infoMessage: null };
+}
+
+function getDefaultCommentAuthor(env: NodeJS.ProcessEnv = process.env) {
+  return {
+    id: env.NEXT_PUBLIC_VISIONFLOW_DEFAULT_USER_ID || 'current-user',
+    name: env.NEXT_PUBLIC_VISIONFLOW_DEFAULT_USER_NAME || 'You',
+    email: env.NEXT_PUBLIC_VISIONFLOW_DEFAULT_USER_EMAIL || 'you@example.com',
+  };
+}
+
+export async function addCommentWithFallback(
+  taskId: string,
+  content: string,
+  service = visionflowService,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  const author = getDefaultCommentAuthor(env);
+  const baseComment = {
+    id: `temp-${Date.now()}`,
+    content,
+    created_at: new Date().toISOString(),
+    user: author,
+  };
+
+  if (isSupabaseConfigured(env)) {
+    const created = await service.addComment(taskId, author.id, content);
+    return {
+      ...baseComment,
+      id: created?.id || baseComment.id,
+      created_at: created?.created_at || baseComment.created_at,
+    };
+  }
+
+  return baseComment;
+}
+
 export default function TaskDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -127,6 +188,10 @@ export default function TaskDetailPage() {
   const [saving, setSaving] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('comments');
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Editable fields
   const [editedTitle, setEditedTitle] = useState('');
@@ -139,18 +204,22 @@ export default function TaskDetailPage() {
   const loadTask = async () => {
     try {
       setLoading(true);
-      // TODO: Fetch task from API
-      // const response = await fetch(`/api/v1/apps/visionflow/tasks/${id}`);
-      // const data = await response.json();
-      // setTask(data.task);
+      setError(null);
+      setInfoMessage(null);
 
-      // Mock data for development
-      setTask(null);
-      setError('Database not connected. Run migrations per VISIONFLOW_SETUP.md');
-      setLoading(false);
+      const { task: loadedTask, infoMessage: info } = await fetchTaskData(id);
+
+      if (!loadedTask) {
+        setError('Task not found in demo data.');
+        return;
+      }
+
+      setTask(loadedTask);
+      setInfoMessage(info);
     } catch (err) {
       console.error('Error loading task:', err);
       setError('Failed to load task');
+    } finally {
       setLoading(false);
     }
   };
@@ -175,11 +244,36 @@ export default function TaskDetailPage() {
 
     try {
       setSaving(true);
-      // TODO: Save via API
+      setFeedback(null);
+      if (isSupabaseConfigured()) {
+        const updated = await visionflowService.updateTask(task.id, {
+          title: editedTitle,
+          description: editedDescription,
+          status: editedStatus as Task['status'],
+          priority: editedPriority as Task['priority'],
+          due_date: editedDueDate || null,
+          estimated_hours: editedEstimatedHours ? Number(editedEstimatedHours) : null,
+        });
+        setTask(updated as Task);
+        setFeedback('Task saved successfully');
+      } else {
+        setTask({
+          ...task,
+          title: editedTitle,
+          description: editedDescription,
+          status: editedStatus as Task['status'],
+          priority: (editedPriority as Task['priority']) || undefined,
+          due_date: editedDueDate || undefined,
+          estimated_hours: editedEstimatedHours ? Number(editedEstimatedHours) : undefined,
+          updated_at: new Date().toISOString(),
+        });
+        setFeedback('Task saved locally (connect Supabase to persist)');
+      }
+
       setEditing(false);
     } catch (err) {
       console.error('Error saving task:', err);
-      alert('Failed to save task');
+      setError('Failed to save task');
     } finally {
       setSaving(false);
     }
@@ -189,11 +283,23 @@ export default function TaskDetailPage() {
     if (!newComment.trim() || !task) return;
 
     try {
-      // TODO: Add comment via API
+      setCommentSubmitting(true);
+      setFeedback(null);
+
+      const createdComment = await addCommentWithFallback(task.id, newComment.trim());
+
+      setTask({
+        ...task,
+        comments: [...(task.comments || []), createdComment],
+      });
+      setFeedback('Comment added');
+
       setNewComment('');
     } catch (err) {
       console.error('Error adding comment:', err);
-      alert('Failed to add comment');
+      setError('Failed to add comment');
+    } finally {
+      setCommentSubmitting(false);
     }
   };
 
@@ -201,11 +307,17 @@ export default function TaskDetailPage() {
     if (!confirm('Are you sure you want to delete this task?')) return;
 
     try {
-      // TODO: Delete via API
+      setDeleting(true);
+      setFeedback(null);
+      if (isSupabaseConfigured()) {
+        await visionflowService.deleteTask(id);
+      }
       router.push('/visionflow/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
-      alert('Failed to delete task');
+      setError('Failed to delete task');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -283,12 +395,12 @@ export default function TaskDetailPage() {
               />
               <GlowButton
                 onClick={handleAddComment}
-                disabled={!newComment.trim()}
+                disabled={!newComment.trim() || commentSubmitting}
                 size="sm"
                 glow="medium"
                 className="mt-3"
               >
-                Comment
+                {commentSubmitting ? 'Posting...' : 'Comment'}
               </GlowButton>
             </div>
           </div>
@@ -421,14 +533,31 @@ export default function TaskDetailPage() {
                 <Edit className="h-4 w-4" />
                 Edit
               </GlowButton>
-              <GlowButton variant="destructive" onClick={handleDelete} size="sm">
+              <GlowButton
+                variant="destructive"
+                onClick={handleDelete}
+                size="sm"
+                disabled={deleting}
+              >
                 <Trash2 className="h-4 w-4" />
-                Delete
+                {deleting ? 'Deleting...' : 'Delete'}
               </GlowButton>
             </>
           )}
         </div>
       </div>
+
+      {infoMessage && (
+        <GlowCard variant="flat" padding="md" className="bg-vision-blue-50 text-vision-blue-950">
+          {infoMessage}
+        </GlowCard>
+      )}
+
+      {feedback && (
+        <GlowCard variant="flat" padding="md" className="bg-vision-green-50 text-vision-green-900">
+          {feedback}
+        </GlowCard>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
