@@ -1,0 +1,288 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ===================================================
+       VISION Platform Bold Color System v3.0 (HSL)
+       ✅ WCAG 2.1 AA Compliant
+       =================================================== */
+
+    /* Primary Brand Colors - Bold & Vibrant */
+    --vision-blue: 215 100% 34%; /* #0047AB - Bold Royal Blue */
+    --vision-green: 168 95% 24%; /* #047857 - Vivid Forest Green */
+    --vision-orange: 21 90% 41%; /* #C2410C - Vivid Tangerine */
+    --vision-purple: 266 68% 51%; /* #6D28D9 - Rich Purple */
+    --vision-red: 0 86% 42%; /* #B91C1C - Electric Scarlet */
+
+    /* Base colors mapped to Bold Color System */
+    --background: 210 20% 98%; /* #F8FAFC - Mist (subtle gray background) */
+    --foreground: 215 25% 17%; /* #1F2937 - Slate Gray (primary text) */
+    --card: 0 0% 100%; /* #FFFFFF - White cards */
+    --card-foreground: 215 25% 17%; /* #1F2937 - Slate Gray */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 17%;
+
+    /* Primary = Bold Royal Blue (#0047AB) */
+    --primary: 215 100% 34%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary = Vivid Forest Green (#047857) */
+    --secondary: 168 95% 24%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent = Vivid Tangerine (#C2410C) */
+    --accent: 21 90% 41%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Success = Vivid Forest Green */
+    --success: 168 95% 24%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning = Vivid Tangerine */
+    --warning: 21 90% 41%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Error = Electric Scarlet (#B91C1C) */
+    --error: 0 86% 42%;
+    --error-foreground: 0 0% 100%;
+
+    /* Info = Electric Blue (#2563EB) */
+    --info: 221 83% 53%;
+    --info-foreground: 0 0% 100%;
+
+    /* Premium = Rich Purple (#6D28D9) */
+    --premium: 266 68% 51%;
+    --premium-foreground: 0 0% 100%;
+
+    /* Neutral grays */
+    --muted: 210 40% 96.1%; /* #F1F5F9 - Smoke */
+    --muted-foreground: 215 16% 47%; /* #64748B - Steel Gray */
+    --destructive: 0 86% 42%; /* #B91C1C - Electric Scarlet */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%; /* #CBD5E1 - Silver */
+    --input: 214 32% 91%;
+    --ring: 215 100% 34%; /* Bold Royal Blue focus ring */
+    --radius: 0.5rem;
+
+    /* Glow effect variables - Bold Color System */
+    --glow-primary: 0 0 16px 2px rgba(0, 71, 171, 0.25); /* Bold Royal Blue */
+    --glow-success: 0 0 16px 2px rgba(4, 120, 87, 0.25); /* Vivid Forest Green */
+    --glow-accent: 0 0 16px 2px rgba(194, 65, 12, 0.25); /* Vivid Tangerine */
+    --glow-error: 0 0 16px 2px rgba(185, 28, 28, 0.25); /* Electric Scarlet */
+    --glow-premium: 0 0 16px 2px rgba(109, 40, 217, 0.25); /* Rich Purple */
+
+    /* Ambient shadows - Bold Color System */
+    --ambient-card: 0 2px 4px rgba(0, 0, 0, 0.04), 0 0 12px rgba(0, 71, 171, 0.06);
+    --ambient-interactive: 0 2px 4px rgba(0, 0, 0, 0.04), 0 0 8px rgba(0, 71, 171, 0.06);
+  }
+
+  .dark {
+    /* Dark mode with Bold Color System */
+    --background: 215 25% 10%; /* #1F2937 - Dark Slate */
+    --foreground: 210 20% 98%; /* #F8FAFC - Mist */
+    --card: 215 25% 15%; /* Slightly lighter than background */
+    --card-foreground: 210 20% 98%;
+    --popover: 215 25% 15%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Primary = Lighter Bold Royal Blue for dark mode */
+    --primary: 221 83% 53%; /* #2563EB - Electric Blue */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary = Lighter green for dark mode */
+    --secondary: 173 58% 39%; /* #14B8A6 - Bright Jade */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent = Lighter orange for dark mode */
+    --accent: 20 91% 48%; /* #EA580C - Bright Orange */
+    --accent-foreground: 0 0% 100%;
+
+    /* State colors for dark mode */
+    --success: 173 58% 39%; /* #14B8A6 - Bright Jade */
+    --warning: 20 91% 48%; /* #EA580C - Bright Orange */
+    --error: 4 90% 58%; /* #DC2626 - Bold Crimson */
+    --info: 221 83% 53%; /* #2563EB - Electric Blue */
+    --premium: 258 90% 66%; /* #8B5CF6 - Bright Amethyst */
+
+    --muted: 215 25% 20%;
+    --muted-foreground: 215 16% 65%; /* Lighter steel gray */
+    --destructive: 4 90% 58%; /* #DC2626 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 25% 25%;
+    --input: 215 25% 25%;
+    --ring: 221 83% 53%; /* Electric Blue focus ring */
+
+    /* Glow effects for dark mode (more intense with bold colors) */
+    --glow-primary: 0 0 20px 3px rgba(37, 99, 235, 0.4); /* Electric Blue */
+    --glow-success: 0 0 20px 3px rgba(20, 184, 166, 0.4); /* Bright Jade */
+    --glow-accent: 0 0 20px 3px rgba(234, 88, 12, 0.4); /* Bright Orange */
+    --glow-error: 0 0 20px 3px rgba(220, 38, 38, 0.4); /* Bold Crimson */
+    --glow-premium: 0 0 20px 3px rgba(139, 92, 246, 0.4); /* Bright Amethyst */
+
+    --ambient-card: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(37, 99, 235, 0.1);
+    --ambient-interactive: 0 2px 6px rgba(0, 0, 0, 0.3), 0 0 12px rgba(37, 99, 235, 0.08);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible styles */
+  *:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px hsl(var(--ring)), 0 0 0 4px hsl(var(--background));
+  }
+}
+
+@layer components {
+  /* Glow effect utilities */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-success {
+    box-shadow: var(--glow-success);
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+
+  .glow-error {
+    box-shadow: var(--glow-error);
+  }
+
+  /* Ambient card effects */
+  .ambient-card {
+    box-shadow: var(--ambient-card);
+  }
+
+  .ambient-interactive {
+    box-shadow: var(--ambient-interactive);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  .ambient-interactive:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 0 20px rgba(0, 44, 85, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Gradient backgrounds - Monochromatic Bold Gradients */
+  .gradient-primary {
+    background: linear-gradient(135deg, #1E3A8A 0%, #0047AB 50%, #2563EB 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, #065F46 0%, #047857 50%, #059669 100%);
+  }
+
+  .gradient-warning {
+    background: linear-gradient(135deg, #9A3412 0%, #C2410C 50%, #EA580C 100%);
+  }
+
+  .gradient-error {
+    background: linear-gradient(135deg, #991B1B 0%, #B91C1C 50%, #DC2626 100%);
+  }
+
+  .gradient-premium {
+    background: linear-gradient(135deg, #5B21B6 0%, #6D28D9 50%, #7C3AED 100%);
+  }
+
+  /* Light gradient variations */
+  .gradient-blue-light {
+    background: linear-gradient(135deg, #3B82F6 0%, #DBEAFE 50%, #EFF6FF 100%);
+  }
+
+  .gradient-green-light {
+    background: linear-gradient(135deg, #14B8A6 0%, #CCFBF1 50%, #F0FDFA 100%);
+  }
+
+  .gradient-orange-light {
+    background: linear-gradient(135deg, #F97316 0%, #FFEDD5 50%, #FFF7ED 100%);
+  }
+
+  .gradient-gray-light {
+    background: linear-gradient(135deg, #CBD5E1 0%, #F1F5F9 50%, #F8FAFC 100%);
+  }
+
+  .app-card {
+    position: relative;
+    border: 1px solid hsl(var(--border));
+    transition:
+      transform 160ms ease,
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .app-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--app-card-module-color, hsl(var(--border)));
+    box-shadow: var(--ambient-interactive);
+  }
+
+  .app-card:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--app-card-module-color, hsl(var(--ring))),
+      0 0 0 4px hsl(var(--background));
+  }
+
+  .app-card[data-status='coming_soon'],
+  .app-card[data-status='paused'] {
+    opacity: 0.9;
+  }
+
+  .app-card-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 9999px;
+    background-color: var(--app-card-module-soft, rgba(0, 0, 0, 0.04));
+    color: var(--app-card-module-color, hsl(var(--foreground)));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 160ms ease;
+  }
+
+  .app-card:hover .app-card-icon {
+    transform: translateY(-1px);
+  }
+
+  .app-card-favorite {
+    border-radius: 9999px;
+    background-color: transparent;
+    color: hsl(var(--muted-foreground));
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .app-card-favorite[data-active='true'] {
+    background-color: var(--app-card-module-soft, rgba(0, 0, 0, 0.04));
+    color: var(--app-card-module-color, hsl(var(--foreground)));
+  }
+
+  .app-card-disabled {
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,84 @@
+'use client';
+
+import * as React from 'react';
+import { GlowCard, GlowCardHeader, GlowCardTitle, GlowCardContent, GlowBadge, GlowButton, Group, Stack, Text } from '@/components/glow-ui';
+import { FileText, MoreVertical } from 'lucide-react';
+import { type Document, formatRelativeTime } from '@/lib/dashboard/mockDashboardData';
+import { getAppMeta } from '@/lib/apps/appMetadata';
+import { getPhaseTokenClasses } from '@/lib/phase-colors';
+import { cn } from '@/lib/utils';
+
+export interface RecentDocumentsCardProps {
+  documents: Document[];
+}
+
+function DocumentRow({ document }: { document: Document }) {
+  const appMeta = getAppMeta(document.appId);
+  const appName = appMeta?.name || document.appId;
+
+  // Use Bold Color System tokens via getPhaseTokenClasses
+  const phaseClasses = appMeta
+    ? getPhaseTokenClasses(appMeta.phase)
+    : { iconBackground: 'bg-vision-gray-100', iconText: 'text-vision-gray-700', badgeBackground: 'bg-vision-gray-100', badgeText: 'text-vision-gray-700' };
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-4 py-3 transition hover:border-border hover:shadow-sm cursor-pointer">
+      <div
+        className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0',
+          phaseClasses.iconBackground,
+          phaseClasses.iconText
+        )}
+      >
+        <FileText className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0 space-y-1">
+        <Text size="sm" weight="medium" className="line-clamp-1">
+          {document.title}
+        </Text>
+        <Group spacing="sm" wrap="wrap">
+          <GlowBadge
+            variant="outline"
+            size="sm"
+            className={cn(
+              'border-transparent text-[10px] font-medium',
+              phaseClasses.badgeBackground,
+              phaseClasses.badgeText
+            )}
+          >
+            {appName}
+          </GlowBadge>
+          <Text size="xs" color="tertiary">
+            Updated {formatRelativeTime(document.updatedAt)} by {document.updatedBy}
+          </Text>
+        </Group>
+      </div>
+      <GlowButton
+        variant="ghost"
+        size="icon"
+        glow="none"
+        className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+        aria-label="View document options"
+      >
+        <MoreVertical className="h-4 w-4" />
+      </GlowButton>
+    </div>
+  );
+}
+
+export function RecentDocumentsCard({ documents }: RecentDocumentsCardProps) {
+  return (
+    <GlowCard variant="elevated">
+      <GlowCardHeader>
+        <GlowCardTitle className="text-lg">Recent documents & drafts</GlowCardTitle>
+      </GlowCardHeader>
+      <GlowCardContent>
+        <Stack spacing="sm">
+          {documents.map((document) => (
+            <DocumentRow key={document.id} document={document} />
+          ))}
+        </Stack>
+      </GlowCardContent>
+    </GlowCard>
+  );
+}
