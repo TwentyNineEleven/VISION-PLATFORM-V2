@@ -5,8 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Sparkles, RefreshCw, Check } from 'lucide-react';
 import { GlowButton, GlowCard, Stack, Text, Title, GlowTextarea } from '@/components/glow-ui';
 import { EmpathyQuadrant, type EmpathyChip } from '@/components/community-compass/EmpathyQuadrant';
+<<<<<<< HEAD
 import { useChips, useToggleChipSelection } from '@/hooks/useChips';
 import { useQueryClient } from '@tanstack/react-query';
+=======
+import { useChips, useCreateChips, useToggleChipSelection } from '@/hooks/useChips';
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 import { toast } from '@/lib/toast';
 
 const QUADRANTS = [
@@ -45,7 +49,11 @@ export default function EmpathyMapPage() {
     );
     const { data: chips = [], isLoading: chipsLoading } = useChips(assessmentId);
     const toggleChipMutation = useToggleChipSelection(assessmentId);
+<<<<<<< HEAD
     const queryClient = useQueryClient();
+=======
+    const createChips = useCreateChips(assessmentId);
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
     const [generatingQuadrant, setGeneratingQuadrant] = React.useState<string | null>(null);
     const [narrative, setNarrative] = React.useState('');
     const [isGeneratingNarrative, setIsGeneratingNarrative] = React.useState(false);
@@ -91,10 +99,32 @@ export default function EmpathyMapPage() {
 
             if (!response.ok) throw new Error('Failed to generate');
 
+<<<<<<< HEAD
             // Fix: Endpoint now persists chips to database (matching generate-chips behavior)
             // Refetch and wait for completion before clearing loading state
             // This ensures the UI shows loading until new chips are actually loaded
             await queryClient.refetchQueries({ queryKey: ['chips', assessmentId] });
+=======
+            const data = await response.json();
+            // Fix: Use mapped question_category from API response (never use quadrantId)
+            // The endpoint maps quadrant values to database format (e.g., 'pain' → 'pain_points')
+            // and provides the correct structure matching generate-chips endpoint
+            const payload = data.chips.map((c: any) => ({
+                assessment_id: c.assessment_id || assessmentId,
+                text: c.text,
+                question_category: c.question_category, // Always use mapped value from API, no fallback
+                is_ai_generated: c.is_ai_generated ?? true,
+                is_selected: c.is_selected ?? false,
+                // Optional fields with defaults
+                is_custom: false,
+                is_edited: false,
+                confidence: null,
+                source_citation: null,
+                original_text: null,
+            }));
+
+            await createChips.mutateAsync(payload);
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
         } catch (error) {
             console.error('Error generating chips:', error);
             toast.error('Unable to generate empathy statements', (error as Error).message);
@@ -179,7 +209,11 @@ export default function EmpathyMapPage() {
                         chips={chipsByQuadrant[quadrant.id]}
                         onToggle={(chipId) => toggleChip(quadrant.id, chipId)}
                         onGenerate={() => handleGenerate(quadrant.id)}
+<<<<<<< HEAD
                         isGenerating={generatingQuadrant === quadrant.id}
+=======
+                        isGenerating={generatingQuadrant === quadrant.id || createChips.isPending}
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
                     />
                 ))}
             </div>

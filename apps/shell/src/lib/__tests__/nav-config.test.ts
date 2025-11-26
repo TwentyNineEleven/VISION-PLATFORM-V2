@@ -28,8 +28,13 @@ describe('nav-config', () => {
 
   it('detects active nav and submenu items for nested routes', () => {
     const items = buildNavConfig();
+<<<<<<< HEAD
     // Test with existing submenu path: /visionflow/tasks/123 should match visionflow-tasks
     expect(getActiveNavItem('/visionflow/tasks/123', items)).toBe('visionflow');
     expect(getActiveSubmenuItem('/visionflow/tasks/123', items)).toBe('visionflow-tasks');
+=======
+    expect(getActiveNavItem('/visionflow/projects/123', items)).toBe('visionflow');
+    expect(getActiveSubmenuItem('/visionflow/projects/123', items)).toBe('visionflow-projects');
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
   });
 });

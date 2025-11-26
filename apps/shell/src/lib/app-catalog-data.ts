@@ -25,6 +25,7 @@ export const APP_CATALOG_DATA: AppMetadata[] = [
     isFavorited: true,
   },
   {
+<<<<<<< HEAD
     id: 'community-pulse',
     slug: 'community-pulse',
     name: 'CommunityPulse',
@@ -39,6 +40,8 @@ export const APP_CATALOG_DATA: AppMetadata[] = [
     focusTags: ['Community listening', 'Stakeholder strategy', 'Engagement planning'],
   },
   {
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
     id: 'stakeholdr',
     slug: 'stakeholdr',
     name: 'Stakeholdr',

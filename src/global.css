@@ -1,0 +1,207 @@
+/**
+ * Global Styles
+ * 
+ * Base styles, resets, and CSS custom properties for the 2911 Design System
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
+
+/* CSS Custom Properties (Design Tokens) */
+:root {
+  /* Colors - Core Brand */
+  --color-deep-blue: #002C55;
+  --color-emerald-green: #2BAE66;
+  --color-vibrant-orange: #F7931E;
+  --color-warm-gray: #6E7781;
+  --color-light-gray: #E6E8EB;
+  --color-white: #FFFFFF;
+
+  /* Semantic Colors */
+  --color-text-primary: var(--color-deep-blue);
+  --color-text-secondary: var(--color-warm-gray);
+  --color-text-tertiary: #889096;
+  --color-text-inverse: var(--color-white);
+  --color-text-brand: var(--color-deep-blue);
+  --color-text-success: var(--color-emerald-green);
+  --color-text-warning: var(--color-vibrant-orange);
+  --color-text-error: #E54D2E;
+  --color-text-danger: #E54D2E;
+
+  --color-background-page: #F5F6F8;
+  --color-background-surface: var(--color-white);
+  --color-background-surface-secondary: #F9FAFB;
+  --color-background-overlay: rgba(0, 44, 85, 0.5);
+
+  --color-fill-primary: var(--color-deep-blue);
+  --color-fill-accent: var(--color-vibrant-orange);
+  --color-fill-success: var(--color-emerald-green);
+  --color-fill-warning: var(--color-vibrant-orange);
+  --color-fill-error: #E54D2E;
+  --color-fill-neutral: var(--color-warm-gray);
+  --color-fill-neutral-light: var(--color-light-gray);
+
+  --color-border-primary: var(--color-light-gray);
+  --color-border-secondary: #D7DBDF;
+  --color-border-tertiary: #EBEDEF;
+  --color-border-brand: var(--color-deep-blue);
+  --color-border-brand-light: #ADBFF5;
+  --color-border-focus: var(--color-deep-blue);
+  --color-border-error: #E54D2E;
+
+  /* Spacing */
+  --spacing-none: 0px;
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 6px;
+  --spacing-md: 8px;
+  --spacing-lg: 10px;
+  --spacing-xl: 12px;
+  --spacing-xxl: 14px;
+  --spacing-2xl: 16px;
+  --spacing-3xl: 16px;
+  --spacing-4xl: 18px;
+  --spacing-5xl: 20px;
+  --spacing-6xl: 24px;
+  --spacing-7xl: 28px;
+  --spacing-8xl: 32px;
+  --spacing-9xl: 40px;
+  --spacing-10xl: 40px;
+  --spacing-12xl: 48px;
+  --spacing-16xl: 64px;
+
+  /* Radius */
+  --radius-none: 0px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 999px;
+  --radius-round: 50%;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* Typography */
+  --font-family-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-body: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'Fira Code', 'Courier New', monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 48px;
+
+  --line-height-xs: 18px;
+  --line-height-sm: 20px;
+  --line-height-md: 24px;
+  --line-height-lg: 28px;
+  --line-height-xl: 32px;
+  --line-height-2xl: 36px;
+  --line-height-3xl: 40px;
+  --line-height-4xl: 48px;
+  --line-height-5xl: 56px;
+}
+
+/* Reset / Normalize */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-md);
+  color: var(--color-text-primary);
+  background-color: var(--color-background-page);
+  margin: 0;
+  padding: 0;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-background-surface-secondary) 0px,
+    var(--color-background-surface) 40px,
+    var(--color-background-surface-secondary) 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Scrollbar styles (Glow UI inspired) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-surface-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-warm-gray);
+}
+
+/* Utility classes */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+

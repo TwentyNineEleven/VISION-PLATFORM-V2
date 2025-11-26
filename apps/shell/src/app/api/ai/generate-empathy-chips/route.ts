@@ -127,7 +127,12 @@ No markdown, no preamble - just the JSON.`;
             chips = content.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 6);
         }
 
+<<<<<<< HEAD
         // Fix: Map quadrant ID to question_category format used in database
+=======
+        // Fix: Return consistent structure matching generate-chips endpoint
+        // Map quadrant ID to question_category format used in database
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
         const categoryMap: Record<string, string> = {
             pain: 'pain_points',
             feelings: 'feelings',
@@ -136,10 +141,14 @@ No markdown, no preamble - just the JSON.`;
         };
         const questionCategory = categoryMap[body.quadrant] || body.quadrant;
 
+<<<<<<< HEAD
         // Fix: Store in DB like generate-chips endpoint for consistency
         // This ensures chips are persisted even if client-side mutation fails
         // AI rate limit is consumed only after successful persistence
         const chipsToInsert = chips.map(text => ({
+=======
+        const chipsResponse = chips.map(text => ({
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
             assessment_id: body.assessmentId,
             text,
             question_category: questionCategory,
@@ -147,6 +156,7 @@ No markdown, no preamble - just the JSON.`;
             is_selected: false,
         }));
 
+<<<<<<< HEAD
         if (chipsToInsert.length > 0) {
             const { error: dbError } = await supabase
                 .from('statement_chips')
@@ -159,6 +169,9 @@ No markdown, no preamble - just the JSON.`;
         }
 
         const res = NextResponse.json({ chips: chipsToInsert });
+=======
+        const res = NextResponse.json({ chips: chipsResponse });
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
         Object.entries(rate.headers).forEach(([key, value]) => res.headers.set(key, value));
         return res;
 
@@ -169,4 +182,8 @@ No markdown, no preamble - just the JSON.`;
         console.error('Internal error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4

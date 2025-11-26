@@ -6,6 +6,7 @@ import {
   createMockSupabaseError,
   mockUser,
 } from '@/test/testUtils';
+<<<<<<< HEAD
 import { USE_REAL_DB, TEST_DATA, setupTestEnvironment } from '@/test/serviceTestHelpers';
 
 // Conditionally mock Supabase client
@@ -13,6 +14,17 @@ import { USE_REAL_DB, TEST_DATA, setupTestEnvironment } from '@/test/serviceTest
 if (!USE_REAL_DB) {
   vi.mock('@/lib/supabase/client');
 } else {
+=======
+import { USE_REAL_DB, TEST_DATA, setupTestEnvironment, getUserIdByEmail } from '@/test/serviceTestHelpers';
+import { setupTestAuth } from '@/test/authTestHelpers';
+
+// Only mock if not using real DB
+// Note: vi.mock is hoisted, but setup file will unmock if USE_REAL_DB is set
+if (!USE_REAL_DB) {
+  vi.mock('@/lib/supabase/client');
+} else {
+  // Ensure we don't mock when using real DB
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
   vi.doUnmock('@/lib/supabase/client');
 }
 
@@ -416,10 +428,26 @@ describe('teamService', () => {
   describe('canInviteMembers', () => {
     it('should return true for Owner', async () => {
       if (USE_REAL_DB) {
+<<<<<<< HEAD
         // Real DB tests for canInviteMembers require auth setup
         // Skip for now - these are tested via mock tests
         expect(true).toBe(true);
         return;
+=======
+        // Real DB test - get owner ID and set up auth
+        const ownerId = await getUserIdByEmail(TEST_DATA.EMAILS.OWNER);
+        if (!ownerId) {
+          expect(true).toBe(true); // Skip if user not found
+          return;
+        }
+        const cleanup = setupTestAuth(ownerId, TEST_DATA.EMAILS.OWNER);
+        try {
+          const canInvite = await teamService.canInviteMembers(TEST_DATA.ORGANIZATION_ID);
+          expect(canInvite).toBe(true);
+        } finally {
+          cleanup();
+        }
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       } else {
         const mockQuery = mockSupabase!.from();
         mockSupabase!.auth.getUser.mockResolvedValue({
@@ -439,10 +467,26 @@ describe('teamService', () => {
 
     it('should return true for Admin', async () => {
       if (USE_REAL_DB) {
+<<<<<<< HEAD
         // Real DB tests for canInviteMembers require auth setup
         // Skip for now - these are tested via mock tests
         expect(true).toBe(true);
         return;
+=======
+        // Real DB test - get admin ID and set up auth
+        const adminId = await getUserIdByEmail(TEST_DATA.EMAILS.ADMIN);
+        if (!adminId) {
+          expect(true).toBe(true);
+          return;
+        }
+        const cleanup = setupTestAuth(adminId, TEST_DATA.EMAILS.ADMIN);
+        try {
+          const canInvite = await teamService.canInviteMembers(TEST_DATA.ORGANIZATION_ID);
+          expect(canInvite).toBe(true);
+        } finally {
+          cleanup();
+        }
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       } else {
         const mockQuery = mockSupabase!.from();
         mockSupabase!.auth.getUser.mockResolvedValue({
@@ -462,10 +506,26 @@ describe('teamService', () => {
 
     it('should return false for Editor', async () => {
       if (USE_REAL_DB) {
+<<<<<<< HEAD
         // Real DB tests for canInviteMembers require auth setup
         // Skip for now - these are tested via mock tests
         expect(true).toBe(true);
         return;
+=======
+        // Real DB test - get editor ID and set up auth
+        const editorId = await getUserIdByEmail(TEST_DATA.EMAILS.EDITOR);
+        if (!editorId) {
+          expect(true).toBe(true);
+          return;
+        }
+        const cleanup = setupTestAuth(editorId, TEST_DATA.EMAILS.EDITOR);
+        try {
+          const canInvite = await teamService.canInviteMembers(TEST_DATA.ORGANIZATION_ID);
+          expect(canInvite).toBe(false);
+        } finally {
+          cleanup();
+        }
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       } else {
         const mockQuery = mockSupabase!.from();
         mockSupabase!.auth.getUser.mockResolvedValue({

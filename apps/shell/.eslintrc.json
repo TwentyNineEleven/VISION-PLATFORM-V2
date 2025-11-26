@@ -1,0 +1,12 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off"
+  },
+  "ignorePatterns": [
+    "**/*.stories.tsx",
+    "**/*.stories.ts",
+    "src/app/documents/**/*",
+    "src/components/documents/**/*"
+  ]
+}

@@ -1,9 +1,14 @@
 # Dependencies
+<<<<<<< HEAD
 node_modules/
+=======
+node_modules
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 .pnp
 .pnp.js
 
 # Testing
+<<<<<<< HEAD
 coverage/
 *.log
 
@@ -16,29 +21,76 @@ out/
 # Misc
 .DS_Store
 *.pem
+=======
+coverage
+
+# Next.js
+.next/
+out/
+build
+dist
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.claude
+.env.claude.quickref.md
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 
 # Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+<<<<<<< HEAD
 
 # Local env files
 .env
 .env*.local
+=======
+pnpm-debug.log*
+
+# Local
+.DS_Store
+*.pem
+
+# Turbo
+.turbo
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 
 # Vercel
 .vercel
 
+<<<<<<< HEAD
 # Turbo
 .turbo/
 
 # IDE
 .vscode/
 .idea/
+=======
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode
+.idea
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 *.swp
 *.swo
 *~
 
+<<<<<<< HEAD
 # OS
 Thumbs.db
 
+=======
+# Backup
+_backup_old_project
+
+# Supabase
+supabase/.temp
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4

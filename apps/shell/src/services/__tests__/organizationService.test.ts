@@ -8,9 +8,15 @@ import {
   mockUser,
 } from '@/test/testUtils';
 import { USE_REAL_DB, TEST_DATA, setupTestEnvironment, getUserIdByEmail } from '@/test/serviceTestHelpers';
+<<<<<<< HEAD
 
 // Conditionally mock Supabase client
 // vi.mock is hoisted but without a factory, it uses automock which allows mockReturnValue
+=======
+import { setupTestAuth } from '@/test/authTestHelpers';
+
+// Conditionally mock Supabase client
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 if (!USE_REAL_DB) {
   vi.mock('@/lib/supabase/client');
 } else {
@@ -161,9 +167,34 @@ describe('organizationService', () => {
   describe('getUserOrganizations', () => {
     it('should fetch all organizations for a user', async () => {
       if (USE_REAL_DB) {
+<<<<<<< HEAD
         // Real DB tests for getUserOrganizations require auth setup
         // Skip for now - these are tested via mock tests
         expect(true).toBe(true);
+=======
+        // Real DB test - get owner ID by email and set up auth
+        const ownerId = await getUserIdByEmail(TEST_DATA.EMAILS.OWNER);
+        if (!ownerId) {
+          expect(true).toBe(true);
+          return;
+        }
+        // Set up auth for the owner user
+        const cleanup = setupTestAuth(ownerId, TEST_DATA.EMAILS.OWNER);
+        try {
+          // getUserOrganizations doesn't take a parameter - it uses current auth user
+          const result = await organizationService.getUserOrganizations();
+          expect(Array.isArray(result)).toBe(true);
+          // Should have at least the test organization
+          expect(result.length).toBeGreaterThanOrEqual(1);
+          if (result.length > 0) {
+            expect(result[0]).toHaveProperty('id');
+            expect(result[0]).toHaveProperty('name');
+            expect(result[0]).toHaveProperty('role');
+          }
+        } finally {
+          cleanup();
+        }
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
         return;
       }
       
@@ -423,6 +454,7 @@ describe('organizationService', () => {
 
   describe('getUserRole', () => {
     it('should return user role in organization', async () => {
+<<<<<<< HEAD
       if (USE_REAL_DB) {
         // Real DB test - verify owner role for test user
         const ownerId = await getUserIdByEmail(TEST_DATA.EMAILS.OWNER);
@@ -434,6 +466,8 @@ describe('organizationService', () => {
         expect(role).toBe('Owner');
         return;
       }
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       mockSupabase.from().select().eq().eq().single.mockResolvedValue({
         data: { role: 'admin' },
         error: null,
@@ -446,12 +480,15 @@ describe('organizationService', () => {
     });
 
     it('should return null when user not in organization', async () => {
+<<<<<<< HEAD
       if (USE_REAL_DB) {
         // Real DB test - use non-existent user
         const role = await organizationService.getUserRole(TEST_DATA.ORGANIZATION_ID, '00000000-0000-0000-0000-000000000999');
         expect(role).toBeNull();
         return;
       }
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       mockSupabase.from().select().eq().eq().single.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Not found', 'PGRST116'),
@@ -465,6 +502,7 @@ describe('organizationService', () => {
 
   describe('isOwner', () => {
     it('should return true for owner', async () => {
+<<<<<<< HEAD
       if (USE_REAL_DB) {
         // Real DB test - verify owner user is owner
         const ownerId = await getUserIdByEmail(TEST_DATA.EMAILS.OWNER);
@@ -476,6 +514,8 @@ describe('organizationService', () => {
         expect(result).toBe(true);
         return;
       }
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       mockSupabase.from().select().eq().eq().eq().single.mockResolvedValue({
         data: { role: 'owner' },
         error: null,
@@ -487,6 +527,7 @@ describe('organizationService', () => {
     });
 
     it('should return false for non-owner', async () => {
+<<<<<<< HEAD
       if (USE_REAL_DB) {
         // Real DB test - verify admin user is not owner
         const adminId = await getUserIdByEmail(TEST_DATA.EMAILS.ADMIN);
@@ -498,6 +539,8 @@ describe('organizationService', () => {
         expect(result).toBe(false);
         return;
       }
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       mockSupabase.from().select().eq().eq().eq().single.mockResolvedValue({
         data: null,
         error: createMockSupabaseError('Not found', 'PGRST116'),

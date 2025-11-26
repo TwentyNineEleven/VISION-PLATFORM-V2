@@ -11,7 +11,10 @@ import {
 import { USE_REAL_DB, TEST_DATA, setupTestEnvironment } from '@/test/serviceTestHelpers';
 
 // Conditionally mock Supabase client
+<<<<<<< HEAD
 // vi.mock is hoisted but without a factory, it uses automock which allows mockReturnValue
+=======
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 if (!USE_REAL_DB) {
   vi.mock('@/lib/supabase/client');
 } else {
@@ -526,8 +529,14 @@ describe('documentService', () => {
 
       const url = await documentService.getDownloadUrl('doc-123');
 
+<<<<<<< HEAD
       // The mock returns the signedUrl from the createSignedUrl response
       expect(url).toBe('https://test.supabase.co/storage/v1/object/sign/test-path');
+=======
+      expect(url).toBe(
+        'https://test.supabase.co/storage/v1/object/sign/organization-documents/org-123/test-document.pdf?token=signed'
+      );
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('organization-documents');
     });
   });

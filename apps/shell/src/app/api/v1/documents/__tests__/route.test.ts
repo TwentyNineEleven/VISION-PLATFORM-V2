@@ -198,7 +198,11 @@ describe('Documents API Routes', () => {
 
       const response = await POST(request);
 
+<<<<<<< HEAD
       expect(response.status).toBe(200); // API returns 200 for successful upload
+=======
+      expect(response.status).toBe(201); // 201 Created is correct for POST
+>>>>>>> 05f07ec71c0c13bbe1c7d94ae8f18e2a05d381c4
 
       const data = await response.json();
       expect(data.success).toBe(true);
