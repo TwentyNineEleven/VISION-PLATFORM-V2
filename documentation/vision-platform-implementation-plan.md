@@ -14,6 +14,7 @@ Use this plan to turn the architecture findings and standards into delivered, te
 - Navigation configuration is frozen at the base layer and covered by unit tests to prevent accidental mutation when badges/routes change.
 - Organization service now includes explicit membership management helpers (add/update/remove/isOwner/isAdmin) with lower-case role normalization, bringing tests for member/role paths back to green.
 - Dashboard KPI tiles, stat groups, widgets, and catalog teasers now source accent/tint colors from `visionSemantic` or phase token helpers instead of inline hex strings, continuing the Bold Color System migration.
+- Auth surfaces and app catalog cards now rely on Bold token classes (phase badge/button/status chip helpers) instead of inline hex colors, keeping sign-in backgrounds and catalog accents aligned with Glow/2911.
 
 ## 2) Workstreams, Deliverables, and Owners
 

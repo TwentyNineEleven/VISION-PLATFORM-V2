@@ -61,7 +61,7 @@ export function AuthPageShell({
   return (
     <div
       className={cn(
-        'min-h-screen bg-[#f5f7fb] px-4 py-10',
+        'min-h-screen bg-vision-gray-50 px-4 py-10 text-vision-gray-950',
         contentClassName
       )}
       data-testid="auth-shell-muted"
