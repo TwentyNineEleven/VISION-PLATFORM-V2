@@ -26,7 +26,8 @@ interface User {
 
 interface Assignment {
   id: string;
-  user_id: string;
+  user_id?: string;
+  assigned_to?: string;
   role: 'OWNER' | 'COLLABORATOR' | 'REVIEWER';
   user: User;
 }
@@ -96,7 +97,9 @@ export function TaskAssignments({
       if (error) throw error;
 
       // Extract users and filter out already assigned ones
-      const assignedUserIds = assignments.map((a) => a.user_id);
+      const assignedUserIds = assignments.map(
+        (assignment) => assignment.user_id || assignment.assigned_to
+      );
       const users = data
         .map((member: any) => member.users)
         .filter((user: User) => user && !assignedUserIds.includes(user.id));
@@ -197,6 +200,7 @@ export function TaskAssignments({
       {assignments.length > 0 ? (
         <div className="space-y-2">
           {assignments.map((assignment) => {
+            const assignmentUserId = assignment.user_id || assignment.assigned_to;
             const roleConfig = ROLE_CONFIG[assignment.role];
             return (
               <GlowCard
@@ -239,7 +243,9 @@ export function TaskAssignments({
                   <GlowButton
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleUnassignUser(assignment.user_id)}
+                    onClick={() =>
+                      assignmentUserId && handleUnassignUser(assignmentUserId)
+                    }
                     disabled={loading}
                     className="text-muted-foreground hover:text-vision-red-900"
                   >

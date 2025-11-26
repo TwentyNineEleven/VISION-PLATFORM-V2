@@ -16,6 +16,15 @@ type PlanUpdate = Database['public']['Tables']['plans']['Update'];
 
 type Project = Database['public']['Tables']['projects']['Row'];
 
+const mapAssignments = (task: Task & { assignments?: any[] }) => ({
+  ...task,
+  assignments:
+    task.assignments?.map((assignment: any) => ({
+      ...assignment,
+      user_id: assignment.assigned_to,
+    })) ?? [],
+});
+
 /**
  * Task Management
  */
@@ -85,7 +94,7 @@ export const visionflowService = {
       throw new Error('Failed to fetch tasks');
     }
 
-    return data as Task[];
+    return (data as Task[]).map(mapAssignments);
   },
 
   /**
@@ -140,7 +149,7 @@ export const visionflowService = {
       throw new Error('Failed to fetch task');
     }
 
-    return data as Task;
+    return mapAssignments(data as Task);
   },
 
   /**
