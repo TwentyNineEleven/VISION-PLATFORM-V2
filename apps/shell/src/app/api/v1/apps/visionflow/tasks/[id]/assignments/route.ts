@@ -103,6 +103,11 @@ export async function POST(
       .maybeSingle();
 
     if (existingAssignment) {
+      const normalizedExistingAssignment = {
+        ...existingAssignment,
+        user_id: existingAssignment.assigned_to,
+      };
+
       // Update existing assignment role if different
       if (existingAssignment.role !== role) {
         const { data: updated, error: updateError } = await supabase
@@ -132,7 +137,7 @@ export async function POST(
         });
 
         return NextResponse.json({
-          assignment: updated,
+          assignment: { ...updated, user_id: updated?.assigned_to },
           message: 'Assignment role updated',
         });
       }
@@ -140,7 +145,7 @@ export async function POST(
       // Assignment already exists with same role
       return NextResponse.json(
         {
-          assignment: existingAssignment,
+          assignment: normalizedExistingAssignment,
           message: 'User already assigned with this role',
         },
         { status: 200 }
@@ -178,7 +183,10 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ assignment }, { status: 201 });
+    return NextResponse.json(
+      { assignment: { ...assignment, user_id: assignment?.assigned_to } },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error in task assignments POST:', error);
     return NextResponse.json(
@@ -212,11 +220,11 @@ export async function DELETE(
 
     // Get user_id from query params
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('user_id');
+    const userId = searchParams.get('user_id') || searchParams.get('assigned_to');
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'user_id query parameter is required' },
+        { error: 'user_id or assigned_to query parameter is required' },
         { status: 400 }
       );
     }
