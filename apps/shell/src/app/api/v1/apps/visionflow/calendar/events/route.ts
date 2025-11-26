@@ -101,10 +101,26 @@ export async function GET(request: NextRequest) {
         .eq('organization_id', organizationId)
         .is('deleted_at', null);
 
-      if (startDate) {
+      // Combine date range filters properly
+      // For a date range, we want projects that overlap with [startDate, endDate]
+      // Overlap condition: start_date <= endDate AND due_date >= startDate
+      // Since Supabase .or() calls replace each other, we need to combine conditions in a single filter
+      if (startDate && endDate) {
+        // Both dates: projects that overlap the range
+        // Use a single combined OR filter with all overlap conditions:
+        // - start_date is in range, OR
+        // - due_date is in range, OR  
+        // - project spans the range (starts before and ends after)
+        projectsQuery = projectsQuery.or(
+          `start_date.gte.${startDate}.and.start_date.lte.${endDate},` +
+          `due_date.gte.${startDate}.and.due_date.lte.${endDate},` +
+          `start_date.lte.${startDate}.and.due_date.gte.${endDate}`
+        );
+      } else if (startDate) {
+        // Only start date: projects that start or end after this date
         projectsQuery = projectsQuery.or(`due_date.gte.${startDate},start_date.gte.${startDate}`);
-      }
-      if (endDate) {
+      } else if (endDate) {
+        // Only end date: projects that start or end before this date
         projectsQuery = projectsQuery.or(`due_date.lte.${endDate},start_date.lte.${endDate}`);
       }
 
